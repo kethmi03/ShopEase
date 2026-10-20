@@ -45,6 +45,7 @@ const DOM = {
   cartToggleBtn: document.getElementById('cart-toggle-btn'),
   cartBadge: document.getElementById('cart-badge'),
   ordersToggleBtn: document.getElementById('orders-toggle-btn'),
+  offersToggleBtn: document.getElementById('offers-toggle-btn'),
   resetStoreBtn: document.getElementById('btn-reset-store'),
 
   // Cart Drawer Elements
@@ -341,7 +342,7 @@ function renderProductCatalog() {
 
           <div class="card-footer">
             <div class="price-row">
-              <span class="product-price">£${product.price.toFixed(2)}</span>
+              <span class="product-price">Rs. ${product.price.toFixed(2)}</span>
               <span class="product-unit">${product.unit}</span>
             </div>
 
@@ -374,6 +375,10 @@ function renderProductCatalog() {
   // Attach event listeners for product card buttons
   DOM.productGrid.querySelectorAll('.add-to-cart-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
+      if (!Auth.isLoggedIn()) {
+        window.location.href = 'login.html';
+        return;
+      }
       const id = btn.dataset.addId;
       const res = Cart.addItem(id, 1);
       if (res.success) {
@@ -423,19 +428,22 @@ function resetAllFilters() {
 function updateCartUI() {
   const summary = Cart.getSummary();
 
-  // Update header badge
-  DOM.cartBadge.textContent = summary.totalItems;
-  DOM.cartBadge.setAttribute('aria-label', `${summary.totalItems} items in shopping basket`);
+  // Update header badge if present
+  const badge = document.getElementById('cart-badge');
+  if (badge) {
+    badge.textContent = summary.totalItems;
+    badge.setAttribute('aria-label', `${summary.totalItems} items in shopping basket`);
+  }
 
   // Update Drawer Subtotal & Totals
-  DOM.cartSubtotal.textContent = `£${summary.subtotal.toFixed(2)}`;
-  DOM.cartDeliveryFee.textContent = summary.deliveryFee === 0 ? 'FREE' : `£${summary.deliveryFee.toFixed(2)}`;
-  DOM.cartGrandTotal.textContent = `£${summary.grandTotal.toFixed(2)}`;
+  DOM.cartSubtotal.textContent = `Rs. ${summary.subtotal.toFixed(2)}`;
+  DOM.cartDeliveryFee.textContent = summary.deliveryFee === 0 ? 'FREE' : `Rs. ${summary.deliveryFee.toFixed(2)}`;
+  DOM.cartGrandTotal.textContent = `Rs. ${summary.grandTotal.toFixed(2)}`;
 
   // Discount row
   if (summary.discount > 0) {
     DOM.cartDiscountRow.style.display = 'flex';
-    DOM.cartDiscountAmount.textContent = `-£${summary.discount.toFixed(2)}`;
+    DOM.cartDiscountAmount.textContent = `-Rs. ${summary.discount.toFixed(2)}`;
   } else {
     DOM.cartDiscountRow.style.display = 'none';
   }
@@ -467,11 +475,11 @@ function updateCartUI() {
     DOM.cartDeliveryBar.style.width = '100%';
     DOM.cartDeliveryBar.style.backgroundColor = 'var(--color-success)';
   } else if (summary.subtotal === 0) {
-    DOM.cartDeliveryText.innerHTML = `<span>Spend <strong>£50.00</strong> for FREE Delivery</span>`;
+    DOM.cartDeliveryText.innerHTML = `<span>Spend <strong>Rs. 50.00</strong> for FREE Delivery</span>`;
     DOM.cartDeliveryBar.style.width = '0%';
   } else {
     const percent = Math.min(100, Math.round((summary.subtotal / 50) * 100));
-    DOM.cartDeliveryText.innerHTML = `<span>Add <strong>£${summary.freeShippingRemaining.toFixed(2)}</strong> more for <strong>FREE Delivery</strong></span>`;
+    DOM.cartDeliveryText.innerHTML = `<span>Add <strong>Rs. ${summary.freeShippingRemaining.toFixed(2)}</strong> more for <strong>FREE Delivery</strong></span>`;
     DOM.cartDeliveryBar.style.width = `${percent}%`;
     DOM.cartDeliveryBar.style.backgroundColor = '';
   }
@@ -501,7 +509,7 @@ function updateCartUI() {
           <img src="${item.image}" alt="${item.name}" class="cart-item-img" />
           <div class="cart-item-details">
             <h4 class="cart-item-title">${item.name}</h4>
-            <div class="cart-item-unit-price">£${item.price.toFixed(2)} each</div>
+            <div class="cart-item-unit-price">Rs. ${item.price.toFixed(2)} each</div>
             <div class="cart-item-bottom">
               <div class="qty-stepper" role="group" aria-label="Quantity for ${item.name}">
                 <button 
@@ -521,7 +529,7 @@ function updateCartUI() {
               </div>
 
               <div class="cart-item-total">
-                £${item.totalPrice.toFixed(2)}
+                Rs. ${item.totalPrice.toFixed(2)}
               </div>
 
               <button 
@@ -543,7 +551,7 @@ function updateCartUI() {
         Clear Basket
       </button>
       <span style="font-size:0.8rem; color:var(--color-text-muted);">
-        Includes 20% estimated VAT (£${summary.estimatedTax.toFixed(2)})
+        Includes 20% estimated VAT (Rs. ${summary.estimatedTax.toFixed(2)})
       </span>
     </div>
   `;
@@ -642,7 +650,7 @@ function openQuickView(productId) {
         </div>
 
         <div style="font-size:1.75rem; font-weight:800; color:var(--color-brand-primary); margin-bottom:0.5rem;">
-          £${product.price.toFixed(2)}
+          Rs. ${product.price.toFixed(2)}
           <span style="font-size:0.85rem; font-weight:normal; color:var(--color-text-muted);">/ ${product.unit}</span>
         </div>
 
@@ -702,6 +710,10 @@ function openQuickView(productId) {
   });
 
   qvAddBtn?.addEventListener('click', () => {
+    if (!Auth.isLoggedIn()) {
+      window.location.href = 'login.html';
+      return;
+    }
     const qty = parseInt(qvQtyInput.value, 10) || 1;
     const res = Cart.addItem(product.id, qty);
     if (res.success) {
@@ -832,17 +844,17 @@ function populateOrderReviewStep() {
       ${summary.items.map(item => `
         <li style="display:flex; justify-content:space-between; font-size:0.875rem;">
           <span>${item.quantity} × ${item.name}</span>
-          <strong>£${item.totalPrice.toFixed(2)}</strong>
+          <strong>Rs. ${item.totalPrice.toFixed(2)}</strong>
         </li>
       `).join('')}
     </ul>
   `;
 
   DOM.checkoutReviewTotal.innerHTML = `
-    <div class="financial-row"><span>Subtotal:</span> <span>£${summary.subtotal.toFixed(2)}</span></div>
-    ${summary.discount > 0 ? `<div class="financial-row" style="color:var(--color-success)"><span>Discount:</span> <span>-£${summary.discount.toFixed(2)}</span></div>` : ''}
-    <div class="financial-row"><span>Delivery:</span> <span>${summary.deliveryFee === 0 ? 'FREE' : '£' + summary.deliveryFee.toFixed(2)}</span></div>
-    <div class="financial-row total-row"><span>Grand Total:</span> <span>£${summary.grandTotal.toFixed(2)}</span></div>
+    <div class="financial-row"><span>Subtotal:</span> <span>Rs. ${summary.subtotal.toFixed(2)}</span></div>
+    ${summary.discount > 0 ? `<div class="financial-row" style="color:var(--color-success)"><span>Discount:</span> <span>-Rs. ${summary.discount.toFixed(2)}</span></div>` : ''}
+    <div class="financial-row"><span>Delivery:</span> <span>${summary.deliveryFee === 0 ? 'FREE' : 'Rs. ' + summary.deliveryFee.toFixed(2)}</span></div>
+    <div class="financial-row total-row"><span>Grand Total:</span> <span>Rs. ${summary.grandTotal.toFixed(2)}</span></div>
   `;
 }
 
@@ -954,14 +966,14 @@ function showOrderSuccess(order) {
           ${order.items.map(item => `
             <li style="display:flex; justify-content:space-between;">
               <span>${item.quantity} × ${item.name}</span>
-              <strong>£${item.totalPrice.toFixed(2)}</strong>
+              <strong>Rs. ${item.totalPrice.toFixed(2)}</strong>
             </li>
           `).join('')}
         </ul>
 
         <div style="border-top:1px dashed var(--color-border-strong); padding-top:0.75rem; display:flex; justify-content:space-between; font-size:1.1rem; font-weight:800;">
           <span>Total Paid:</span>
-          <span style="color:var(--color-brand-primary);">£${order.financials.grandTotal.toFixed(2)}</span>
+          <span style="color:var(--color-brand-primary);">Rs. ${order.financials.grandTotal.toFixed(2)}</span>
         </div>
       </div>
 
@@ -1061,7 +1073,7 @@ function openOrderHistory() {
           ${order.items.map(i => `
             <li style="display:flex; justify-content:space-between;">
               <span>${i.quantity} × ${i.name}</span>
-              <span>£${i.totalPrice.toFixed(2)}</span>
+              <span>Rs. ${i.totalPrice.toFixed(2)}</span>
             </li>
           `).join('')}
         </ul>
@@ -1071,7 +1083,7 @@ function openOrderHistory() {
             Payment: Mock Card (•••• ${order.payment.last4})
           </span>
           <strong style="font-size:1.1rem; color:var(--color-text-primary);">
-            £${order.financials.grandTotal.toFixed(2)}
+            Rs. ${order.financials.grandTotal.toFixed(2)}
           </strong>
         </div>
       </div>
@@ -1141,8 +1153,15 @@ function initEventListeners() {
     renderProductCatalog();
   });
 
-  // Cart Drawer toggles
-  DOM.cartToggleBtn?.addEventListener('click', openCart);
+  // Cart Drawer toggles - redirect to login if not authenticated
+  DOM.cartToggleBtn?.addEventListener('click', (e) => {
+    if (!Auth.isLoggedIn()) {
+      e.preventDefault();
+      window.location.href = 'login.html';
+      return;
+    }
+    openCart();
+  });
   DOM.cartCloseBtn?.addEventListener('click', closeCart);
   DOM.cartOverlay?.addEventListener('click', (e) => {
     if (e.target === DOM.cartOverlay) closeCart();
@@ -1178,8 +1197,25 @@ function initEventListeners() {
   DOM.checkoutForm?.addEventListener('submit', handleCheckoutSubmit);
   DOM.btnAutofillDemo?.addEventListener('click', autofillDemoCheckout);
 
-  // Orders History
-  DOM.ordersToggleBtn?.addEventListener('click', openOrderHistory);
+  // My Offers in Navigation Bar - redirect to login if not authenticated
+  DOM.offersToggleBtn?.addEventListener('click', (e) => {
+    if (!Auth.isLoggedIn()) {
+      e.preventDefault();
+      window.location.href = 'login.html';
+      return;
+    }
+    document.getElementById('deals-section')?.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  // Orders History in Navigation Bar - redirect to login if not authenticated
+  DOM.ordersToggleBtn?.addEventListener('click', (e) => {
+    if (!Auth.isLoggedIn()) {
+      e.preventDefault();
+      window.location.href = 'login.html';
+      return;
+    }
+    openOrderHistory();
+  });
   DOM.ordersCloseBtn?.addEventListener('click', closeOrderHistory);
   DOM.ordersOverlay?.addEventListener('click', (e) => {
     if (e.target === DOM.ordersOverlay) closeOrderHistory();
@@ -1215,6 +1251,7 @@ function initEventListeners() {
 
   window.addEventListener('shopease:auth-changed', () => {
     renderUserMenu();
+    renderUserWelcomeBanner();
   });
 
   // Check if URL specifies auto-opening checkout
@@ -1227,25 +1264,160 @@ function initEventListeners() {
 }
 
 /**
- * Renders User Account button or menu dropdown in navigation bar
+ * Renders Navigation Bar actions dynamically:
+ * When NOT logged in: Shows About Us, Sign In, Register.
+ * When LOGGED IN: Shows Customer Dashboard, My Offers, Basket, My Orders, Logout.
  */
-function renderUserMenu() {
-  const container = document.getElementById('user-menu-wrapper');
+function renderNavBar() {
+  const container = document.getElementById('main-nav-actions');
   if (!container) return;
 
   const user = Auth.getCurrentUser();
 
   if (!user) {
     container.innerHTML = `
-      <a href="login.html" class="nav-btn" id="nav-login-btn" aria-label="Sign in to your account" title="Sign In or Register">
+      <a href="#about-us" class="nav-btn" aria-label="About ShopEase store">
+        <span aria-hidden="true">ℹ️</span>
+        <span>About Us</span>
+      </a>
+      <a href="login.html" class="nav-btn nav-btn-primary" id="nav-login-btn" aria-label="Sign in to your account" title="Sign In">
         <span aria-hidden="true">👤</span>
-        <span style="display:inline-block;">Sign In</span>
+        <span>Sign In</span>
+      </a>
+      <a href="register.html" class="nav-btn" id="nav-register-btn" style="border:1px solid var(--color-brand-primary); color:var(--color-brand-primary);" aria-label="Create new account" title="Register">
+        <span aria-hidden="true">✨</span>
+        <span>Register</span>
       </a>
     `;
     return;
   }
 
-  const firstName = user.fullName.split(' ')[0] || user.fullName;
+  const summary = Cart.getSummary();
+
+  container.innerHTML = `
+    <a href="dashboard.html" class="nav-btn" id="nav-dashboard-btn" style="background:var(--color-brand-primary); color:#ffffff; border-color:var(--color-brand-primary);" aria-label="Customer Dashboard" title="View Customer Dashboard">
+      <span aria-hidden="true">📊</span>
+      <span>Dashboard</span>
+    </a>
+
+    <button 
+      type="button" 
+      id="offers-toggle-btn" 
+      class="nav-btn" 
+      aria-label="View promotional offers"
+      title="View promotional offers"
+    >
+      <span>🏷️</span>
+      <span>My Offers</span>
+    </button>
+
+    <button 
+      type="button" 
+      id="orders-toggle-btn" 
+      class="nav-btn" 
+      aria-label="View past orders"
+      title="View order history"
+    >
+      <span>📦</span>
+      <span>My Orders</span>
+    </button>
+
+    <button 
+      type="button" 
+      id="cart-toggle-btn" 
+      class="nav-btn cart-btn" 
+      aria-label="Shopping basket, ${summary.totalItems} items"
+      aria-haspopup="dialog"
+    >
+      <span aria-hidden="true">🛍️</span>
+      <span>Basket</span>
+      <span id="cart-badge" class="cart-badge" aria-hidden="true">${summary.totalItems}</span>
+    </button>
+
+    <button 
+      type="button" 
+      id="nav-logout-btn" 
+      class="nav-btn nav-btn-danger" 
+      aria-label="Sign out of account"
+      title="Sign Out"
+    >
+      <span>🚪</span>
+      <span>Logout</span>
+    </button>
+  `;
+
+  // Attach event handlers for authenticated dynamic buttons
+  document.getElementById('cart-toggle-btn')?.addEventListener('click', openCart);
+  document.getElementById('offers-toggle-btn')?.addEventListener('click', () => {
+    document.getElementById('deals-section')?.scrollIntoView({ behavior: 'smooth' });
+  });
+  document.getElementById('orders-toggle-btn')?.addEventListener('click', openOrderHistory);
+  document.getElementById('nav-logout-btn')?.addEventListener('click', () => {
+    Auth.logout();
+    showToast('Signed out successfully.', 'info');
+    renderNavBar();
+    renderUserWelcomeBanner();
+  });
+}
+
+const renderUserMenu = renderNavBar;
+
+// Global Interaction Helpers for Home Page
+window.shopeaseFilterCategory = (category) => {
+  const btn = document.querySelector(`.category-pill-btn[data-category="${category}"]`);
+  if (btn) {
+    btn.click();
+  } else {
+    state.selectedCategory = category;
+    renderCategoryPills();
+    renderProductCatalog();
+  }
+  document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' });
+};
+
+window.shopeaseApplyVoucher = (code) => {
+  const res = Cart.setPromo(code);
+  if (res.success) {
+    showToast(`Voucher "${code}" applied to your basket!`, 'success');
+    announce(`Promotional code ${code} applied.`);
+    updateCartUI();
+    openCart();
+  } else {
+    showToast(res.message, 'warning');
+  }
+};
+
+window.shopeaseQuickAdd = (productId) => {
+  if (!Auth.isLoggedIn()) {
+    window.location.href = 'login.html';
+    return;
+  }
+  const res = Cart.add(productId, 1);
+  if (res.success) {
+    showToast(res.message, 'success');
+    openCart();
+  } else {
+    showToast(res.message, 'warning');
+  }
+};
+
+window.shopeaseOpenQuickView = (productId) => {
+  openQuickView(productId);
+};
+
+/**
+ * Renders Authenticated Member Welcome Banner above catalog
+ */
+function renderUserWelcomeBanner() {
+  const container = document.getElementById('user-welcome-slot');
+  if (!container) return;
+
+  const user = Auth.getCurrentUser();
+  if (!user) {
+    container.innerHTML = '';
+    return;
+  }
+
   const initials = user.fullName
     .split(' ')
     .filter(Boolean)
@@ -1255,90 +1427,57 @@ function renderUserMenu() {
     .toUpperCase();
 
   container.innerHTML = `
-    <div style="position:relative;">
-      <button 
-        type="button" 
-        class="user-menu-btn" 
-        id="user-menu-trigger" 
-        aria-haspopup="true" 
-        aria-expanded="false" 
-        aria-label="User account menu for ${escapeHtml(user.fullName)}"
-      >
-        <span class="user-avatar" aria-hidden="true">${initials}</span>
-        <span style="display:inline-block; max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(firstName)}</span>
-        <span style="font-size:0.65rem;" aria-hidden="true">▼</span>
-      </button>
-
-      <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu" aria-label="Account options">
-        <div class="user-dropdown-header">
-          <div class="user-dropdown-name">${escapeHtml(user.fullName)}</div>
-          <div class="user-dropdown-email">${escapeHtml(user.email)}</div>
-          <div style="font-size:0.75rem; color:var(--color-brand-primary); font-weight:700; margin-top:3px;">
-            ${escapeHtml(user.role || 'Customer')}
+    <div class="user-welcome-banner" role="region" aria-label="Authenticated customer session">
+      <div class="user-welcome-left">
+        <div class="user-welcome-avatar" aria-hidden="true">${initials}</div>
+        <div>
+          <div class="user-welcome-title">
+            👋 Welcome back, <strong>${escapeHtml(user.fullName)}</strong>!
+          </div>
+          <div class="user-welcome-subtitle">
+            Signed in as <strong>${escapeHtml(user.email)}</strong> • Exclusive member discounts & fast checkout active
           </div>
         </div>
-
-        <button type="button" class="user-dropdown-item" id="dropdown-orders-btn" role="menuitem">
-          <span>📦</span>
-          <span>My Orders</span>
+      </div>
+      <div class="user-welcome-actions">
+        <button type="button" class="btn btn-secondary" style="font-size:0.85rem; padding:0.4rem 0.85rem;" onclick="document.getElementById('orders-toggle-btn')?.click()">
+          📦 Past Orders
         </button>
-
-        <a href="login.html" class="user-dropdown-item" role="menuitem">
-          <span>👥</span>
-          <span>Switch Account</span>
-        </a>
-
-        <a href="register.html" class="user-dropdown-item" role="menuitem">
-          <span>✨</span>
-          <span>Create New Account</span>
-        </a>
-
-        <button type="button" class="user-dropdown-item danger" id="dropdown-logout-btn" role="menuitem" style="border-top:1px solid var(--color-border); margin-top:0.25rem;">
-          <span>🚪</span>
-          <span>Sign Out</span>
+        <button type="button" class="btn btn-secondary" style="font-size:0.85rem; padding:0.4rem 0.85rem;" id="banner-signout-btn">
+          🚪 Sign Out
         </button>
       </div>
     </div>
   `;
 
-  const trigger = document.getElementById('user-menu-trigger');
-  const dropdown = document.getElementById('user-dropdown-menu');
-
-  trigger?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isOpen = dropdown?.classList.contains('active');
-    dropdown?.classList.toggle('active', !isOpen);
-    trigger.setAttribute('aria-expanded', !isOpen);
-  });
-
-  document.getElementById('dropdown-orders-btn')?.addEventListener('click', () => {
-    dropdown?.classList.remove('active');
-    trigger?.setAttribute('aria-expanded', 'false');
-    openOrderHistory();
-  });
-
-  document.getElementById('dropdown-logout-btn')?.addEventListener('click', () => {
-    dropdown?.classList.remove('active');
+  document.getElementById('banner-signout-btn')?.addEventListener('click', () => {
     Auth.logout();
     showToast('Signed out successfully.', 'info');
     renderUserMenu();
-  });
-
-  // Close dropdown when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!container.contains(e.target)) {
-      dropdown?.classList.remove('active');
-      trigger?.setAttribute('aria-expanded', 'false');
-    }
+    renderUserWelcomeBanner();
   });
 }
 
 // Initial App Boot
 document.addEventListener('DOMContentLoaded', () => {
   initAccessibilitySettings();
+
+  // Show full home page and product catalog first
   renderUserMenu();
+  renderUserWelcomeBanner();
   renderCategoryPills();
   renderProductCatalog();
   updateCartUI();
   initEventListeners();
+
+  // Newsletter Form Handler
+  document.getElementById('newsletter-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = document.getElementById('newsletter-email');
+    if (input && input.value.trim()) {
+      showToast('Thank you for subscribing! Check your mock inbox for exclusive updates.', 'success');
+      announce('Subscribed to ShopEase newsletter.');
+      input.value = '';
+    }
+  });
 });

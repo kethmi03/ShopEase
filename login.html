@@ -18,39 +18,40 @@
 
   <!-- Top Accessibility & Preferences Bar -->
   <header class="site-header" role="banner">
-    <div class="a11y-topbar" aria-label="Accessibility & preferences bar">
-      <div class="container">
-        <div class="a11y-perks">
-          <span>🛡️ Universal WCAG 2.1 AA Compliant</span>
-          <span>🔒 Mock Authentication (Stored in LocalStorage)</span>
-        </div>
+    <nav class="main-nav" aria-label="Sign In Navigation">
+      <div class="container" style="display:flex; justify-content:space-between; align-items:center;">
+        <a href="index.html" class="brand-logo" aria-label="ShopEase Home Page">
+          <div class="brand-icon" aria-hidden="true">🛒</div>
+          <div class="brand-text">Shop<span>Ease</span></div>
+        </a>
 
-        <div class="a11y-controls" role="region" aria-label="Display Preferences">
-          <!-- Theme Switcher -->
-          <div class="a11y-group">
-            <label for="theme-select" style="font-size:0.75rem; font-weight:600; padding:0 0.35rem;">Theme:</label>
-            <select id="theme-select" class="select-custom" style="height:26px; padding:0 1.25rem 0 0.4rem; font-size:0.75rem; border:none; background-color:transparent;" aria-label="Select color theme">
-              <option value="light">☀️ Light</option>
-              <option value="dark">🌙 Dark</option>
-              <option value="high-contrast">👁️ High Contrast</option>
-            </select>
+        <div class="nav-right-section">
+          <!-- Theme & Display Controls directly in Navbar -->
+          <div class="a11y-controls" role="region" aria-label="Display Preferences">
+            <div class="a11y-group" title="Select theme color scheme">
+              <label for="theme-select" style="font-size:0.75rem; font-weight:600; padding:0 0.25rem;">Theme:</label>
+              <select id="theme-select" class="select-custom" style="height:26px; padding:0 1.25rem 0 0.35rem; font-size:0.78rem; border:none; background-color:transparent;" aria-label="Select color theme">
+                <option value="light">☀️ Light</option>
+                <option value="dark">🌙 Dark</option>
+                <option value="high-contrast">👁️ Contrast</option>
+              </select>
+            </div>
+
+            <div class="a11y-group" role="group" aria-label="Font size adjustment" title="Adjust text size">
+              <span style="font-size:0.75rem; font-weight:600; padding:0 0.2rem;">Text:</span>
+              <button type="button" id="btn-font-normal" class="a11y-btn active" title="Default font size" aria-label="Default font size">A</button>
+              <button type="button" id="btn-font-large" class="a11y-btn" title="Large font size" aria-label="Large font size">A+</button>
+              <button type="button" id="btn-font-xlarge" class="a11y-btn" title="Extra large font size" aria-label="Extra large font size">A++</button>
+            </div>
           </div>
 
-          <!-- Font Size Adjuster -->
-          <div class="a11y-group" role="group" aria-label="Font size adjustment">
-            <span style="font-size:0.75rem; font-weight:600; padding:0 0.35rem;">Text:</span>
-            <button type="button" id="btn-font-normal" class="a11y-btn active" title="Default font size" aria-label="Default font size">A</button>
-            <button type="button" id="btn-font-large" class="a11y-btn" title="Large font size" aria-label="Large font size">A+</button>
-            <button type="button" id="btn-font-xlarge" class="a11y-btn" title="Extra large font size" aria-label="Extra large font size">A++</button>
-          </div>
-
-          <!-- Back to Store Link -->
-          <a href="index.html" class="a11y-btn" style="border:1px solid var(--color-border); text-decoration:none;" aria-label="Return to store homepage">
-            🏪 Back to Store
+          <a href="index.html" class="nav-btn" aria-label="Return to store homepage">
+            <span>🏪</span>
+            <span>Back to Store</span>
           </a>
         </div>
       </div>
-    </div>
+    </nav>
   </header>
 
   <!-- Main Content Area -->
@@ -62,17 +63,19 @@
           ← Back to Shop
         </a>
         <span style="font-size:0.8rem; color:var(--color-text-muted);">
-          10 Products Catalog
+          Secure Member Portal
         </span>
       </div>
 
       <div class="auth-header">
-        <a href="index.html" class="brand-logo" aria-label="ShopEase Home Page">
+        <div class="brand-logo" style="justify-content:center; margin-bottom:0.75rem;">
           <div class="brand-icon" aria-hidden="true">🛒</div>
           <div class="brand-text">Shop<span>Ease</span></div>
-        </a>
-        <h1 class="auth-title">Welcome Back</h1>
-        <p class="auth-subtitle">Sign in to manage your basket, orders, and saved preferences.</p>
+        </div>
+        <h1 class="auth-title">Sign In to ShopEase</h1>
+        <p class="auth-subtitle">
+          Sign in to access your personal shopping basket, order history, and exclusive member discounts.
+        </p>
       </div>
 
       <!-- Authentication Navigation Tabs -->
@@ -87,6 +90,44 @@
 
       <!-- Banner if user is already logged in -->
       <div id="already-logged-in-banner" style="display:none;"></div>
+
+      <!-- Demo Accounts 1-Click Fast Login Section (Prominently Placed at Top) -->
+      <div class="demo-login-box" style="margin-top:0; margin-bottom:1.5rem; background:linear-gradient(135deg, rgba(37, 99, 235, 0.06) 0%, rgba(99, 102, 241, 0.06) 100%); border-color:var(--color-brand-primary);">
+        <div class="demo-login-title" style="color:var(--color-brand-primary);">
+          <span>⚡</span>
+          <span>Fast Demo Sign In (1-Click)</span>
+        </div>
+        <p style="font-size:0.8rem; color:var(--color-text-secondary); margin-bottom:0.75rem;">
+          Select a pre-configured account below to test member shopping immediately:
+        </p>
+        <div class="demo-accounts-grid">
+          <button 
+            type="button" 
+            class="btn-demo-account" 
+            data-demo-email="alex@example.com" 
+            data-demo-pass="password123"
+            aria-label="Log in as Alex Morgan, standard customer"
+          >
+            <span class="demo-acc-name">👤 Alex Morgan</span>
+            <span class="demo-acc-meta">alex@example.com</span>
+          </button>
+
+          <button 
+            type="button" 
+            class="btn-demo-account" 
+            data-demo-email="sarah@example.com" 
+            data-demo-pass="password123"
+            aria-label="Log in as Sarah Jenkins, VIP member"
+          >
+            <span class="demo-acc-name">⭐ Sarah Jenkins</span>
+            <span class="demo-acc-meta">sarah@example.com</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="auth-divider">
+        <span>Or sign in with email</span>
+      </div>
 
       <!-- General Error Display Container -->
       <div id="login-error-message" class="toast toast-danger" style="display:none; margin-bottom:1.25rem; font-size:0.875rem;" role="alert"></div>
@@ -159,40 +200,6 @@
           <span aria-hidden="true">→</span>
         </button>
       </form>
-
-      <!-- Demo Accounts 1-Click Login Section -->
-      <div class="demo-login-box">
-        <div class="demo-login-title">
-          <span>⚡</span>
-          <span>1-Click Fast Demo Login</span>
-        </div>
-        <p style="font-size:0.75rem; color:var(--color-text-muted); margin-bottom:0.75rem;">
-          Select a pre-configured sample account for instant evaluation:
-        </p>
-        <div class="demo-accounts-grid">
-          <button 
-            type="button" 
-            class="btn-demo-account" 
-            data-demo-email="alex@example.com" 
-            data-demo-pass="password123"
-            aria-label="Log in as Alex Morgan, standard customer"
-          >
-            <span class="demo-acc-name">👤 Alex Morgan</span>
-            <span class="demo-acc-meta">alex@example.com</span>
-          </button>
-
-          <button 
-            type="button" 
-            class="btn-demo-account" 
-            data-demo-email="sarah@example.com" 
-            data-demo-pass="password123"
-            aria-label="Log in as Sarah Jenkins, VIP member"
-          >
-            <span class="demo-acc-name">⭐ Sarah Jenkins</span>
-            <span class="demo-acc-meta">sarah@example.com</span>
-          </button>
-        </div>
-      </div>
 
       <!-- Footer switch link -->
       <div class="auth-footer">

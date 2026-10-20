@@ -65,33 +65,33 @@ async function runTests() {
   Cart.clear();
 
   // Test Add to Cart
-  const firstProd = products[0]; // Food: Artisan Sourdough, price £4.95, stock 25
+  const firstProd = products[0]; // Food: Artisan Sourdough, price Rs. 4.95, stock 25
   const addRes1 = Cart.addItem(firstProd.id, 2);
   assert(addRes1.success === true, `Successfully added 2 of "${firstProd.name}" to cart`);
 
   let summary = Cart.getSummary();
   assert(summary.totalItems === 2, `Cart total items is 2 (Found: ${summary.totalItems})`);
-  assert(summary.subtotal === 9.90, `Subtotal correctly computed: £${summary.subtotal} (Expected: £9.90)`);
-  assert(summary.deliveryFee === 3.99, `Standard delivery fee (£3.99) charged below £50 threshold`);
+  assert(summary.subtotal === 9.90, `Subtotal correctly computed: Rs. ${summary.subtotal} (Expected: Rs. 9.90)`);
+  assert(summary.deliveryFee === 3.99, `Standard delivery fee (Rs. 3.99) charged below Rs. 50 threshold`);
 
   // Test Stock Boundary (Attempt to add more than available stock)
   const highQtyRes = Cart.addItem(firstProd.id, 100);
   assert(highQtyRes.success === false, `Blocked adding quantity exceeding stock (Result: "${highQtyRes.message}")`);
 
   // Test Second Item & Free Delivery Threshold
-  const headphones = products.find(p => p.id === 'prod-09'); // £199.99
+  const headphones = products.find(p => p.id === 'prod-09'); // Rs. 199.99
   Cart.addItem(headphones.id, 1);
   summary = Cart.getSummary();
   assert(summary.items.length === 2, `Cart now has 2 distinct product lines`);
-  assert(summary.subtotal > 50, `Subtotal (£${summary.subtotal}) exceeds £50 free delivery threshold`);
-  assert(summary.deliveryFee === 0, `Free delivery successfully granted (£0.00)`);
+  assert(summary.subtotal > 50, `Subtotal (Rs. ${summary.subtotal}) exceeds Rs. 50 free delivery threshold`);
+  assert(summary.deliveryFee === 0, `Free delivery successfully granted (Rs. 0.00)`);
 
   // Test Promo Codes
   const promoRes = Cart.setPromo('SAVE10');
   assert(promoRes.success === true, `Promo code SAVE10 successfully applied`);
   summary = Cart.getSummary();
   const expectedDiscount = Number((summary.subtotal * 0.10).toFixed(2));
-  assert(summary.discount === expectedDiscount, `10% discount correctly computed: £${summary.discount}`);
+  assert(summary.discount === expectedDiscount, `10% discount correctly computed: Rs. ${summary.discount}`);
 
   // Test Quantity Update
   Cart.updateQuantity(firstProd.id, 1);

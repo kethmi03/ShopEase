@@ -245,6 +245,21 @@ export const Storage = {
     window.dispatchEvent(new CustomEvent('shopease:auth-changed', { detail: { user } }));
   },
 
+  updateUser(updatedData) {
+    const current = this.getCurrentUser();
+    if (!current) return null;
+    const updated = { ...current, ...updatedData };
+    this.setCurrentUser(updated);
+
+    const users = this.getUsers();
+    const idx = users.findIndex(u => u.id === updated.id);
+    if (idx !== -1) {
+      users[idx] = { ...users[idx], ...updatedData };
+      this.saveUsers(users);
+    }
+    return updated;
+  },
+
   clearCurrentUser() {
     setItem(STORAGE_KEYS.CURRENT_USER, null);
     window.dispatchEvent(new CustomEvent('shopease:auth-changed', { detail: { user: null } }));
