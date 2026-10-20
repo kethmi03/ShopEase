@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" data-font-size="normal">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sign in to your ShopEase account to manage orders, wishlist, and fast mock checkout.">
+  <title>Sign In | ShopEase Accessible E-Commerce</title>
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="auth-page">
+  <!-- Skip Link for Accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- ARIA Live Region for screen reader announcements -->
+  <div id="live-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Top Accessibility & Preferences Bar -->
+  <header class="site-header" role="banner">
+    <div class="a11y-topbar" aria-label="Accessibility & preferences bar">
+      <div class="container">
+        <div class="a11y-perks">
+          <span>🛡️ Universal WCAG 2.1 AA Compliant</span>
+          <span>🔒 Mock Authentication (Stored in LocalStorage)</span>
+        </div>
+
+        <div class="a11y-controls" role="region" aria-label="Display Preferences">
+          <!-- Theme Switcher -->
+          <div class="a11y-group">
+            <label for="theme-select" style="font-size:0.75rem; font-weight:600; padding:0 0.35rem;">Theme:</label>
+            <select id="theme-select" class="select-custom" style="height:26px; padding:0 1.25rem 0 0.4rem; font-size:0.75rem; border:none; background-color:transparent;" aria-label="Select color theme">
+              <option value="light">☀️ Light</option>
+              <option value="dark">🌙 Dark</option>
+              <option value="high-contrast">👁️ High Contrast</option>
+            </select>
+          </div>
+
+          <!-- Font Size Adjuster -->
+          <div class="a11y-group" role="group" aria-label="Font size adjustment">
+            <span style="font-size:0.75rem; font-weight:600; padding:0 0.35rem;">Text:</span>
+            <button type="button" id="btn-font-normal" class="a11y-btn active" title="Default font size" aria-label="Default font size">A</button>
+            <button type="button" id="btn-font-large" class="a11y-btn" title="Large font size" aria-label="Large font size">A+</button>
+            <button type="button" id="btn-font-xlarge" class="a11y-btn" title="Extra large font size" aria-label="Extra large font size">A++</button>
+          </div>
+
+          <!-- Back to Store Link -->
+          <a href="index.html" class="a11y-btn" style="border:1px solid var(--color-border); text-decoration:none;" aria-label="Return to store homepage">
+            🏪 Back to Store
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main id="main-content" class="auth-container">
+    <div class="auth-card" role="region" aria-label="Sign In Form">
+      <!-- Top Navigation & Brand -->
+      <div class="back-to-store-bar">
+        <a href="index.html" class="back-to-store-link" aria-label="Back to ShopEase catalog">
+          ← Back to Shop
+        </a>
+        <span style="font-size:0.8rem; color:var(--color-text-muted);">
+          10 Products Catalog
+        </span>
+      </div>
+
+      <div class="auth-header">
+        <a href="index.html" class="brand-logo" aria-label="ShopEase Home Page">
+          <div class="brand-icon" aria-hidden="true">🛒</div>
+          <div class="brand-text">Shop<span>Ease</span></div>
+        </a>
+        <h1 class="auth-title">Welcome Back</h1>
+        <p class="auth-subtitle">Sign in to manage your basket, orders, and saved preferences.</p>
+      </div>
+
+      <!-- Authentication Navigation Tabs -->
+      <div class="auth-tabs" role="tablist" aria-label="Account Access Options">
+        <a href="login.html" class="auth-tab-link active" role="tab" aria-selected="true">
+          <span>🔑</span> Sign In
+        </a>
+        <a href="register.html" class="auth-tab-link" role="tab" aria-selected="false">
+          <span>✨</span> Create Account
+        </a>
+      </div>
+
+      <!-- Banner if user is already logged in -->
+      <div id="already-logged-in-banner" style="display:none;"></div>
+
+      <!-- General Error Display Container -->
+      <div id="login-error-message" class="toast toast-danger" style="display:none; margin-bottom:1.25rem; font-size:0.875rem;" role="alert"></div>
+
+      <!-- Login Form -->
+      <form id="login-form" novalidate>
+        <!-- Email Field -->
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label for="login-email" class="form-label">
+            <span>Email Address <span aria-hidden="true">*</span></span>
+          </label>
+          <input 
+            type="email" 
+            id="login-email" 
+            name="email" 
+            class="form-input" 
+            placeholder="e.g. alex@example.com" 
+            autocomplete="email" 
+            required 
+            aria-required="true"
+            aria-describedby="error-login-email"
+          />
+          <span id="error-login-email" class="field-error" role="alert"></span>
+        </div>
+
+        <!-- Password Field with Show/Hide -->
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label for="login-password" class="form-label">
+            <span>Password <span aria-hidden="true">*</span></span>
+          </label>
+          <div class="password-input-group">
+            <input 
+              type="password" 
+              id="login-password" 
+              name="password" 
+              class="form-input" 
+              placeholder="Enter your password" 
+              autocomplete="current-password" 
+              required 
+              aria-required="true"
+              aria-describedby="error-login-password"
+            />
+            <button 
+              type="button" 
+              class="password-toggle-btn" 
+              data-target="login-password" 
+              aria-label="Show password"
+              title="Show / hide password text"
+            >
+              👁️
+            </button>
+          </div>
+          <span id="error-login-password" class="field-error" role="alert"></span>
+        </div>
+
+        <!-- Remember Me & Forgot Password Helper -->
+        <div class="auth-options">
+          <label class="checkbox-label">
+            <input type="checkbox" id="login-remember" checked />
+            <span>Remember this device</span>
+          </label>
+          <a href="#" class="auth-link" onclick="alert('Demo Simulation: In this mock store, you can use the 1-Click Fast Login demo accounts below, or use the password: password123'); return false;">
+            Forgot password?
+          </a>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="login-submit-btn" class="btn btn-primary btn-auth-submit">
+          <span>Sign In</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </form>
+
+      <!-- Demo Accounts 1-Click Login Section -->
+      <div class="demo-login-box">
+        <div class="demo-login-title">
+          <span>⚡</span>
+          <span>1-Click Fast Demo Login</span>
+        </div>
+        <p style="font-size:0.75rem; color:var(--color-text-muted); margin-bottom:0.75rem;">
+          Select a pre-configured sample account for instant evaluation:
+        </p>
+        <div class="demo-accounts-grid">
+          <button 
+            type="button" 
+            class="btn-demo-account" 
+            data-demo-email="alex@example.com" 
+            data-demo-pass="password123"
+            aria-label="Log in as Alex Morgan, standard customer"
+          >
+            <span class="demo-acc-name">👤 Alex Morgan</span>
+            <span class="demo-acc-meta">alex@example.com</span>
+          </button>
+
+          <button 
+            type="button" 
+            class="btn-demo-account" 
+            data-demo-email="sarah@example.com" 
+            data-demo-pass="password123"
+            aria-label="Log in as Sarah Jenkins, VIP member"
+          >
+            <span class="demo-acc-name">⭐ Sarah Jenkins</span>
+            <span class="demo-acc-meta">sarah@example.com</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer switch link -->
+      <div class="auth-footer">
+        Don't have an account yet? 
+        <a href="register.html" class="auth-link">Create an account here</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Global Toast Notifications Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Application Script -->
+  <script type="module" src="js/auth-pages.js"></script>
+</body>
+</html>

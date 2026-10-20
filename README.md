@@ -68,6 +68,8 @@ All persistent data is saved under namespaced keys in the browser's `window.loca
 - `shopease_orders_v1`: Historical log of placed mock orders including order ID, timestamp, items, shipping address, and payment receipt.
 - `shopease_wishlist_v1`: User's favorited items.
 - `shopease_settings_v1`: User's accessibility settings (theme and font size).
+- `shopease_users_v1`: Registered customer accounts database with pre-seeded demo accounts.
+- `shopease_current_user_v1`: Active authenticated user session.
 
 ---
 
@@ -113,4 +115,4 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ```bash
 node test_suite.js
 ```
-Validates all 23 checks (product count, category count, pricing uniqueness, cart calculation, promo codes, stock deduction, and mock checkout).
+Validates all 30 checks (product count, category count, pricing uniqueness, cart calculation, promo codes, stock deduction, mock checkout, and user authentication/registration).

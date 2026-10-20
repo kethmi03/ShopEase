@@ -84,8 +84,16 @@
           </div>
         </form>
 
-        <!-- Navigation Actions (Order History & Cart) -->
+        <!-- Navigation Actions (User Account, Order History & Cart) -->
         <div class="nav-actions">
+          <!-- User Account Navigation & Dropdown -->
+          <div class="user-menu-wrapper" id="user-menu-wrapper">
+            <a href="login.html" class="nav-btn" id="nav-login-btn" aria-label="Sign in to your account" title="Sign In or Register">
+              <span aria-hidden="true">👤</span>
+              <span style="display:inline-block;">Sign In</span>
+            </a>
+          </div>
+
           <!-- Past Orders Button -->
           <button 
             type="button" 
@@ -473,13 +481,12 @@
         </div>
 
         <div class="footer-col">
-          <h4>Universal Design</h4>
+          <h4>Customer Account</h4>
           <ul class="footer-links">
-            <li><a href="#main-content">WCAG 2.1 AA Compliant</a></li>
-            <li><a href="#main-content">High Contrast Mode</a></li>
-            <li><a href="#main-content">Dynamic Font Scaling</a></li>
-            <li><a href="#main-content">Full Keyboard Focus</a></li>
-            <li><a href="#main-content">Screen Reader Announcer</a></li>
+            <li><a href="login.html">🔑 Sign In to Account</a></li>
+            <li><a href="register.html">✨ Create New Account</a></li>
+            <li><a href="#main-content" onclick="document.getElementById('orders-toggle-btn')?.click()">📦 Past Order Receipts</a></li>
+            <li><a href="login.html" onclick="localStorage.removeItem('shopease_current_user_v1'); window.location.href='login.html';">👤 Switch Demo User</a></li>
           </ul>
         </div>
 

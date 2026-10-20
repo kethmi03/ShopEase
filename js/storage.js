@@ -11,8 +11,38 @@ const STORAGE_KEYS = {
   CART: 'shopease_cart_v1',
   ORDERS: 'shopease_orders_v1',
   WISHLIST: 'shopease_wishlist_v1',
-  SETTINGS: 'shopease_settings_v1'
+  SETTINGS: 'shopease_settings_v1',
+  USERS: 'shopease_users_v1',
+  CURRENT_USER: 'shopease_current_user_v1'
 };
+
+// Seed Demo User Accounts
+export const DEFAULT_USERS = [
+  {
+    id: 'user_alex',
+    fullName: 'Alex Morgan',
+    email: 'alex@example.com',
+    password: 'password123',
+    phone: '07123 456789',
+    address: '14 Elm Street',
+    city: 'London',
+    postcode: 'SW1A 1AA',
+    role: 'Customer',
+    joinedDate: '2026-01-15'
+  },
+  {
+    id: 'user_sarah',
+    fullName: 'Sarah Jenkins',
+    email: 'sarah@example.com',
+    password: 'password123',
+    phone: '07700 900123',
+    address: '42 Highfield Terrace',
+    city: 'Manchester',
+    postcode: 'M14 6XX',
+    role: 'VIP Member',
+    joinedDate: '2026-02-20'
+  }
+];
 
 // Default Accessibility and UI Settings
 const DEFAULT_SETTINGS = {
@@ -187,5 +217,36 @@ export const Storage = {
       setItem(STORAGE_KEYS.ORDERS, []);
     }
     window.dispatchEvent(new CustomEvent('shopease:store-reset'));
+  },
+
+  /**
+   * User Management operations
+   */
+  getUsers() {
+    let users = getItem(STORAGE_KEYS.USERS, null);
+    if (!users || !Array.isArray(users) || users.length === 0) {
+      users = JSON.parse(JSON.stringify(DEFAULT_USERS));
+      setItem(STORAGE_KEYS.USERS, users);
+    }
+    return users;
+  },
+
+  saveUsers(users) {
+    setItem(STORAGE_KEYS.USERS, users);
+    window.dispatchEvent(new CustomEvent('shopease:users-updated', { detail: { users } }));
+  },
+
+  getCurrentUser() {
+    return getItem(STORAGE_KEYS.CURRENT_USER, null);
+  },
+
+  setCurrentUser(user) {
+    setItem(STORAGE_KEYS.CURRENT_USER, user);
+    window.dispatchEvent(new CustomEvent('shopease:auth-changed', { detail: { user } }));
+  },
+
+  clearCurrentUser() {
+    setItem(STORAGE_KEYS.CURRENT_USER, null);
+    window.dispatchEvent(new CustomEvent('shopease:auth-changed', { detail: { user: null } }));
   }
 };

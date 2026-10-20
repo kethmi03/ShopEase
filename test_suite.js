@@ -129,6 +129,46 @@ async function runTests() {
   assert(savedOrders.length === 1, `Order saved to localStorage history`);
   assert(savedOrders[0].orderId === orderResult.order.orderId, `Saved order ID matches generated ID`);
 
+  // 7. Verify Authentication & User Management
+  const { Auth } = await import('./js/auth.js');
+  
+  const seedUsers = Auth.getUsers();
+  assert(seedUsers.length >= 2, `Pre-seeded demo user accounts exist (Found: ${seedUsers.length})`);
+
+  // Test successful login
+  const validLogin = Auth.login('alex@example.com', 'password123');
+  assert(validLogin.success === true && Auth.getCurrentUser().email === 'alex@example.com',
+    `Login succeeds with valid credentials (User: ${validLogin.user?.fullName})`);
+
+  // Test failed login
+  const badLogin = Auth.login('alex@example.com', 'wrongpassword');
+  assert(badLogin.success === false, `Rejected login with incorrect password`);
+
+  // Test Logout
+  Auth.logout();
+  assert(Auth.getCurrentUser() === null, `Session successfully cleared on logout`);
+
+  // Test Registration
+  const testReg = Auth.register({
+    fullName: 'Test Auditor',
+    email: 'auditor@university.ac.uk',
+    password: 'securePass2026!',
+    phone: '07111 222333',
+    address: '10 Oxford Road',
+    city: 'Oxford',
+    postcode: 'OX1 1AA'
+  });
+  assert(testReg.success === true, `Registration succeeds for new account`);
+  assert(Auth.getCurrentUser()?.email === 'auditor@university.ac.uk', `Registered user automatically logged into active session`);
+
+  // Test Duplicate Email Rejection
+  const duplicateReg = Auth.register({
+    fullName: 'Test Clone',
+    email: 'auditor@university.ac.uk',
+    password: 'anotherPassword123'
+  });
+  assert(duplicateReg.success === false, `Blocked duplicate registration with existing email address`);
+
   console.log(`\n========================================`);
   console.log(`Suite Summary: ${passed} of ${total} tests PASSED!`);
   console.log(`========================================\n`);

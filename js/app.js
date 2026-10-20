@@ -8,6 +8,7 @@ import { CATEGORIES } from './products.js';
 import { Storage } from './storage.js';
 import { Cart } from './cart.js';
 import { Checkout, DEMO_USER } from './checkout.js';
+import { Auth } from './auth.js';
 
 // Application State
 const state = {
@@ -734,6 +735,25 @@ function openCheckout() {
   closeCart();
   state.activeModal = 'checkout';
   Checkout.currentStep = 1;
+
+  // Auto-populate delivery fields if user is authenticated
+  const currentUser = Auth.getCurrentUser();
+  if (currentUser) {
+    const fn = document.getElementById('checkout-fullname');
+    const em = document.getElementById('checkout-email');
+    const ph = document.getElementById('checkout-phone');
+    const ad = document.getElementById('checkout-address');
+    const ci = document.getElementById('checkout-city');
+    const pc = document.getElementById('checkout-postcode');
+
+    if (fn && !fn.value) fn.value = currentUser.fullName || '';
+    if (em && !em.value) em.value = currentUser.email || '';
+    if (ph && !ph.value) ph.value = currentUser.phone || '';
+    if (ad && !ad.value) ad.value = currentUser.address || '';
+    if (ci && !ci.value) ci.value = currentUser.city || '';
+    if (pc && !pc.value) pc.value = currentUser.postcode || '';
+  }
+
   updateCheckoutStepDisplay();
 
   DOM.checkoutOverlay.classList.add('open');
@@ -1192,11 +1212,131 @@ function initEventListeners() {
   window.addEventListener('shopease:cart-updated', () => {
     updateCartUI();
   });
+
+  window.addEventListener('shopease:auth-changed', () => {
+    renderUserMenu();
+  });
+
+  // Check if URL specifies auto-opening checkout
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('open') === 'checkout') {
+    setTimeout(() => {
+      openCheckout();
+    }, 350);
+  }
+}
+
+/**
+ * Renders User Account button or menu dropdown in navigation bar
+ */
+function renderUserMenu() {
+  const container = document.getElementById('user-menu-wrapper');
+  if (!container) return;
+
+  const user = Auth.getCurrentUser();
+
+  if (!user) {
+    container.innerHTML = `
+      <a href="login.html" class="nav-btn" id="nav-login-btn" aria-label="Sign in to your account" title="Sign In or Register">
+        <span aria-hidden="true">👤</span>
+        <span style="display:inline-block;">Sign In</span>
+      </a>
+    `;
+    return;
+  }
+
+  const firstName = user.fullName.split(' ')[0] || user.fullName;
+  const initials = user.fullName
+    .split(' ')
+    .filter(Boolean)
+    .map(p => p[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase();
+
+  container.innerHTML = `
+    <div style="position:relative;">
+      <button 
+        type="button" 
+        class="user-menu-btn" 
+        id="user-menu-trigger" 
+        aria-haspopup="true" 
+        aria-expanded="false" 
+        aria-label="User account menu for ${escapeHtml(user.fullName)}"
+      >
+        <span class="user-avatar" aria-hidden="true">${initials}</span>
+        <span style="display:inline-block; max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(firstName)}</span>
+        <span style="font-size:0.65rem;" aria-hidden="true">▼</span>
+      </button>
+
+      <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu" aria-label="Account options">
+        <div class="user-dropdown-header">
+          <div class="user-dropdown-name">${escapeHtml(user.fullName)}</div>
+          <div class="user-dropdown-email">${escapeHtml(user.email)}</div>
+          <div style="font-size:0.75rem; color:var(--color-brand-primary); font-weight:700; margin-top:3px;">
+            ${escapeHtml(user.role || 'Customer')}
+          </div>
+        </div>
+
+        <button type="button" class="user-dropdown-item" id="dropdown-orders-btn" role="menuitem">
+          <span>📦</span>
+          <span>My Orders</span>
+        </button>
+
+        <a href="login.html" class="user-dropdown-item" role="menuitem">
+          <span>👥</span>
+          <span>Switch Account</span>
+        </a>
+
+        <a href="register.html" class="user-dropdown-item" role="menuitem">
+          <span>✨</span>
+          <span>Create New Account</span>
+        </a>
+
+        <button type="button" class="user-dropdown-item danger" id="dropdown-logout-btn" role="menuitem" style="border-top:1px solid var(--color-border); margin-top:0.25rem;">
+          <span>🚪</span>
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </div>
+  `;
+
+  const trigger = document.getElementById('user-menu-trigger');
+  const dropdown = document.getElementById('user-dropdown-menu');
+
+  trigger?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = dropdown?.classList.contains('active');
+    dropdown?.classList.toggle('active', !isOpen);
+    trigger.setAttribute('aria-expanded', !isOpen);
+  });
+
+  document.getElementById('dropdown-orders-btn')?.addEventListener('click', () => {
+    dropdown?.classList.remove('active');
+    trigger?.setAttribute('aria-expanded', 'false');
+    openOrderHistory();
+  });
+
+  document.getElementById('dropdown-logout-btn')?.addEventListener('click', () => {
+    dropdown?.classList.remove('active');
+    Auth.logout();
+    showToast('Signed out successfully.', 'info');
+    renderUserMenu();
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!container.contains(e.target)) {
+      dropdown?.classList.remove('active');
+      trigger?.setAttribute('aria-expanded', 'false');
+    }
+  });
 }
 
 // Initial App Boot
 document.addEventListener('DOMContentLoaded', () => {
   initAccessibilitySettings();
+  renderUserMenu();
   renderCategoryPills();
   renderProductCatalog();
   updateCartUI();
