@@ -132,9 +132,9 @@ function showToast(message, type = 'success') {
    ========================================================================== */
 const THEMES = ['light', 'dark', 'high-contrast'];
 const THEME_ICONS = {
-  'light': '☀️',
-  'dark': '🌙',
-  'high-contrast': '👁️'
+  'light': '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>',
+  'dark': '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>',
+  'high-contrast': '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"></path></svg>'
 };
 const THEME_NAMES = {
   'light': 'Light',
@@ -150,7 +150,7 @@ function applyTheme(theme) {
   const iconSpan = document.getElementById('theme-icon');
   const btn = document.getElementById('theme-toggle-btn');
   if (iconSpan) {
-    iconSpan.textContent = THEME_ICONS[targetTheme];
+    iconSpan.innerHTML = THEME_ICONS[targetTheme] || THEME_ICONS['light'];
   }
   if (btn) {
     btn.setAttribute('aria-label', `Toggle theme (Current: ${THEME_NAMES[targetTheme]})`);
@@ -175,7 +175,7 @@ function initAccessibilitySettings() {
     const nextTheme = THEMES[nextIdx];
     applyTheme(nextTheme);
     announce(`Theme switched to ${THEME_NAMES[nextTheme]} mode.`);
-    showToast(`Switched to ${THEME_NAMES[nextTheme]} theme ${THEME_ICONS[nextTheme]}`, 'info');
+    showToast(`Switched to ${THEME_NAMES[nextTheme]} theme`, 'info');
   });
 }
 
@@ -204,7 +204,6 @@ function renderCategoryPills() {
         aria-pressed="${isActive}"
         aria-label="Filter by ${cat.name} (${count} products)"
       >
-        <span>${cat.icon}</span>
         <span>${cat.name}</span>
         <span class="category-count">${count}</span>
       </button>
@@ -357,7 +356,6 @@ function renderProductCatalog() {
                 data-add-id="${product.id}"
                 ${isOutOfStock ? 'disabled aria-disabled="true"' : ''}
               >
-                <span>🛒</span>
                 <span>${isOutOfStock ? 'Out of Stock' : 'Add to Basket'}</span>
               </button>
               <button 
@@ -367,7 +365,7 @@ function renderProductCatalog() {
                 aria-label="Quick preview of ${product.name}"
                 title="View full product specifications"
               >
-                👁️ View
+                View Details
               </button>
             </div>
           </div>
@@ -686,7 +684,7 @@ function openQuickView(productId) {
             style="flex:1;"
             ${isOutOfStock ? 'disabled' : ''}
           >
-            🛒 ${isOutOfStock ? 'Currently Unavailable' : 'Add to Shopping Basket'}
+            ${isOutOfStock ? 'Currently Unavailable' : 'Add to Shopping Basket'}
           </button>
         </div>
       </div>
@@ -1208,7 +1206,7 @@ function initEventListeners() {
       window.location.href = 'login.html';
       return;
     }
-    document.getElementById('deals-section')?.scrollIntoView({ behavior: 'smooth' });
+    (document.getElementById('deals-section') || document.getElementById('catalog-section'))?.scrollIntoView({ behavior: 'smooth' });
   });
 
   // Orders History in Navigation Bar - redirect to login if not authenticated
@@ -1280,48 +1278,18 @@ function renderNavBar() {
 
   if (!user) {
     container.innerHTML = `
-      <button 
-        type="button" 
-        id="cart-toggle-btn" 
-        class="nav-btn nav-btn-cart" 
-        aria-label="Shopping basket, ${summary.totalItems} items"
-        aria-haspopup="dialog"
-        title="View Shopping Basket"
-      >
-        <span aria-hidden="true">🛍️</span>
-        <span class="nav-btn-text">Basket</span>
-        <span id="cart-badge" class="cart-badge" aria-hidden="true">${summary.totalItems}</span>
-      </button>
-
       <a href="login.html" class="nav-btn nav-btn-ghost" id="nav-login-btn" aria-label="Sign in to your account" title="Sign In">
-        <span aria-hidden="true">👤</span>
         <span>Sign In</span>
       </a>
       <a href="register.html" class="nav-btn nav-btn-primary" id="nav-register-btn" aria-label="Create new account" title="Register">
-        <span aria-hidden="true">✨</span>
         <span>Register</span>
       </a>
     `;
-    document.getElementById('cart-toggle-btn')?.addEventListener('click', openCart);
     return;
   }
 
   container.innerHTML = `
-    <button 
-      type="button" 
-      id="cart-toggle-btn" 
-      class="nav-btn nav-btn-cart" 
-      aria-label="Shopping basket, ${summary.totalItems} items"
-      aria-haspopup="dialog"
-      title="View Shopping Basket"
-    >
-      <span aria-hidden="true">🛍️</span>
-      <span class="nav-btn-text">Basket</span>
-      <span id="cart-badge" class="cart-badge" aria-hidden="true">${summary.totalItems}</span>
-    </button>
-
     <a href="dashboard.html" class="nav-btn nav-btn-dashboard" id="nav-dashboard-btn" aria-label="Customer Dashboard" title="View Customer Dashboard">
-      <span aria-hidden="true">📊</span>
       <span>Dashboard</span>
     </a>
 
@@ -1332,7 +1300,6 @@ function renderNavBar() {
       aria-label="View past orders"
       title="View order history"
     >
-      <span aria-hidden="true">📦</span>
       <span>Orders</span>
     </button>
 
@@ -1343,16 +1310,11 @@ function renderNavBar() {
       aria-label="Sign out of account"
       title="Sign Out"
     >
-      <span aria-hidden="true">🚪</span>
       <span>Logout</span>
     </button>
   `;
 
   // Attach event handlers for authenticated dynamic buttons
-  document.getElementById('cart-toggle-btn')?.addEventListener('click', openCart);
-  document.getElementById('offers-toggle-btn')?.addEventListener('click', () => {
-    document.getElementById('deals-section')?.scrollIntoView({ behavior: 'smooth' });
-  });
   document.getElementById('orders-toggle-btn')?.addEventListener('click', openOrderHistory);
   document.getElementById('nav-logout-btn')?.addEventListener('click', () => {
     Auth.logout();

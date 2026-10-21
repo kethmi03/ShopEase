@@ -42,7 +42,7 @@ async function runTests() {
   }
 
   // 1. Verify Catalog
-  const { INITIAL_PRODUCTS, CATEGORIES } = await import('./js/products.js');
+  const { INITIAL_PRODUCTS, CATEGORIES } = await import('./products.js');
   
   assert(INITIAL_PRODUCTS.length === 10, `Store has exactly 10 products (Found: ${INITIAL_PRODUCTS.length})`);
 
@@ -56,12 +56,12 @@ async function runTests() {
   assert(uniquePrices.size === 10, `All 10 products have unique distinct prices (Prices: ${prices.join(', ')})`);
 
   // 2. Verify Storage & Inventory
-  const { Storage } = await import('./js/storage.js');
+  const { Storage } = await import('./storage.js');
   const products = Storage.getProducts();
   assert(products.length === 10, `Storage initializes and returns 10 products from localStorage`);
 
   // 3. Verify Cart Operations
-  const { Cart } = await import('./js/cart.js');
+  const { Cart } = await import('./cart.js');
   Cart.clear();
 
   // Test Add to Cart
@@ -100,7 +100,7 @@ async function runTests() {
   assert(updatedItem.quantity === 1, `Quantity updated to 1`);
 
   // 4. Test Checkout Process
-  const { Checkout, DEMO_USER } = await import('./js/checkout.js');
+  const { Checkout, DEMO_USER } = await import('./checkout.js');
   
   const deliveryValidation = Checkout.validateDeliveryForm(DEMO_USER);
   assert(deliveryValidation.isValid === true, 'Delivery form validates demo customer details');
@@ -130,7 +130,7 @@ async function runTests() {
   assert(savedOrders[0].orderId === orderResult.order.orderId, `Saved order ID matches generated ID`);
 
   // 7. Verify Authentication & User Management
-  const { Auth } = await import('./js/auth.js');
+  const { Auth } = await import('./auth.js');
   
   const seedUsers = Auth.getUsers();
   assert(seedUsers.length >= 2, `Pre-seeded demo user accounts exist (Found: ${seedUsers.length})`);

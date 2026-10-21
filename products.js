@@ -14,10 +14,10 @@ export const CURRENCY = {
 };
 
 export const CATEGORIES = [
-  { id: 'all', name: 'All Categories', icon: '🛍️' },
-  { id: 'Food', name: 'Food & Gourmet', icon: '🍞' },
-  { id: 'Clothing', name: 'Clothing & Apparel', icon: '👕' },
-  { id: 'Electronics', name: 'Electronics & Tech', icon: '🎧' }
+  { id: 'all', name: 'All Categories' },
+  { id: 'Food', name: 'Food & Gourmet' },
+  { id: 'Clothing', name: 'Clothing & Apparel' },
+  { id: 'Electronics', name: 'Electronics & Tech' }
 ];
 
 export const INITIAL_PRODUCTS = [

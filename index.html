@@ -13,7 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <!-- Accessibility: Skip Link for keyboard & screen reader users -->
@@ -30,15 +30,26 @@
         <div class="header-container">
           <!-- Brand Logo with Gradient Icon & PRO Badge -->
           <a href="index.html" class="brand-logo" aria-label="ShopEase Home Page">
-            <div class="brand-icon" aria-hidden="true">🛒</div>
-            <div class="brand-text">Shop<span>Ease</span><span class="brand-badge">PRO</span></div>
+            <div class="brand-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="8" cy="21" r="1"></circle>
+                <circle cx="19" cy="21" r="1"></circle>
+                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+              </svg>
+            </div>
+            <div class="brand-text">Shop<span>Ease</span></div>
           </a>
 
           <!-- Creative Search Capsule -->
           <form class="search-form" id="search-form" role="search" onsubmit="event.preventDefault();">
             <label for="search-input" class="sr-only">Search products by title, category, or features</label>
             <div class="search-input-wrapper">
-              <span class="search-icon" aria-hidden="true">🔍</span>
+              <span class="search-icon" aria-hidden="true">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </span>
               <input 
                 type="search" 
                 id="search-input" 
@@ -66,32 +77,28 @@
               aria-label="Toggle color theme" 
               title="Switch color theme"
             >
-              <span id="theme-icon" class="theme-icon" aria-hidden="true">☀️</span>
+              <span id="theme-icon" class="theme-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="5"></circle>
+                  <line x1="12" y1="1" x2="12" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="23"></line>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                  <line x1="1" y1="12" x2="3" y2="12"></line>
+                  <line x1="21" y1="12" x2="23" y2="12"></line>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+              </span>
             </button>
 
             <!-- Navigation Actions (Dynamic according to auth status) -->
             <div class="nav-actions" id="main-nav-actions">
-              <!-- Basket Button -->
-              <button 
-                type="button" 
-                id="cart-toggle-btn" 
-                class="nav-btn nav-btn-cart" 
-                aria-label="Shopping basket, 0 items"
-                aria-haspopup="dialog"
-                title="View Shopping Basket"
-              >
-                <span aria-hidden="true">🛍️</span>
-                <span class="nav-btn-text">Basket</span>
-                <span id="cart-badge" class="cart-badge" aria-hidden="true">0</span>
-              </button>
-
               <!-- Sign In & Register Buttons -->
               <a href="login.html" class="nav-btn nav-btn-ghost" id="nav-login-btn" aria-label="Sign in to your account" title="Sign In">
-                <span aria-hidden="true">👤</span>
                 <span>Sign In</span>
               </a>
               <a href="register.html" class="nav-btn nav-btn-primary" id="nav-register-btn" aria-label="Create new account" title="Register">
-                <span aria-hidden="true">✨</span>
                 <span>Register</span>
               </a>
             </div>
@@ -99,341 +106,59 @@
         </div>
       </nav>
 
-      <!-- Secondary Sub-Navigation Ribbon (Department Bar) -->
-      <nav class="sub-nav" aria-label="Department Categories">
-        <div class="sub-nav-container">
-          <div class="sub-nav-left">
-            <button type="button" class="sub-nav-all-btn" onclick="window.shopeaseFilterCategory('all')" title="Browse all departments">
-              <span class="sub-nav-icon" aria-hidden="true">☰</span>
-              <span>All Departments</span>
-            </button>
-            <div class="sub-nav-chips">
-              <a href="#catalog-section" class="sub-nav-link" onclick="window.shopeaseFilterCategory('Food')">
-                <span>🍞</span> Food &amp; Gourmet
-              </a>
-              <a href="#catalog-section" class="sub-nav-link" onclick="window.shopeaseFilterCategory('Clothing')">
-                <span>👕</span> Clothing &amp; Apparel
-              </a>
-              <a href="#catalog-section" class="sub-nav-link" onclick="window.shopeaseFilterCategory('Electronics')">
-                <span>🎧</span> Electronics &amp; Tech
-              </a>
-              <a href="#deals-section" class="sub-nav-link sub-nav-deals">
-                <span>🏷️</span> Today's Offers <span class="badge-mini">SAVE</span>
-              </a>
-              <a href="#about-us" class="sub-nav-link">
-                <span>ℹ️</span> About Us
-              </a>
-              <a href="#catalog-section" class="sub-nav-link" onclick="document.getElementById('orders-toggle-btn')?.click() || (window.location.href='login.html')">
-                <span>📦</span> Track Orders
-              </a>
-            </div>
-          </div>
-          <div class="sub-nav-right">
-            <div class="delivery-perk-badge">
-              <span class="pulse-indicator" aria-hidden="true"></span>
-              <span>Free Express Shipping on Rs. 50+</span>
-            </div>
-          </div>
-        </div>
-      </nav>
     </div>
   </header>
 
   <!-- Main Content Area -->
   <main id="main-content">
-    <!-- 1. Hero Showcase Section -->
-    <section class="hero-banner" aria-label="Store announcement and featured highlight">
+    <!-- Clean, Balanced Hero Showcase -->
+    <section class="simple-hero" aria-label="Store Welcome">
       <div class="container">
-        <div class="hero-grid">
-          <!-- Left Hero Column: Value Proposition & CTAs -->
-          <div class="hero-text">
-            <div class="hero-tag">
-              <span>✨</span>
-              <span>Premium Quality • Best Price Guarantee</span>
-            </div>
-            <h1 class="hero-title">Curated Everyday Essentials, Delivered Fast</h1>
-            <p class="hero-subtitle">
-              Discover handpicked collections across gourmet foods, designer apparel, and smart electronics. Enjoy transparent pricing, express delivery, and seamless customer service.
-            </p>
-
-            <div class="hero-cta-group">
-              <a href="#catalog-section" class="hero-btn-primary">
-                <span>🛍️ Shop All Products</span>
-                <span aria-hidden="true">→</span>
-              </a>
-              <a href="#deals-section" class="hero-btn-secondary">
-                <span>🏷️ View Today's Deals</span>
-              </a>
-            </div>
-
-            <!-- Store Metrics Counters -->
-            <div class="hero-stats-row" role="region" aria-label="Key store metrics">
-              <div class="stat-item">
-                <span class="stat-number">100%</span>
-                <span class="stat-label">Authentic Products</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">3</span>
-                <span class="stat-label">Core Departments</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">Rs. 50+</span>
-                <span class="stat-label">Free Express Courier</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">4.8★</span>
-                <span class="stat-label">Customer Rating</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right Hero Column: Interactive Featured Product Spotlight Card -->
-          <div class="hero-spotlight-card" aria-label="Featured product spotlight">
-            <span class="spotlight-badge">🔥 Top Trending</span>
-            <div class="spotlight-image-wrap">
-              <img 
-                src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80" 
-                alt="AcousticPro Hybrid ANC Wireless Headphones"
-                loading="eager"
-              />
-            </div>
-            <div class="spotlight-content">
-              <div class="spotlight-category">🎧 Electronics & Tech</div>
-              <h2 class="spotlight-title">AcousticPro Hybrid ANC Wireless Headphones</h2>
-              <div style="font-size:0.85rem; color:var(--color-brand-accent);">
-                ★★★★★ <span style="color:var(--color-text-muted); font-weight:600;">4.9 (245 reviews)</span>
-              </div>
-              <div class="spotlight-price-row">
-                <span class="spotlight-price">Rs. 199.99</span>
-                <span style="font-size:0.8rem; color:var(--color-success); font-weight:700; background:var(--color-success-bg); padding:0.2rem 0.5rem; border-radius:var(--radius-full);">
-                  10 in stock
-                </span>
-              </div>
-              <div class="spotlight-actions">
-                <button 
-                  type="button" 
-                  class="btn btn-primary" 
-                  style="flex:1;"
-                  onclick="window.shopeaseQuickAdd('prod-09')"
-                >
-                  🛒 Add to Basket
-                </button>
-                <button 
-                  type="button" 
-                  class="btn btn-secondary"
-                  onclick="window.shopeaseOpenQuickView('prod-09')"
-                  aria-label="Quick view AcousticPro Headphones specs"
-                >
-                  👁️ Quick View
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 2. Trust & Value Propositions Bar -->
-    <section class="trust-perks-section" aria-label="Customer guarantees and trust perks">
-      <div class="container">
-        <div class="trust-perks-grid">
-          <div class="perk-card">
-            <div class="perk-icon-wrap" aria-hidden="true">🚚</div>
-            <div>
-              <div class="perk-title">Free Express Delivery</div>
-              <div class="perk-desc">Complimentary shipping on all orders over Rs. 50.00.</div>
-            </div>
-          </div>
-
-          <div class="perk-card">
-            <div class="perk-icon-wrap" aria-hidden="true">🛡️</div>
-            <div>
-              <div class="perk-title">100% Quality Guaranteed</div>
-              <div class="perk-desc">Direct from verified suppliers with full satisfaction assurance.</div>
-            </div>
-          </div>
-
-          <div class="perk-card">
-            <div class="perk-icon-wrap" aria-hidden="true">⚡</div>
-            <div>
-              <div class="perk-title">Fast Order Dispatch</div>
-              <div class="perk-desc">Real-time stock management and same-day packaging.</div>
-            </div>
-          </div>
-
-          <div class="perk-card">
-            <div class="perk-icon-wrap" aria-hidden="true">🔒</div>
-            <div>
-              <div class="perk-title">Safe & Encrypted Checkout</div>
-              <div class="perk-desc">Industry-standard 256-bit SSL encryption on all orders.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3. Shop by Department (Category Spotlight Cards) -->
-    <section class="container departments-section" aria-label="Shop by Department">
-      <div class="section-header-wrap">
-        <div>
-          <h2 class="section-title">Shop by Department</h2>
-          <p class="section-subtitle">Click any category card to immediately filter the catalog below.</p>
-        </div>
-        <button 
-          type="button" 
-          class="btn btn-secondary" 
-          style="font-size:0.85rem; padding:0.4rem 0.85rem;"
-          onclick="window.shopeaseFilterCategory('all')"
-        >
-          View All 10 Products
-        </button>
-      </div>
-
-      <div class="department-cards-grid">
-        <!-- Department 1: Food & Gourmet -->
-        <div class="dept-card" onclick="window.shopeaseFilterCategory('Food')" role="button" tabindex="0" onkeydown="if(event.key==='Enter') window.shopeaseFilterCategory('Food')" aria-label="Filter Food and Gourmet department">
-          <div class="dept-image-wrap">
-            <img 
-              src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80" 
-              alt="Artisan Sourdough and Bakery"
-              loading="lazy"
-            />
-            <span class="dept-count-badge">🍞 3 Products</span>
-          </div>
-          <div class="dept-info">
-            <h3 class="dept-title">
-              <span>Food & Gourmet</span>
-              <span aria-hidden="true">→</span>
-            </h3>
-            <p class="dept-desc">
-              Artisan organic sourdough loaves, single-estate Ethiopian Arabica coffee, and Swiss dark truffles.
-            </p>
-            <span class="dept-cta-link">Browse Food Catalog →</span>
-          </div>
-        </div>
-
-        <!-- Department 2: Clothing & Apparel -->
-        <div class="dept-card" onclick="window.shopeaseFilterCategory('Clothing')" role="button" tabindex="0" onkeydown="if(event.key==='Enter') window.shopeaseFilterCategory('Clothing')" aria-label="Filter Clothing and Apparel department">
-          <div class="dept-image-wrap">
-            <img 
-              src="https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=800&q=80" 
-              alt="Denim Jacket and Casual Wear"
-              loading="lazy"
-            />
-            <span class="dept-count-badge">👕 3 Products</span>
-          </div>
-          <div class="dept-info">
-            <h3 class="dept-title">
-              <span>Clothing & Apparel</span>
-              <span aria-hidden="true">→</span>
-            </h3>
-            <p class="dept-desc">
-              Everyday tailored stretch chinos, 13.5oz organic rigid denim trucker jackets, and Italian merino knitwear.
-            </p>
-            <span class="dept-cta-link">Browse Clothing Catalog →</span>
-          </div>
-        </div>
-
-        <!-- Department 3: Electronics & Tech -->
-        <div class="dept-card" onclick="window.shopeaseFilterCategory('Electronics')" role="button" tabindex="0" onkeydown="if(event.key==='Enter') window.shopeaseFilterCategory('Electronics')" aria-label="Filter Electronics and Tech department">
-          <div class="dept-image-wrap">
-            <img 
-              src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80" 
-              alt="Mechanical Keyboard and Gadgets"
-              loading="lazy"
-            />
-            <span class="dept-count-badge">🎧 4 Products</span>
-          </div>
-          <div class="dept-info">
-            <h3 class="dept-title">
-              <span>Electronics & Tech</span>
-              <span aria-hidden="true">→</span>
-            </h3>
-            <p class="dept-desc">
-              ErgoPro wireless mechanical keyboards, AMOLED GPS smartwatches, 38dB ANC headphones, and 4K OLED monitor.
-            </p>
-            <span class="dept-cta-link">Browse Electronics Catalog →</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 4. Promotional Voucher Showcase Banner -->
-    <section class="container" id="deals-section" aria-label="Promotional Vouchers and Offers">
-      <div class="promo-spotlight-banner">
-        <div style="max-width: 650px;">
-          <span style="background:rgba(255,255,255,0.2); font-size:0.75rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:var(--radius-full); text-transform:uppercase; letter-spacing:0.05em;">
-            🏷️ Exclusive Member Savings
+        <div class="simple-hero-card">
+          <span class="hero-tag-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            Curated Quality • Direct Delivery
           </span>
-          <h2 style="font-size:clamp(1.5rem, 2.5vw, 2rem); font-weight:800; margin:0.6rem 0 0.4rem;">
-            Save Big with Special Promotional Coupons
-          </h2>
-          <p style="font-size:0.95rem; opacity:0.9; line-height:1.5;">
-            Enjoy instant discounts on your order. Click any voucher code below to automatically apply the discount to your basket!
+          <h1 class="simple-hero-title">Curated Everyday Essentials</h1>
+          <p class="simple-hero-subtitle">
+            Browse our handpicked collections across gourmet foods, designer apparel, and smart electronics with transparent pricing and fast delivery.
           </p>
-        </div>
 
-        <div class="promo-vouchers-grid">
-          <!-- Voucher 1 -->
-          <div class="voucher-ticket">
-            <div>
-              <div style="font-size:1.1rem; font-weight:800;">10% Off Entire Basket</div>
-              <div style="font-size:0.8rem; opacity:0.85;">No minimum purchase required.</div>
+          <!-- Centered Interactive Category Filter Deck -->
+          <div class="hero-categories-deck">
+            <div id="category-pills" class="category-pills" role="group" aria-label="Filter products by category">
+              <!-- Dynamically populated categories -->
             </div>
-            <button 
-              type="button" 
-              class="voucher-code-btn" 
-              onclick="window.shopeaseApplyVoucher('SAVE10')"
-              aria-label="Apply voucher code SAVE10 for 10% discount"
-            >
-              <span>Code: <strong>SAVE10</strong></span>
-              <span>Apply →</span>
-            </button>
           </div>
 
-          <!-- Voucher 2 -->
-          <div class="voucher-ticket">
-            <div>
-              <div style="font-size:1.1rem; font-weight:800;">20% Welcome Discount</div>
-              <div style="font-size:0.8rem; opacity:0.85;">Exclusive discount on your full basket.</div>
+          <!-- Micro-Trust Pillars (Balanced 3-column row) -->
+          <div class="hero-micro-perks" role="region" aria-label="Store guarantees">
+            <div class="micro-perk-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="3" width="15" height="13"></rect>
+                <polygon points="16 8 20 8 23 11 23 16 16 16 8"></polygon>
+                <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                <circle cx="18.5" cy="18.5" r="2.5"></circle>
+              </svg>
+              <span>Free Delivery on Rs. 50+</span>
             </div>
-            <button 
-              type="button" 
-              class="voucher-code-btn" 
-              onclick="window.shopeaseApplyVoucher('WELCOME20')"
-              aria-label="Apply voucher code WELCOME20 for 20% discount"
-            >
-              <span>Code: <strong>WELCOME20</strong></span>
-              <span>Apply →</span>
-            </button>
-          </div>
-
-          <!-- Voucher 3 -->
-          <div class="voucher-ticket">
-            <div>
-              <div style="font-size:1.1rem; font-weight:800;">Free Express Delivery</div>
-              <div style="font-size:0.8rem; opacity:0.85;">Waives Rs. 3.99 standard delivery fee.</div>
+            <div class="micro-perk-divider" aria-hidden="true">•</div>
+            <div class="micro-perk-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+              <span>100% Quality Guaranteed</span>
             </div>
-            <button 
-              type="button" 
-              class="voucher-code-btn" 
-              onclick="window.shopeaseApplyVoucher('FREESHIP')"
-              aria-label="Apply voucher code FREESHIP for free delivery"
-            >
-              <span>Code: <strong>FREESHIP</strong></span>
-              <span>Apply →</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 5. Category Pills Navigation & Main Catalog Section -->
-    <section class="category-nav-section" aria-label="Product categories bar">
-      <div class="container">
-        <div class="category-nav-wrapper">
-          <div id="category-pills" class="category-pills" role="group" aria-label="Filter products by category">
-            <!-- Dynamically populated categories -->
+            <div class="micro-perk-divider" aria-hidden="true">•</div>
+            <div class="micro-perk-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+              </svg>
+              <span>Hassle-Free Returns</span>
+            </div>
           </div>
         </div>
       </div>
@@ -447,7 +172,7 @@
       <!-- Filter Toolbar -->
       <div class="filter-toolbar">
         <div class="toolbar-status">
-          <h2 style="font-size:1.25rem; font-weight:800; margin:0;" id="catalog-heading">Our 10 Curated Products</h2>
+          <h2 style="font-size:1.25rem; font-weight:800; margin:0;" id="catalog-heading">Our Products</h2>
           <span id="product-results-count" style="font-size:0.85rem; color:var(--color-text-muted);">10 products found</span>
         </div>
 
@@ -476,138 +201,6 @@
       <!-- Product Cards Grid Container -->
       <div id="product-grid" class="product-grid" aria-live="polite">
         <!-- Dynamically rendered 10 product cards -->
-      </div>
-    </section>
-
-    <!-- 6. Universal Design Principles Showcase -->
-    <section class="ud-principles-section" id="about-us" aria-label="Why Shop With ShopEase">
-      <div class="container">
-        <div class="section-header-wrap" style="text-align:center; justify-content:center; flex-direction:column; align-items:center;">
-          <span style="font-size:0.8rem; font-weight:700; color:var(--color-brand-primary); text-transform:uppercase; letter-spacing:0.06em;">
-            The ShopEase Difference
-          </span>
-          <h2 class="section-title">Why Customers Love Shopping With Us</h2>
-          <p class="section-subtitle" style="max-width:600px; margin:0.35rem auto 0;">
-            Engineered from the ground up for speed, quality, and effortless shopping for everyone.
-          </p>
-        </div>
-
-        <div class="ud-grid">
-          <div class="ud-card">
-            <span class="ud-card-icon" aria-hidden="true">♿</span>
-            <h3 class="ud-card-title">1. Universally Accessible Design</h3>
-            <p class="ud-card-desc">
-              Thoughtfully built for all abilities: Light/Dark/High Contrast modes, dynamic font scaling, full screen reader support, and keyboard navigation.
-            </p>
-          </div>
-
-          <div class="ud-card">
-            <span class="ud-card-icon" aria-hidden="true">⚡</span>
-            <h3 class="ud-card-title">2. Fast, Seamless Experience</h3>
-            <p class="ud-card-desc">
-              Instant live search, keyboard shortcuts (<kbd style="background:var(--color-surface); padding:0.1rem 0.3rem; border:1px solid var(--color-border); border-radius:4px;">/</kbd> to search, <kbd style="background:var(--color-surface); padding:0.1rem 0.3rem; border:1px solid var(--color-border); border-radius:4px;">Esc</kbd> to close), and swift 1-click quick-view previews.
-            </p>
-          </div>
-
-          <div class="ud-card">
-            <span class="ud-card-icon" aria-hidden="true">🛡️</span>
-            <h3 class="ud-card-title">3. Transparent & Reliable Shopping</h3>
-            <p class="ud-card-desc">
-              Real-time stock indicators prevent over-ordering, clear fee breakdowns, instant order receipts, and hassle-free returns on all products.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 7. Customer Testimonials & Reviews -->
-    <section class="container testimonials-section" aria-label="Customer Reviews">
-      <div class="section-header-wrap">
-        <div>
-          <h2 class="section-title">What Our Customers Say</h2>
-          <p class="section-subtitle">Real feedback on accessibility, product quality, and smooth checkout.</p>
-        </div>
-      </div>
-
-      <div class="testimonials-grid">
-        <div class="testimonial-card">
-          <div style="color:var(--color-brand-accent); font-size:1.1rem; margin-bottom:0.75rem;" aria-label="5 out of 5 stars">
-            ★★★★★
-          </div>
-          <p class="testimonial-quote">
-            "The High-Contrast mode and text scaling options are exceptional. As someone with low vision, shopping on ShopEase is vastly more comfortable than conventional e-commerce websites."
-          </p>
-          <div class="testimonial-author">
-            <div class="author-avatar" aria-hidden="true">👓</div>
-            <div>
-              <div class="author-name">David Thornton</div>
-              <div class="author-role">Verified Buyer • Manchester</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="testimonial-card">
-          <div style="color:var(--color-brand-accent); font-size:1.1rem; margin-bottom:0.75rem;" aria-label="5 out of 5 stars">
-            ★★★★★
-          </div>
-          <p class="testimonial-quote">
-            "The sourdough bread and Ethiopian coffee arrived fresh and delicious. The checkout was lightning-quick with the autofill features. Brilliant design!"
-          </p>
-          <div class="testimonial-author">
-            <div class="author-avatar" aria-hidden="true">☕</div>
-            <div>
-              <div class="author-name">Elena Rostova</div>
-              <div class="author-role">VIP Member • London</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="testimonial-card">
-          <div style="color:var(--color-brand-accent); font-size:1.1rem; margin-bottom:0.75rem;" aria-label="5 out of 5 stars">
-            ★★★★★
-          </div>
-          <p class="testimonial-quote">
-            "Being able to navigate completely using my keyboard with the '/' shortcut and tab indexing made adding items to my basket effortless. Truly universal design in action."
-          </p>
-          <div class="testimonial-author">
-            <div class="author-avatar" aria-hidden="true">💻</div>
-            <div>
-              <div class="author-name">Marcus Vance</div>
-              <div class="author-role">Tech Enthusiast • Bristol</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 8. Newsletter Subscription Card -->
-    <section class="container" aria-label="Newsletter Subscription">
-      <div class="newsletter-card">
-        <span style="font-size:2rem; display:inline-block; margin-bottom:0.5rem;" aria-hidden="true">📬</span>
-        <h2 style="font-size:1.5rem; font-weight:800; color:var(--color-text-primary); margin-bottom:0.4rem;">
-          Join the ShopEase Community
-        </h2>
-        <p style="font-size:0.95rem; color:var(--color-text-secondary); max-width:480px; margin:0 auto;">
-          Get exclusive discount vouchers, early access to new seasonal products, and accessibility updates delivered to your inbox.
-        </p>
-
-        <form class="newsletter-form" id="newsletter-form">
-          <label for="newsletter-email" class="sr-only">Email address for newsletter</label>
-          <input 
-            type="email" 
-            id="newsletter-email" 
-            class="form-input" 
-            style="max-width:320px; flex:1;" 
-            placeholder="Enter your email address" 
-            required 
-          />
-          <button type="submit" class="btn btn-primary" style="height:44px; padding:0 1.25rem;">
-            Subscribe
-          </button>
-        </form>
-        <span style="font-size:0.75rem; color:var(--color-text-muted); display:block; margin-top:0.75rem;">
-          🔒 Zero spam policy. Unsubscribe anytime with 1 click.
-        </span>
       </div>
     </section>
   </main>
@@ -877,7 +470,13 @@
       <div class="footer-grid">
         <div class="footer-col" style="max-width:320px;">
           <div class="brand-logo" style="margin-bottom:0.75rem;">
-            <div class="brand-icon" aria-hidden="true">🛒</div>
+            <div class="brand-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="8" cy="21" r="1"></circle>
+                <circle cx="19" cy="21" r="1"></circle>
+                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+              </svg>
+            </div>
             <div class="brand-text">Shop<span>Ease</span></div>
           </div>
           <p style="font-size:0.875rem; color:var(--color-text-secondary); line-height:1.6; margin-bottom:1rem;">
@@ -891,20 +490,19 @@
         <div class="footer-col">
           <h4>Shop Departments</h4>
           <ul class="footer-links">
-            <li><a href="#main-content" onclick="document.querySelector('[data-category=Food]')?.click()">🍞 Food & Gourmet</a></li>
-            <li><a href="#main-content" onclick="document.querySelector('[data-category=Clothing]')?.click()">👕 Clothing & Apparel</a></li>
-            <li><a href="#main-content" onclick="document.querySelector('[data-category=Electronics]')?.click()">🎧 Electronics & Tech</a></li>
-            <li><a href="#main-content" onclick="document.querySelector('[data-category=all]')?.click()">🛍️ View All Products</a></li>
+            <li><a href="#main-content" onclick="document.querySelector('[data-category=Food]')?.click()">Food &amp; Gourmet</a></li>
+            <li><a href="#main-content" onclick="document.querySelector('[data-category=Clothing]')?.click()">Clothing &amp; Apparel</a></li>
+            <li><a href="#main-content" onclick="document.querySelector('[data-category=Electronics]')?.click()">Electronics &amp; Tech</a></li>
+            <li><a href="#main-content" onclick="document.querySelector('[data-category=all]')?.click()">View All Products</a></li>
           </ul>
         </div>
 
         <div class="footer-col">
           <h4>Customer Care</h4>
           <ul class="footer-links">
-            <li><a href="login.html">🔑 Sign In / Register</a></li>
-            <li><a href="#main-content" onclick="document.getElementById('orders-toggle-btn')?.click()">📦 Track Orders & Receipts</a></li>
-            <li><a href="#main-content" onclick="document.getElementById('offers-toggle-btn')?.click()">🏷️ Today's Offers & Deals</a></li>
-            <li><a href="login.html">👤 Account Settings</a></li>
+            <li><a href="login.html">Sign In / Register</a></li>
+            <li><a href="#main-content" onclick="document.getElementById('orders-toggle-btn')?.click()">Track Orders &amp; Receipts</a></li>
+            <li><a href="login.html">Account Settings</a></li>
           </ul>
         </div>
 
@@ -931,6 +529,6 @@
   </footer>
 
   <!-- Application Scripts -->
-  <script type="module" src="js/app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

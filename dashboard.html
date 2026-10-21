@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
 
   <!-- Main Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <!-- Accessibility Skip Link -->
@@ -29,8 +29,14 @@
         <div class="header-container" style="padding:0.25rem 0.5rem;">
           <!-- Brand Logo -->
           <a href="index.html" class="brand-logo" aria-label="ShopEase Home Page">
-            <div class="brand-icon" aria-hidden="true">🛒</div>
-            <div class="brand-text">Shop<span>Ease</span><span class="brand-badge">PRO</span></div>
+            <div class="brand-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="8" cy="21" r="1"></circle>
+                <circle cx="19" cy="21" r="1"></circle>
+                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+              </svg>
+            </div>
+            <div class="brand-text">Shop<span>Ease</span></div>
           </a>
 
           <!-- Right Side Nav Header Section: Theme Control + Authenticated Action Buttons -->
@@ -43,14 +49,25 @@
               aria-label="Toggle color theme" 
               title="Switch color theme"
             >
-              <span id="theme-icon" class="theme-icon" aria-hidden="true">☀️</span>
+              <span id="theme-icon" class="theme-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="5"></circle>
+                  <line x1="12" y1="1" x2="12" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="23"></line>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                  <line x1="1" y1="12" x2="3" y2="12"></line>
+                  <line x1="21" y1="12" x2="23" y2="12"></line>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+              </span>
             </button>
 
             <!-- Authenticated Navigation Action Buttons -->
             <div class="nav-actions">
               <!-- Shop Catalog link -->
               <a href="index.html" class="nav-btn nav-btn-ghost" aria-label="Return to store catalog">
-                <span aria-hidden="true">🛒</span>
                 <span>Shop Catalog</span>
               </a>
 
@@ -62,7 +79,6 @@
                 aria-label="View promotional offers"
                 title="View promotional offers"
               >
-                <span>🏷️</span>
                 <span>My Offers</span>
               </button>
 
@@ -73,7 +89,6 @@
                 class="nav-btn nav-btn-cart" 
                 aria-label="Shopping basket"
               >
-                <span aria-hidden="true">🛍️</span>
                 <span>Basket</span>
                 <span id="dash-cart-badge" class="cart-badge" aria-hidden="true">0</span>
               </button>
@@ -86,7 +101,6 @@
                 aria-label="View order history"
                 title="View past orders"
               >
-                <span>📦</span>
                 <span>My Orders</span>
               </button>
 
@@ -98,7 +112,6 @@
                 aria-label="Sign out of customer account"
                 title="Sign Out"
               >
-                <span>🚪</span>
                 <span>Logout</span>
               </button>
             </div>
@@ -247,6 +260,6 @@
   </footer>
 
   <!-- Application Controller -->
-  <script type="module" src="js/dashboard.js"></script>
+  <script type="module" src="dashboard.js"></script>
 </body>
 </html>
