@@ -6,6 +6,11 @@
   <meta name="description" content="Sign in to your ShopEase account to manage orders, wishlist, and fast mock checkout.">
   <title>Sign In | ShopEase Accessible E-Commerce</title>
   
+  <!-- Preconnect to font sources -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <!-- Stylesheet -->
   <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -18,40 +23,34 @@
 
   <!-- Top Accessibility & Preferences Bar -->
   <header class="site-header" role="banner">
-    <nav class="main-nav" aria-label="Sign In Navigation">
-      <div class="container" style="display:flex; justify-content:space-between; align-items:center;">
-        <a href="index.html" class="brand-logo" aria-label="ShopEase Home Page">
-          <div class="brand-icon" aria-hidden="true">🛒</div>
-          <div class="brand-text">Shop<span>Ease</span></div>
-        </a>
-
-        <div class="nav-right-section">
-          <!-- Theme & Display Controls directly in Navbar -->
-          <div class="a11y-controls" role="region" aria-label="Display Preferences">
-            <div class="a11y-group" title="Select theme color scheme">
-              <label for="theme-select" style="font-size:0.75rem; font-weight:600; padding:0 0.25rem;">Theme:</label>
-              <select id="theme-select" class="select-custom" style="height:26px; padding:0 1.25rem 0 0.35rem; font-size:0.78rem; border:none; background-color:transparent;" aria-label="Select color theme">
-                <option value="light">☀️ Light</option>
-                <option value="dark">🌙 Dark</option>
-                <option value="high-contrast">👁️ Contrast</option>
-              </select>
-            </div>
-
-            <div class="a11y-group" role="group" aria-label="Font size adjustment" title="Adjust text size">
-              <span style="font-size:0.75rem; font-weight:600; padding:0 0.2rem;">Text:</span>
-              <button type="button" id="btn-font-normal" class="a11y-btn active" title="Default font size" aria-label="Default font size">A</button>
-              <button type="button" id="btn-font-large" class="a11y-btn" title="Large font size" aria-label="Large font size">A+</button>
-              <button type="button" id="btn-font-xlarge" class="a11y-btn" title="Extra large font size" aria-label="Extra large font size">A++</button>
-            </div>
-          </div>
-
-          <a href="index.html" class="nav-btn" aria-label="Return to store homepage">
-            <span>🏪</span>
-            <span>Back to Store</span>
+    <div class="header-island">
+      <nav class="main-nav" aria-label="Sign In Navigation">
+        <div class="header-container" style="padding:0.25rem 0.5rem;">
+          <a href="index.html" class="brand-logo" aria-label="ShopEase Home Page">
+            <div class="brand-icon" aria-hidden="true">🛒</div>
+            <div class="brand-text">Shop<span>Ease</span><span class="brand-badge">PRO</span></div>
           </a>
+
+          <div class="nav-right-section">
+            <!-- Theme Toggle (Icon only - No theme words) -->
+            <button 
+              type="button" 
+              id="theme-toggle-btn" 
+              class="theme-toggle-btn" 
+              aria-label="Toggle color theme" 
+              title="Switch color theme"
+            >
+              <span id="theme-icon" class="theme-icon" aria-hidden="true">☀️</span>
+            </button>
+
+            <a href="index.html" class="nav-btn nav-btn-ghost" aria-label="Return to store homepage">
+              <span>🏪</span>
+              <span>Back to Store</span>
+            </a>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </div>
   </header>
 
   <!-- Main Content Area -->

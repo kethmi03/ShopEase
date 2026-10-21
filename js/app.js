@@ -24,11 +24,9 @@ const state = {
    DOM Elements
    ========================================================================== */
 const DOM = {
-  // Theme & Accessibility
-  themeSelect: document.getElementById('theme-select'),
-  fontSizeNormalBtn: document.getElementById('btn-font-normal'),
-  fontSizeLargeBtn: document.getElementById('btn-font-large'),
-  fontSizeXLargeBtn: document.getElementById('btn-font-xlarge'),
+  // Theme & Controls
+  themeToggleBtn: document.getElementById('theme-toggle-btn'),
+  themeIcon: document.getElementById('theme-icon'),
   liveAnnouncer: document.getElementById('live-announcer'),
 
   // Search & Filters
@@ -130,49 +128,55 @@ function showToast(message, type = 'success') {
 }
 
 /* ==========================================================================
-   Accessibility Settings Management (Universal Design)
+   Theme Management (Icon-only theme switcher - No theme words)
    ========================================================================== */
+const THEMES = ['light', 'dark', 'high-contrast'];
+const THEME_ICONS = {
+  'light': '☀️',
+  'dark': '🌙',
+  'high-contrast': '👁️'
+};
+const THEME_NAMES = {
+  'light': 'Light',
+  'dark': 'Dark',
+  'high-contrast': 'High Contrast'
+};
+
+function applyTheme(theme) {
+  const targetTheme = THEMES.includes(theme) ? theme : 'light';
+  document.documentElement.setAttribute('data-theme', targetTheme);
+  Storage.saveSettings({ theme: targetTheme });
+
+  const iconSpan = document.getElementById('theme-icon');
+  const btn = document.getElementById('theme-toggle-btn');
+  if (iconSpan) {
+    iconSpan.textContent = THEME_ICONS[targetTheme];
+  }
+  if (btn) {
+    btn.setAttribute('aria-label', `Toggle theme (Current: ${THEME_NAMES[targetTheme]})`);
+    btn.setAttribute('title', `Switch theme (Current: ${THEME_NAMES[targetTheme]})`);
+  }
+}
+
 function initAccessibilitySettings() {
   const settings = Storage.getSettings();
 
   // Apply Theme
-  document.documentElement.setAttribute('data-theme', settings.theme);
-  if (DOM.themeSelect) {
-    DOM.themeSelect.value = settings.theme;
-  }
+  applyTheme(settings.theme || 'light');
 
-  // Apply Font Size
-  document.documentElement.setAttribute('data-font-size', settings.fontSize);
-  updateFontSizeButtons(settings.fontSize);
+  // Maintain font size attribute for document
+  document.documentElement.setAttribute('data-font-size', settings.fontSize || 'normal');
 
-  // Theme change listener
-  DOM.themeSelect?.addEventListener('change', (e) => {
-    const newTheme = e.target.value;
-    document.documentElement.setAttribute('data-theme', newTheme);
-    Storage.saveSettings({ theme: newTheme });
-    announce(`Theme switched to ${newTheme} mode.`);
+  // Theme Toggle Button (Icon-only cycle: Light -> Dark -> High Contrast -> Light)
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  themeToggleBtn?.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const nextIdx = (THEMES.indexOf(currentTheme) + 1) % THEMES.length;
+    const nextTheme = THEMES[nextIdx];
+    applyTheme(nextTheme);
+    announce(`Theme switched to ${THEME_NAMES[nextTheme]} mode.`);
+    showToast(`Switched to ${THEME_NAMES[nextTheme]} theme ${THEME_ICONS[nextTheme]}`, 'info');
   });
-
-  // Font Size buttons
-  DOM.fontSizeNormalBtn?.addEventListener('click', () => setFontSize('normal'));
-  DOM.fontSizeLargeBtn?.addEventListener('click', () => setFontSize('large'));
-  DOM.fontSizeXLargeBtn?.addEventListener('click', () => setFontSize('xlarge'));
-}
-
-function setFontSize(size) {
-  document.documentElement.setAttribute('data-font-size', size);
-  Storage.saveSettings({ fontSize: size });
-  updateFontSizeButtons(size);
-  announce(`Font size set to ${size}.`);
-}
-
-function updateFontSizeButtons(currentSize) {
-  [DOM.fontSizeNormalBtn, DOM.fontSizeLargeBtn, DOM.fontSizeXLargeBtn].forEach(btn => {
-    if (btn) btn.classList.remove('active');
-  });
-  if (currentSize === 'normal') DOM.fontSizeNormalBtn?.classList.add('active');
-  if (currentSize === 'large') DOM.fontSizeLargeBtn?.classList.add('active');
-  if (currentSize === 'xlarge') DOM.fontSizeXLargeBtn?.classList.add('active');
 }
 
 /* ==========================================================================
@@ -1276,62 +1280,60 @@ function renderNavBar() {
 
   if (!user) {
     container.innerHTML = `
-      <a href="#about-us" class="nav-btn" aria-label="About ShopEase store">
-        <span aria-hidden="true">ℹ️</span>
-        <span>About Us</span>
-      </a>
-      <a href="login.html" class="nav-btn nav-btn-primary" id="nav-login-btn" aria-label="Sign in to your account" title="Sign In">
+      <button 
+        type="button" 
+        id="cart-toggle-btn" 
+        class="nav-btn nav-btn-cart" 
+        aria-label="Shopping basket, ${summary.totalItems} items"
+        aria-haspopup="dialog"
+        title="View Shopping Basket"
+      >
+        <span aria-hidden="true">🛍️</span>
+        <span class="nav-btn-text">Basket</span>
+        <span id="cart-badge" class="cart-badge" aria-hidden="true">${summary.totalItems}</span>
+      </button>
+
+      <a href="login.html" class="nav-btn nav-btn-ghost" id="nav-login-btn" aria-label="Sign in to your account" title="Sign In">
         <span aria-hidden="true">👤</span>
         <span>Sign In</span>
       </a>
-      <a href="register.html" class="nav-btn" id="nav-register-btn" style="border:1px solid var(--color-brand-primary); color:var(--color-brand-primary);" aria-label="Create new account" title="Register">
+      <a href="register.html" class="nav-btn nav-btn-primary" id="nav-register-btn" aria-label="Create new account" title="Register">
         <span aria-hidden="true">✨</span>
         <span>Register</span>
       </a>
     `;
+    document.getElementById('cart-toggle-btn')?.addEventListener('click', openCart);
     return;
   }
 
-  const summary = Cart.getSummary();
-
   container.innerHTML = `
-    <a href="dashboard.html" class="nav-btn" id="nav-dashboard-btn" style="background:var(--color-brand-primary); color:#ffffff; border-color:var(--color-brand-primary);" aria-label="Customer Dashboard" title="View Customer Dashboard">
+    <button 
+      type="button" 
+      id="cart-toggle-btn" 
+      class="nav-btn nav-btn-cart" 
+      aria-label="Shopping basket, ${summary.totalItems} items"
+      aria-haspopup="dialog"
+      title="View Shopping Basket"
+    >
+      <span aria-hidden="true">🛍️</span>
+      <span class="nav-btn-text">Basket</span>
+      <span id="cart-badge" class="cart-badge" aria-hidden="true">${summary.totalItems}</span>
+    </button>
+
+    <a href="dashboard.html" class="nav-btn nav-btn-dashboard" id="nav-dashboard-btn" aria-label="Customer Dashboard" title="View Customer Dashboard">
       <span aria-hidden="true">📊</span>
       <span>Dashboard</span>
     </a>
 
     <button 
       type="button" 
-      id="offers-toggle-btn" 
-      class="nav-btn" 
-      aria-label="View promotional offers"
-      title="View promotional offers"
-    >
-      <span>🏷️</span>
-      <span>My Offers</span>
-    </button>
-
-    <button 
-      type="button" 
       id="orders-toggle-btn" 
-      class="nav-btn" 
+      class="nav-btn nav-btn-ghost" 
       aria-label="View past orders"
       title="View order history"
     >
-      <span>📦</span>
-      <span>My Orders</span>
-    </button>
-
-    <button 
-      type="button" 
-      id="cart-toggle-btn" 
-      class="nav-btn cart-btn" 
-      aria-label="Shopping basket, ${summary.totalItems} items"
-      aria-haspopup="dialog"
-    >
-      <span aria-hidden="true">🛍️</span>
-      <span>Basket</span>
-      <span id="cart-badge" class="cart-badge" aria-hidden="true">${summary.totalItems}</span>
+      <span aria-hidden="true">📦</span>
+      <span>Orders</span>
     </button>
 
     <button 
@@ -1341,7 +1343,7 @@ function renderNavBar() {
       aria-label="Sign out of account"
       title="Sign Out"
     >
-      <span>🚪</span>
+      <span aria-hidden="true">🚪</span>
       <span>Logout</span>
     </button>
   `;

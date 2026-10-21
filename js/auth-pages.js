@@ -27,56 +27,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /**
  * Universal Design Preferences (Theme & Font Size)
- */
-function initAccessibilityPreferences() {
-  const themeSelect = document.getElementById('theme-select');
-  const btnFontNormal = document.getElementById('btn-font-normal');
-  const btnFontLarge = document.getElementById('btn-font-large');
-  const btnFontXLarge = document.getElementById('btn-font-xlarge');
-
-  const settings = Storage.getSettings();
-
-  // Apply initial theme & font size
-  applyTheme(settings.theme || 'light');
-  applyFontSize(settings.fontSize || 'normal');
-
-  if (themeSelect) {
-    themeSelect.value = settings.theme || 'light';
-    themeSelect.addEventListener('change', (e) => {
-      const newTheme = e.target.value;
-      applyTheme(newTheme);
-      Storage.saveSettings({ theme: newTheme });
-      announceToScreenReader(`Theme switched to ${newTheme} mode.`);
-    });
-  }
-
-  const fontBtns = [
-    { btn: btnFontNormal, size: 'normal' },
-    { btn: btnFontLarge, size: 'large' },
-    { btn: btnFontXLarge, size: 'xlarge' }
-  ];
-
-  fontBtns.forEach(({ btn, size }) => {
-    if (!btn) return;
-    btn.addEventListener('click', () => {
-      fontBtns.forEach(b => b.btn?.classList.remove('active'));
-      btn.classList.add('active');
-      applyFontSize(size);
-      Storage.saveSettings({ fontSize: size });
-      announceToScreenReader(`Font size adjusted to ${size}.`);
-    });
-  });
-
-  // Highlight active font button
-  fontBtns.forEach(({ btn, size }) => {
-    if (btn && settings.fontSize === size) {
-      btn.classList.add('active');
-    }
-  });
-}
+const THEMES = ['light', 'dark', 'high-contrast'];
+const THEME_ICONS = {
+  'light': '☀️',
+  'dark': '🌙',
+  'high-contrast': '👁️'
+};
+const THEME_NAMES = {
+  'light': 'Light',
+  'dark': 'Dark',
+  'high-contrast': 'High Contrast'
+};
 
 function applyTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
+  const targetTheme = THEMES.includes(theme) ? theme : 'light';
+  document.documentElement.setAttribute('data-theme', targetTheme);
+  Storage.saveSettings({ theme: targetTheme });
+
+  const iconSpan = document.getElementById('theme-icon');
+  const btn = document.getElementById('theme-toggle-btn');
+  if (iconSpan) {
+    iconSpan.textContent = THEME_ICONS[targetTheme];
+  }
+  if (btn) {
+    btn.setAttribute('aria-label', `Toggle theme (Current: ${THEME_NAMES[targetTheme]})`);
+    btn.setAttribute('title', `Switch theme (Current: ${THEME_NAMES[targetTheme]})`);
+  }
+}
+
+function initAccessibilityPreferences() {
+  const settings = Storage.getSettings();
+  applyTheme(settings.theme || 'light');
+  document.documentElement.setAttribute('data-font-size', settings.fontSize || 'normal');
+
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  themeToggleBtn?.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const nextIdx = (THEMES.indexOf(currentTheme) + 1) % THEMES.length;
+    const nextTheme = THEMES[nextIdx];
+    applyTheme(nextTheme);
+    announceToScreenReader(`Theme switched to ${THEME_NAMES[nextTheme]} mode.`);
+  });
 }
 
 function applyFontSize(size) {

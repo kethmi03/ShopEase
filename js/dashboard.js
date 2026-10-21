@@ -42,44 +42,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /**
  * Universal Design Preferences (Theme & Font Scaling)
+const THEMES = ['light', 'dark', 'high-contrast'];
+const THEME_ICONS = {
+  'light': '☀️',
+  'dark': '🌙',
+  'high-contrast': '👁️'
+};
+const THEME_NAMES = {
+  'light': 'Light',
+  'dark': 'Dark',
+  'high-contrast': 'High Contrast'
+};
+
+function applyTheme(theme) {
+  const targetTheme = THEMES.includes(theme) ? theme : 'light';
+  document.documentElement.setAttribute('data-theme', targetTheme);
+  Storage.saveSettings({ theme: targetTheme });
+
+  const iconSpan = document.getElementById('theme-icon');
+  const btn = document.getElementById('theme-toggle-btn');
+  if (iconSpan) {
+    iconSpan.textContent = THEME_ICONS[targetTheme];
+  }
+  if (btn) {
+    btn.setAttribute('aria-label', `Toggle theme (Current: ${THEME_NAMES[targetTheme]})`);
+    btn.setAttribute('title', `Switch theme (Current: ${THEME_NAMES[targetTheme]})`);
+  }
+}
+
+/**
+ * Universal Design Preferences (Theme Management - Icon Only)
  */
 function initAccessibilityControls() {
-  const themeSelect = document.getElementById('theme-select');
-  const btnFontNormal = document.getElementById('btn-font-normal');
-  const btnFontLarge = document.getElementById('btn-font-large');
-  const btnFontXLarge = document.getElementById('btn-font-xlarge');
-
   const settings = Storage.getSettings();
-  document.documentElement.setAttribute('data-theme', settings.theme || 'light');
+  applyTheme(settings.theme || 'light');
   document.documentElement.setAttribute('data-font-size', settings.fontSize || 'normal');
 
-  if (themeSelect) {
-    themeSelect.value = settings.theme || 'light';
-    themeSelect.addEventListener('change', (e) => {
-      const theme = e.target.value;
-      document.documentElement.setAttribute('data-theme', theme);
-      Storage.saveSettings({ theme });
-      announce(`Theme changed to ${theme} mode.`);
-    });
-  }
-
-  const fontBtns = [
-    { btn: btnFontNormal, size: 'normal' },
-    { btn: btnFontLarge, size: 'large' },
-    { btn: btnFontXLarge, size: 'xlarge' }
-  ];
-
-  fontBtns.forEach(({ btn, size }) => {
-    if (!btn) return;
-    if (settings.fontSize === size) btn.classList.add('active');
-
-    btn.addEventListener('click', () => {
-      fontBtns.forEach(b => b.btn?.classList.remove('active'));
-      btn.classList.add('active');
-      document.documentElement.setAttribute('data-font-size', size);
-      Storage.saveSettings({ fontSize: size });
-      announce(`Font size changed to ${size}.`);
-    });
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  themeToggleBtn?.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const nextIdx = (THEMES.indexOf(currentTheme) + 1) % THEMES.length;
+    const nextTheme = THEMES[nextIdx];
+    applyTheme(nextTheme);
+    announce(`Theme switched to ${THEME_NAMES[nextTheme]} mode.`);
   });
 }
 
