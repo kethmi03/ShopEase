@@ -6,11 +6,18 @@
  * - Electronics (4 products)
  */
 
+export const CURRENCY = {
+  symbol: 'Rs. ',
+  code: 'INR',
+  name: 'Rupees',
+  format: (amount) => `Rs. ${Number(amount).toFixed(2)}`
+};
+
 export const CATEGORIES = [
-  { id: 'all', name: 'All Categories', icon: '🛍️' },
-  { id: 'Food', name: 'Food & Gourmet', icon: '🍞' },
-  { id: 'Clothing', name: 'Clothing & Apparel', icon: '👕' },
-  { id: 'Electronics', name: 'Electronics & Tech', icon: '🎧' }
+  { id: 'all', name: 'All Categories' },
+  { id: 'Food', name: 'Food & Gourmet' },
+  { id: 'Clothing', name: 'Clothing & Apparel' },
+  { id: 'Electronics', name: 'Electronics & Tech' }
 ];
 
 export const INITIAL_PRODUCTS = [

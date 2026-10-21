@@ -8,6 +8,7 @@ import { CATEGORIES } from './products.js';
 import { Storage } from './storage.js';
 import { Cart } from './cart.js';
 import { Checkout, DEMO_USER } from './checkout.js';
+import { Auth } from './auth.js';
 
 // Application State
 const state = {
@@ -23,11 +24,9 @@ const state = {
    DOM Elements
    ========================================================================== */
 const DOM = {
-  // Theme & Accessibility
-  themeSelect: document.getElementById('theme-select'),
-  fontSizeNormalBtn: document.getElementById('btn-font-normal'),
-  fontSizeLargeBtn: document.getElementById('btn-font-large'),
-  fontSizeXLargeBtn: document.getElementById('btn-font-xlarge'),
+  // Theme & Controls
+  themeToggleBtn: document.getElementById('theme-toggle-btn'),
+  themeIcon: document.getElementById('theme-icon'),
   liveAnnouncer: document.getElementById('live-announcer'),
 
   // Search & Filters
@@ -44,6 +43,7 @@ const DOM = {
   cartToggleBtn: document.getElementById('cart-toggle-btn'),
   cartBadge: document.getElementById('cart-badge'),
   ordersToggleBtn: document.getElementById('orders-toggle-btn'),
+  offersToggleBtn: document.getElementById('offers-toggle-btn'),
   resetStoreBtn: document.getElementById('btn-reset-store'),
 
   // Cart Drawer Elements
@@ -128,49 +128,55 @@ function showToast(message, type = 'success') {
 }
 
 /* ==========================================================================
-   Accessibility Settings Management (Universal Design)
+   Theme Management (Icon-only theme switcher - No theme words)
    ========================================================================== */
+const THEMES = ['light', 'dark', 'high-contrast'];
+const THEME_ICONS = {
+  'light': '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>',
+  'dark': '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>',
+  'high-contrast': '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"></path></svg>'
+};
+const THEME_NAMES = {
+  'light': 'Light',
+  'dark': 'Dark',
+  'high-contrast': 'High Contrast'
+};
+
+function applyTheme(theme) {
+  const targetTheme = THEMES.includes(theme) ? theme : 'light';
+  document.documentElement.setAttribute('data-theme', targetTheme);
+  Storage.saveSettings({ theme: targetTheme });
+
+  const iconSpan = document.getElementById('theme-icon');
+  const btn = document.getElementById('theme-toggle-btn');
+  if (iconSpan) {
+    iconSpan.innerHTML = THEME_ICONS[targetTheme] || THEME_ICONS['light'];
+  }
+  if (btn) {
+    btn.setAttribute('aria-label', `Toggle theme (Current: ${THEME_NAMES[targetTheme]})`);
+    btn.setAttribute('title', `Switch theme (Current: ${THEME_NAMES[targetTheme]})`);
+  }
+}
+
 function initAccessibilitySettings() {
   const settings = Storage.getSettings();
 
   // Apply Theme
-  document.documentElement.setAttribute('data-theme', settings.theme);
-  if (DOM.themeSelect) {
-    DOM.themeSelect.value = settings.theme;
-  }
+  applyTheme(settings.theme || 'light');
 
-  // Apply Font Size
-  document.documentElement.setAttribute('data-font-size', settings.fontSize);
-  updateFontSizeButtons(settings.fontSize);
+  // Maintain font size attribute for document
+  document.documentElement.setAttribute('data-font-size', settings.fontSize || 'normal');
 
-  // Theme change listener
-  DOM.themeSelect?.addEventListener('change', (e) => {
-    const newTheme = e.target.value;
-    document.documentElement.setAttribute('data-theme', newTheme);
-    Storage.saveSettings({ theme: newTheme });
-    announce(`Theme switched to ${newTheme} mode.`);
+  // Theme Toggle Button (Icon-only cycle: Light -> Dark -> High Contrast -> Light)
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  themeToggleBtn?.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const nextIdx = (THEMES.indexOf(currentTheme) + 1) % THEMES.length;
+    const nextTheme = THEMES[nextIdx];
+    applyTheme(nextTheme);
+    announce(`Theme switched to ${THEME_NAMES[nextTheme]} mode.`);
+    showToast(`Switched to ${THEME_NAMES[nextTheme]} theme`, 'info');
   });
-
-  // Font Size buttons
-  DOM.fontSizeNormalBtn?.addEventListener('click', () => setFontSize('normal'));
-  DOM.fontSizeLargeBtn?.addEventListener('click', () => setFontSize('large'));
-  DOM.fontSizeXLargeBtn?.addEventListener('click', () => setFontSize('xlarge'));
-}
-
-function setFontSize(size) {
-  document.documentElement.setAttribute('data-font-size', size);
-  Storage.saveSettings({ fontSize: size });
-  updateFontSizeButtons(size);
-  announce(`Font size set to ${size}.`);
-}
-
-function updateFontSizeButtons(currentSize) {
-  [DOM.fontSizeNormalBtn, DOM.fontSizeLargeBtn, DOM.fontSizeXLargeBtn].forEach(btn => {
-    if (btn) btn.classList.remove('active');
-  });
-  if (currentSize === 'normal') DOM.fontSizeNormalBtn?.classList.add('active');
-  if (currentSize === 'large') DOM.fontSizeLargeBtn?.classList.add('active');
-  if (currentSize === 'xlarge') DOM.fontSizeXLargeBtn?.classList.add('active');
 }
 
 /* ==========================================================================
@@ -198,7 +204,6 @@ function renderCategoryPills() {
         aria-pressed="${isActive}"
         aria-label="Filter by ${cat.name} (${count} products)"
       >
-        <span>${cat.icon}</span>
         <span>${cat.name}</span>
         <span class="category-count">${count}</span>
       </button>
@@ -340,7 +345,7 @@ function renderProductCatalog() {
 
           <div class="card-footer">
             <div class="price-row">
-              <span class="product-price">£${product.price.toFixed(2)}</span>
+              <span class="product-price">Rs. ${product.price.toFixed(2)}</span>
               <span class="product-unit">${product.unit}</span>
             </div>
 
@@ -351,7 +356,6 @@ function renderProductCatalog() {
                 data-add-id="${product.id}"
                 ${isOutOfStock ? 'disabled aria-disabled="true"' : ''}
               >
-                <span>🛒</span>
                 <span>${isOutOfStock ? 'Out of Stock' : 'Add to Basket'}</span>
               </button>
               <button 
@@ -361,7 +365,7 @@ function renderProductCatalog() {
                 aria-label="Quick preview of ${product.name}"
                 title="View full product specifications"
               >
-                👁️ View
+                View Details
               </button>
             </div>
           </div>
@@ -373,6 +377,10 @@ function renderProductCatalog() {
   // Attach event listeners for product card buttons
   DOM.productGrid.querySelectorAll('.add-to-cart-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
+      if (!Auth.isLoggedIn()) {
+        window.location.href = 'login.html';
+        return;
+      }
       const id = btn.dataset.addId;
       const res = Cart.addItem(id, 1);
       if (res.success) {
@@ -422,19 +430,22 @@ function resetAllFilters() {
 function updateCartUI() {
   const summary = Cart.getSummary();
 
-  // Update header badge
-  DOM.cartBadge.textContent = summary.totalItems;
-  DOM.cartBadge.setAttribute('aria-label', `${summary.totalItems} items in shopping basket`);
+  // Update header badge if present
+  const badge = document.getElementById('cart-badge');
+  if (badge) {
+    badge.textContent = summary.totalItems;
+    badge.setAttribute('aria-label', `${summary.totalItems} items in shopping basket`);
+  }
 
   // Update Drawer Subtotal & Totals
-  DOM.cartSubtotal.textContent = `£${summary.subtotal.toFixed(2)}`;
-  DOM.cartDeliveryFee.textContent = summary.deliveryFee === 0 ? 'FREE' : `£${summary.deliveryFee.toFixed(2)}`;
-  DOM.cartGrandTotal.textContent = `£${summary.grandTotal.toFixed(2)}`;
+  DOM.cartSubtotal.textContent = `Rs. ${summary.subtotal.toFixed(2)}`;
+  DOM.cartDeliveryFee.textContent = summary.deliveryFee === 0 ? 'FREE' : `Rs. ${summary.deliveryFee.toFixed(2)}`;
+  DOM.cartGrandTotal.textContent = `Rs. ${summary.grandTotal.toFixed(2)}`;
 
   // Discount row
   if (summary.discount > 0) {
     DOM.cartDiscountRow.style.display = 'flex';
-    DOM.cartDiscountAmount.textContent = `-£${summary.discount.toFixed(2)}`;
+    DOM.cartDiscountAmount.textContent = `-Rs. ${summary.discount.toFixed(2)}`;
   } else {
     DOM.cartDiscountRow.style.display = 'none';
   }
@@ -466,11 +477,11 @@ function updateCartUI() {
     DOM.cartDeliveryBar.style.width = '100%';
     DOM.cartDeliveryBar.style.backgroundColor = 'var(--color-success)';
   } else if (summary.subtotal === 0) {
-    DOM.cartDeliveryText.innerHTML = `<span>Spend <strong>£50.00</strong> for FREE Delivery</span>`;
+    DOM.cartDeliveryText.innerHTML = `<span>Spend <strong>Rs. 50.00</strong> for FREE Delivery</span>`;
     DOM.cartDeliveryBar.style.width = '0%';
   } else {
     const percent = Math.min(100, Math.round((summary.subtotal / 50) * 100));
-    DOM.cartDeliveryText.innerHTML = `<span>Add <strong>£${summary.freeShippingRemaining.toFixed(2)}</strong> more for <strong>FREE Delivery</strong></span>`;
+    DOM.cartDeliveryText.innerHTML = `<span>Add <strong>Rs. ${summary.freeShippingRemaining.toFixed(2)}</strong> more for <strong>FREE Delivery</strong></span>`;
     DOM.cartDeliveryBar.style.width = `${percent}%`;
     DOM.cartDeliveryBar.style.backgroundColor = '';
   }
@@ -500,7 +511,7 @@ function updateCartUI() {
           <img src="${item.image}" alt="${item.name}" class="cart-item-img" />
           <div class="cart-item-details">
             <h4 class="cart-item-title">${item.name}</h4>
-            <div class="cart-item-unit-price">£${item.price.toFixed(2)} each</div>
+            <div class="cart-item-unit-price">Rs. ${item.price.toFixed(2)} each</div>
             <div class="cart-item-bottom">
               <div class="qty-stepper" role="group" aria-label="Quantity for ${item.name}">
                 <button 
@@ -520,7 +531,7 @@ function updateCartUI() {
               </div>
 
               <div class="cart-item-total">
-                £${item.totalPrice.toFixed(2)}
+                Rs. ${item.totalPrice.toFixed(2)}
               </div>
 
               <button 
@@ -542,7 +553,7 @@ function updateCartUI() {
         Clear Basket
       </button>
       <span style="font-size:0.8rem; color:var(--color-text-muted);">
-        Includes 20% estimated VAT (£${summary.estimatedTax.toFixed(2)})
+        Includes 20% estimated VAT (Rs. ${summary.estimatedTax.toFixed(2)})
       </span>
     </div>
   `;
@@ -641,7 +652,7 @@ function openQuickView(productId) {
         </div>
 
         <div style="font-size:1.75rem; font-weight:800; color:var(--color-brand-primary); margin-bottom:0.5rem;">
-          £${product.price.toFixed(2)}
+          Rs. ${product.price.toFixed(2)}
           <span style="font-size:0.85rem; font-weight:normal; color:var(--color-text-muted);">/ ${product.unit}</span>
         </div>
 
@@ -673,7 +684,7 @@ function openQuickView(productId) {
             style="flex:1;"
             ${isOutOfStock ? 'disabled' : ''}
           >
-            🛒 ${isOutOfStock ? 'Currently Unavailable' : 'Add to Shopping Basket'}
+            ${isOutOfStock ? 'Currently Unavailable' : 'Add to Shopping Basket'}
           </button>
         </div>
       </div>
@@ -701,6 +712,10 @@ function openQuickView(productId) {
   });
 
   qvAddBtn?.addEventListener('click', () => {
+    if (!Auth.isLoggedIn()) {
+      window.location.href = 'login.html';
+      return;
+    }
     const qty = parseInt(qvQtyInput.value, 10) || 1;
     const res = Cart.addItem(product.id, qty);
     if (res.success) {
@@ -734,6 +749,25 @@ function openCheckout() {
   closeCart();
   state.activeModal = 'checkout';
   Checkout.currentStep = 1;
+
+  // Auto-populate delivery fields if user is authenticated
+  const currentUser = Auth.getCurrentUser();
+  if (currentUser) {
+    const fn = document.getElementById('checkout-fullname');
+    const em = document.getElementById('checkout-email');
+    const ph = document.getElementById('checkout-phone');
+    const ad = document.getElementById('checkout-address');
+    const ci = document.getElementById('checkout-city');
+    const pc = document.getElementById('checkout-postcode');
+
+    if (fn && !fn.value) fn.value = currentUser.fullName || '';
+    if (em && !em.value) em.value = currentUser.email || '';
+    if (ph && !ph.value) ph.value = currentUser.phone || '';
+    if (ad && !ad.value) ad.value = currentUser.address || '';
+    if (ci && !ci.value) ci.value = currentUser.city || '';
+    if (pc && !pc.value) pc.value = currentUser.postcode || '';
+  }
+
   updateCheckoutStepDisplay();
 
   DOM.checkoutOverlay.classList.add('open');
@@ -812,17 +846,17 @@ function populateOrderReviewStep() {
       ${summary.items.map(item => `
         <li style="display:flex; justify-content:space-between; font-size:0.875rem;">
           <span>${item.quantity} × ${item.name}</span>
-          <strong>£${item.totalPrice.toFixed(2)}</strong>
+          <strong>Rs. ${item.totalPrice.toFixed(2)}</strong>
         </li>
       `).join('')}
     </ul>
   `;
 
   DOM.checkoutReviewTotal.innerHTML = `
-    <div class="financial-row"><span>Subtotal:</span> <span>£${summary.subtotal.toFixed(2)}</span></div>
-    ${summary.discount > 0 ? `<div class="financial-row" style="color:var(--color-success)"><span>Discount:</span> <span>-£${summary.discount.toFixed(2)}</span></div>` : ''}
-    <div class="financial-row"><span>Delivery:</span> <span>${summary.deliveryFee === 0 ? 'FREE' : '£' + summary.deliveryFee.toFixed(2)}</span></div>
-    <div class="financial-row total-row"><span>Grand Total:</span> <span>£${summary.grandTotal.toFixed(2)}</span></div>
+    <div class="financial-row"><span>Subtotal:</span> <span>Rs. ${summary.subtotal.toFixed(2)}</span></div>
+    ${summary.discount > 0 ? `<div class="financial-row" style="color:var(--color-success)"><span>Discount:</span> <span>-Rs. ${summary.discount.toFixed(2)}</span></div>` : ''}
+    <div class="financial-row"><span>Delivery:</span> <span>${summary.deliveryFee === 0 ? 'FREE' : 'Rs. ' + summary.deliveryFee.toFixed(2)}</span></div>
+    <div class="financial-row total-row"><span>Grand Total:</span> <span>Rs. ${summary.grandTotal.toFixed(2)}</span></div>
   `;
 }
 
@@ -934,14 +968,14 @@ function showOrderSuccess(order) {
           ${order.items.map(item => `
             <li style="display:flex; justify-content:space-between;">
               <span>${item.quantity} × ${item.name}</span>
-              <strong>£${item.totalPrice.toFixed(2)}</strong>
+              <strong>Rs. ${item.totalPrice.toFixed(2)}</strong>
             </li>
           `).join('')}
         </ul>
 
         <div style="border-top:1px dashed var(--color-border-strong); padding-top:0.75rem; display:flex; justify-content:space-between; font-size:1.1rem; font-weight:800;">
           <span>Total Paid:</span>
-          <span style="color:var(--color-brand-primary);">£${order.financials.grandTotal.toFixed(2)}</span>
+          <span style="color:var(--color-brand-primary);">Rs. ${order.financials.grandTotal.toFixed(2)}</span>
         </div>
       </div>
 
@@ -1041,7 +1075,7 @@ function openOrderHistory() {
           ${order.items.map(i => `
             <li style="display:flex; justify-content:space-between;">
               <span>${i.quantity} × ${i.name}</span>
-              <span>£${i.totalPrice.toFixed(2)}</span>
+              <span>Rs. ${i.totalPrice.toFixed(2)}</span>
             </li>
           `).join('')}
         </ul>
@@ -1051,7 +1085,7 @@ function openOrderHistory() {
             Payment: Mock Card (•••• ${order.payment.last4})
           </span>
           <strong style="font-size:1.1rem; color:var(--color-text-primary);">
-            £${order.financials.grandTotal.toFixed(2)}
+            Rs. ${order.financials.grandTotal.toFixed(2)}
           </strong>
         </div>
       </div>
@@ -1121,8 +1155,15 @@ function initEventListeners() {
     renderProductCatalog();
   });
 
-  // Cart Drawer toggles
-  DOM.cartToggleBtn?.addEventListener('click', openCart);
+  // Cart Drawer toggles - redirect to login if not authenticated
+  DOM.cartToggleBtn?.addEventListener('click', (e) => {
+    if (!Auth.isLoggedIn()) {
+      e.preventDefault();
+      window.location.href = 'login.html';
+      return;
+    }
+    openCart();
+  });
   DOM.cartCloseBtn?.addEventListener('click', closeCart);
   DOM.cartOverlay?.addEventListener('click', (e) => {
     if (e.target === DOM.cartOverlay) closeCart();
@@ -1158,8 +1199,25 @@ function initEventListeners() {
   DOM.checkoutForm?.addEventListener('submit', handleCheckoutSubmit);
   DOM.btnAutofillDemo?.addEventListener('click', autofillDemoCheckout);
 
-  // Orders History
-  DOM.ordersToggleBtn?.addEventListener('click', openOrderHistory);
+  // My Offers in Navigation Bar - redirect to login if not authenticated
+  DOM.offersToggleBtn?.addEventListener('click', (e) => {
+    if (!Auth.isLoggedIn()) {
+      e.preventDefault();
+      window.location.href = 'login.html';
+      return;
+    }
+    (document.getElementById('deals-section') || document.getElementById('catalog-section'))?.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  // Orders History in Navigation Bar - redirect to login if not authenticated
+  DOM.ordersToggleBtn?.addEventListener('click', (e) => {
+    if (!Auth.isLoggedIn()) {
+      e.preventDefault();
+      window.location.href = 'login.html';
+      return;
+    }
+    openOrderHistory();
+  });
   DOM.ordersCloseBtn?.addEventListener('click', closeOrderHistory);
   DOM.ordersOverlay?.addEventListener('click', (e) => {
     if (e.target === DOM.ordersOverlay) closeOrderHistory();
@@ -1192,13 +1250,198 @@ function initEventListeners() {
   window.addEventListener('shopease:cart-updated', () => {
     updateCartUI();
   });
+
+  window.addEventListener('shopease:auth-changed', () => {
+    renderUserMenu();
+    renderUserWelcomeBanner();
+  });
+
+  // Check if URL specifies auto-opening checkout
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('open') === 'checkout') {
+    setTimeout(() => {
+      openCheckout();
+    }, 350);
+  }
+}
+
+/**
+ * Renders Navigation Bar actions dynamically:
+ * When NOT logged in: Shows About Us, Sign In, Register.
+ * When LOGGED IN: Shows Customer Dashboard, My Offers, Basket, My Orders, Logout.
+ */
+function renderNavBar() {
+  const container = document.getElementById('main-nav-actions');
+  if (!container) return;
+
+  const user = Auth.getCurrentUser();
+
+  if (!user) {
+    container.innerHTML = `
+      <a href="login.html" class="nav-btn nav-btn-ghost" id="nav-login-btn" aria-label="Sign in to your account" title="Sign In">
+        <span>Sign In</span>
+      </a>
+      <a href="register.html" class="nav-btn nav-btn-primary" id="nav-register-btn" aria-label="Create new account" title="Register">
+        <span>Register</span>
+      </a>
+    `;
+    return;
+  }
+
+  container.innerHTML = `
+    <a href="dashboard.html" class="nav-btn nav-btn-dashboard" id="nav-dashboard-btn" aria-label="Customer Dashboard" title="View Customer Dashboard">
+      <span>Dashboard</span>
+    </a>
+
+    <button 
+      type="button" 
+      id="orders-toggle-btn" 
+      class="nav-btn nav-btn-ghost" 
+      aria-label="View past orders"
+      title="View order history"
+    >
+      <span>Orders</span>
+    </button>
+
+    <button 
+      type="button" 
+      id="nav-logout-btn" 
+      class="nav-btn nav-btn-danger" 
+      aria-label="Sign out of account"
+      title="Sign Out"
+    >
+      <span>Logout</span>
+    </button>
+  `;
+
+  // Attach event handlers for authenticated dynamic buttons
+  document.getElementById('orders-toggle-btn')?.addEventListener('click', openOrderHistory);
+  document.getElementById('nav-logout-btn')?.addEventListener('click', () => {
+    Auth.logout();
+    showToast('Signed out successfully.', 'info');
+    renderNavBar();
+    renderUserWelcomeBanner();
+  });
+}
+
+const renderUserMenu = renderNavBar;
+
+// Global Interaction Helpers for Home Page
+window.shopeaseFilterCategory = (category) => {
+  const btn = document.querySelector(`.category-pill-btn[data-category="${category}"]`);
+  if (btn) {
+    btn.click();
+  } else {
+    state.selectedCategory = category;
+    renderCategoryPills();
+    renderProductCatalog();
+  }
+  document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' });
+};
+
+window.shopeaseApplyVoucher = (code) => {
+  const res = Cart.setPromo(code);
+  if (res.success) {
+    showToast(`Voucher "${code}" applied to your basket!`, 'success');
+    announce(`Promotional code ${code} applied.`);
+    updateCartUI();
+    openCart();
+  } else {
+    showToast(res.message, 'warning');
+  }
+};
+
+window.shopeaseQuickAdd = (productId) => {
+  if (!Auth.isLoggedIn()) {
+    window.location.href = 'login.html';
+    return;
+  }
+  const res = Cart.add(productId, 1);
+  if (res.success) {
+    showToast(res.message, 'success');
+    openCart();
+  } else {
+    showToast(res.message, 'warning');
+  }
+};
+
+window.shopeaseOpenQuickView = (productId) => {
+  openQuickView(productId);
+};
+
+/**
+ * Renders Authenticated Member Welcome Banner above catalog
+ */
+function renderUserWelcomeBanner() {
+  const container = document.getElementById('user-welcome-slot');
+  if (!container) return;
+
+  const user = Auth.getCurrentUser();
+  if (!user) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const initials = user.fullName
+    .split(' ')
+    .filter(Boolean)
+    .map(p => p[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase();
+
+  container.innerHTML = `
+    <div class="user-welcome-banner" role="region" aria-label="Authenticated customer session">
+      <div class="user-welcome-left">
+        <div class="user-welcome-avatar" aria-hidden="true">${initials}</div>
+        <div>
+          <div class="user-welcome-title">
+            👋 Welcome back, <strong>${escapeHtml(user.fullName)}</strong>!
+          </div>
+          <div class="user-welcome-subtitle">
+            Signed in as <strong>${escapeHtml(user.email)}</strong> • Exclusive member discounts & fast checkout active
+          </div>
+        </div>
+      </div>
+      <div class="user-welcome-actions">
+        <button type="button" class="btn btn-secondary" style="font-size:0.85rem; padding:0.4rem 0.85rem;" onclick="document.getElementById('orders-toggle-btn')?.click()">
+          📦 Past Orders
+        </button>
+        <button type="button" class="btn btn-secondary" style="font-size:0.85rem; padding:0.4rem 0.85rem;" id="banner-signout-btn">
+          🚪 Sign Out
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('banner-signout-btn')?.addEventListener('click', () => {
+    Auth.logout();
+    showToast('Signed out successfully.', 'info');
+    renderUserMenu();
+    renderUserWelcomeBanner();
+  });
 }
 
 // Initial App Boot
 document.addEventListener('DOMContentLoaded', () => {
   initAccessibilitySettings();
+
+  // Show full home page and product catalog first
+  renderUserMenu();
+  renderUserWelcomeBanner();
   renderCategoryPills();
   renderProductCatalog();
   updateCartUI();
   initEventListeners();
+
+  // Newsletter Form Handler
+  document.getElementById('newsletter-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = document.getElementById('newsletter-email');
+    if (input && input.value.trim()) {
+      showToast('Thank you for subscribing! Check your mock inbox for exclusive updates.', 'success');
+      announce('Subscribed to ShopEase newsletter.');
+      input.value = '';
+    }
+  });
 });

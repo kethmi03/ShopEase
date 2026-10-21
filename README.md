@@ -11,16 +11,16 @@ Each of the 10 products features distinct pricing, customer ratings, detailed de
 
 | # | Product Name | Category | Unit Price | Initial Stock | Highlights |
 |---|--------------|----------|------------|---------------|------------|
-| 1 | **Artisan Organic Sourdough Loaf** | Food | **£4.95** | 25 | 36h cold-fermentation, 100% stoneground flour |
-| 2 | **Single-Estate Ethiopian Yirgacheffe Coffee** | Food | **£14.50** | 40 | 500g whole bean, floral & bergamot notes |
-| 3 | **Luxury Swiss Dark Chocolate Truffle Box** | Food | **£22.00** | 18 | 24 handcrafted Grand Cru 72% dark truffles |
-| 4 | **Everyday Tailored Stretch Chino Trousers** | Clothing | **£49.99** | 20 | 98% cotton, 2% elastane, wrinkle-resistant |
-| 5 | **Vintage Washed Denim Trucker Jacket** | Clothing | **£68.00** | 15 | 13.5oz organic rigid denim, brass shanks |
-| 6 | **Pure Italian Merino Wool Knit Jumper** | Clothing | **£85.50** | 12 | 19.5-micron extrafine yarn, thermo-regulating |
-| 7 | **ErgoPro Wireless Mechanical Keyboard** | Electronics | **£119.50** | 16 | Hot-swap tactile switches, tri-mode wireless |
-| 8 | **SmartPulse GPS & Health Tracker Watch** | Electronics | **£159.00** | 14 | AMOLED display, ECG + SpO2, 5ATM swimproof |
-| 9 | **AcousticPro Hybrid ANC Wireless Headphones** | Electronics | **£199.99** | 10 | 38dB active noise cancellation, 50h battery |
-| 10 | **UltraSlim 4K OLED 15.6" Portable Monitor** | Electronics | **£279.00** | 8 | True-Black 3840x2160 panel, dual USB-C |
+| 1 | **Artisan Organic Sourdough Loaf** | Food | **Rs. 4.95** | 25 | 36h cold-fermentation, 100% stoneground flour |
+| 2 | **Single-Estate Ethiopian Yirgacheffe Coffee** | Food | **Rs. 14.50** | 40 | 500g whole bean, floral & bergamot notes |
+| 3 | **Luxury Swiss Dark Chocolate Truffle Box** | Food | **Rs. 22.00** | 18 | 24 handcrafted Grand Cru 72% dark truffles |
+| 4 | **Everyday Tailored Stretch Chino Trousers** | Clothing | **Rs. 49.99** | 20 | 98% cotton, 2% elastane, wrinkle-resistant |
+| 5 | **Vintage Washed Denim Trucker Jacket** | Clothing | **Rs. 68.00** | 15 | 13.5oz organic rigid denim, brass shanks |
+| 6 | **Pure Italian Merino Wool Knit Jumper** | Clothing | **Rs. 85.50** | 12 | 19.5-micron extrafine yarn, thermo-regulating |
+| 7 | **ErgoPro Wireless Mechanical Keyboard** | Electronics | **Rs. 119.50** | 16 | Hot-swap tactile switches, tri-mode wireless |
+| 8 | **SmartPulse GPS & Health Tracker Watch** | Electronics | **Rs. 159.00** | 14 | AMOLED display, ECG + SpO2, 5ATM swimproof |
+| 9 | **AcousticPro Hybrid ANC Wireless Headphones** | Electronics | **Rs. 199.99** | 10 | 38dB active noise cancellation, 50h battery |
+| 10 | **UltraSlim 4K OLED 15.6" Portable Monitor** | Electronics | **Rs. 279.00** | 8 | True-Black 3840x2160 panel, dual USB-C |
 
 ---
 
@@ -68,6 +68,8 @@ All persistent data is saved under namespaced keys in the browser's `window.loca
 - `shopease_orders_v1`: Historical log of placed mock orders including order ID, timestamp, items, shipping address, and payment receipt.
 - `shopease_wishlist_v1`: User's favorited items.
 - `shopease_settings_v1`: User's accessibility settings (theme and font size).
+- `shopease_users_v1`: Registered customer accounts database with pre-seeded demo accounts.
+- `shopease_current_user_v1`: Active authenticated user session.
 
 ---
 
@@ -78,7 +80,7 @@ All persistent data is saved under namespaced keys in the browser's `window.loca
    - Quick View dialog displays detailed bulleted specs, full description, and quantity selector.
 
 2. **Slide-Over Basket Drawer**:
-   - Dynamic subtotal, free shipping progress meter (Spend £50.00 for FREE express delivery; standard £3.99 otherwise).
+   - Dynamic subtotal, free shipping progress meter (Spend Rs. 50.00 for FREE express delivery; standard Rs. 3.99 otherwise).
    - Stepper controls (`−` / `+`) and item removal button.
    - Promo discount code engine:
      - `SAVE10` (10% off entire basket)
@@ -91,6 +93,11 @@ All persistent data is saved under namespaced keys in the browser's `window.loca
    - **Step 3: Review & Confirmation**: Complete cost breakdown including 20% estimated VAT.
    - **Order Confirmation**: Generates a realistic order number (e.g., `SE-849201`), decrements stock from inventory, clears cart, and enables printing receipts.
    - **My Orders**: Past orders modal accessible anytime from header.
+
+4. **Customer Dashboard & Navigation States**:
+   - **Visitor Nav (Unauthenticated)**: Displays **About Us**, **Sign In**, and **Register**.
+   - **Customer Nav (Authenticated)**: Displays **Dashboard**, **My Offers**, **Basket** (with live count badge), **My Orders**, and **Logout**.
+   - **Customer Dashboard (dashboard.html)**: Complete member account management portal with KPIs, order receipts, active vouchers, and editable delivery details.
 
 ---
 
@@ -113,4 +120,4 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ```bash
 node test_suite.js
 ```
-Validates all 23 checks (product count, category count, pricing uniqueness, cart calculation, promo codes, stock deduction, and mock checkout).
+Validates all 30 checks (product count, category count, pricing uniqueness, cart calculation, promo codes, stock deduction, mock checkout, and user authentication/registration).
