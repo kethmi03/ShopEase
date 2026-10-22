@@ -94,6 +94,12 @@
 
             <!-- Navigation Actions (Dynamic according to auth status) -->
             <div class="nav-actions" id="main-nav-actions">
+              <a href="dashboard.html" class="nav-btn nav-btn-ghost" aria-label="Customer Dashboard" title="Customer Dashboard">
+                <span>Dashboard</span>
+              </a>
+              <a href="admin.html" class="nav-btn nav-btn-ghost" aria-label="Admin Console" title="Admin Console">
+                <span>🛡️ Admin</span>
+              </a>
               <!-- Sign In & Register Buttons -->
               <a href="login.html" class="nav-btn nav-btn-ghost" id="nav-login-btn" aria-label="Sign in to your account" title="Sign In">
                 <span>Sign In</span>
@@ -498,11 +504,12 @@
         </div>
 
         <div class="footer-col">
-          <h4>Customer Care</h4>
+          <h4>Dashboards &amp; Care</h4>
           <ul class="footer-links">
+            <li><a href="dashboard.html">👤 Customer Dashboard</a></li>
+            <li><a href="admin.html">🛡️ Admin Console</a></li>
             <li><a href="login.html">Sign In / Register</a></li>
             <li><a href="#main-content" onclick="document.getElementById('orders-toggle-btn')?.click()">Track Orders &amp; Receipts</a></li>
-            <li><a href="login.html">Account Settings</a></li>
           </ul>
         </div>
 
