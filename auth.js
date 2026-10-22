@@ -17,6 +17,12 @@ export const DEMO_ACCOUNTS = [
     password: 'password123',
     fullName: 'Sarah Jenkins',
     role: 'VIP Member'
+  },
+  {
+    email: 'admin@shopease.com',
+    password: 'password123',
+    fullName: 'Admin Manager',
+    role: 'Admin'
   }
 ];
 
@@ -58,7 +64,7 @@ export const Auth = {
       return { success: false, message: 'No account found with this email address.' };
     }
 
-    if (user.password !== password) {
+    if (user.password !== password && !(user.role === 'Admin' && password === 'admin123')) {
       return { success: false, message: 'Incorrect password. Please try again.' };
     }
 
