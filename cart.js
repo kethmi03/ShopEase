@@ -18,6 +18,14 @@ export const STANDARD_DELIVERY_FEE = 3.99;
 let activePromoCode = null;
 
 export const Cart = {
+  getCart() {
+    return Storage.getCart();
+  },
+
+  getItemCount() {
+    return this.getSummary().totalItems;
+  },
+
   getActivePromo() {
     return activePromoCode;
   },

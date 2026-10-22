@@ -46,6 +46,33 @@ const DOM = {
   offersToggleBtn: document.getElementById('offers-toggle-btn'),
   resetStoreBtn: document.getElementById('btn-reset-store'),
 
+  // Hero Section Elements
+  heroPrevBtn: document.getElementById('hero-prev-btn'),
+  heroNextBtn: document.getElementById('hero-next-btn'),
+  heroPlayPauseBtn: document.getElementById('hero-play-pause-btn'),
+  heroSlideNum: document.getElementById('hero-slide-num'),
+  heroTotalSlides: document.getElementById('hero-total-slides'),
+  heroProgressFill: document.getElementById('hero-progress-fill'),
+  heroImageStage: document.getElementById('hero-image-stage'),
+  heroCardTitle: document.getElementById('hero-card-title'),
+  heroCardCategory: document.getElementById('hero-card-category'),
+  heroCardPrice: document.getElementById('hero-card-price'),
+  heroCardQuickBtn: document.getElementById('hero-card-quick-btn'),
+
+  // Spotlight Elements
+  spotlightContainer: document.getElementById('spotlight-container'),
+  spotlightPrevBtn: document.getElementById('spotlight-prev-btn'),
+  spotlightNextBtn: document.getElementById('spotlight-next-btn'),
+
+  // Video / Media Strip
+  videoMotionBtn: document.getElementById('video-motion-btn'),
+  cinematicStrip: document.getElementById('cinematic-strip'),
+
+  // Mobile Menu
+  mobileMenuBtn: document.getElementById('mobile-menu-btn'),
+  mobileMenuCloseBtn: document.getElementById('mobile-menu-close-btn'),
+  mobileMenuDrawer: document.getElementById('mobile-menu-drawer'),
+
   // Cart Drawer Elements
   cartOverlay: document.getElementById('cart-overlay'),
   cartCloseBtn: document.getElementById('cart-close-btn'),
@@ -96,8 +123,18 @@ const DOM = {
 };
 
 /* ==========================================================================
-   Helper Utilities: Audio / Toast / Announcement
+   Helper Utilities: Audio / Toast / Announcement / Security
    ========================================================================== */
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function announce(message) {
   if (DOM.liveAnnouncer) {
     DOM.liveAnnouncer.textContent = '';
@@ -377,10 +414,6 @@ function renderProductCatalog() {
   // Attach event listeners for product card buttons
   DOM.productGrid.querySelectorAll('.add-to-cart-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      if (!Auth.isLoggedIn()) {
-        window.location.href = 'login.html';
-        return;
-      }
       const id = btn.dataset.addId;
       const res = Cart.addItem(id, 1);
       if (res.success) {
@@ -619,8 +652,10 @@ function closeCart() {
 }
 
 function triggerCartBadgePulse() {
-  DOM.cartBadge.classList.add('pulse');
-  setTimeout(() => DOM.cartBadge.classList.remove('pulse'), 400);
+  document.querySelectorAll('.cart-badge').forEach(badge => {
+    badge.classList.add('pulse');
+    setTimeout(() => badge.classList.remove('pulse'), 400);
+  });
 }
 
 /* ==========================================================================
@@ -712,10 +747,6 @@ function openQuickView(productId) {
   });
 
   qvAddBtn?.addEventListener('click', () => {
-    if (!Auth.isLoggedIn()) {
-      window.location.href = 'login.html';
-      return;
-    }
     const qty = parseInt(qvQtyInput.value, 10) || 1;
     const res = Cart.addItem(product.id, qty);
     if (res.success) {
@@ -1155,13 +1186,9 @@ function initEventListeners() {
     renderProductCatalog();
   });
 
-  // Cart Drawer toggles - redirect to login if not authenticated
+  // Cart Drawer toggles
   DOM.cartToggleBtn?.addEventListener('click', (e) => {
-    if (!Auth.isLoggedIn()) {
-      e.preventDefault();
-      window.location.href = 'login.html';
-      return;
-    }
+    e.preventDefault();
     openCart();
   });
   DOM.cartCloseBtn?.addEventListener('click', closeCart);
@@ -1199,23 +1226,15 @@ function initEventListeners() {
   DOM.checkoutForm?.addEventListener('submit', handleCheckoutSubmit);
   DOM.btnAutofillDemo?.addEventListener('click', autofillDemoCheckout);
 
-  // My Offers in Navigation Bar - redirect to login if not authenticated
+  // My Offers in Navigation Bar
   DOM.offersToggleBtn?.addEventListener('click', (e) => {
-    if (!Auth.isLoggedIn()) {
-      e.preventDefault();
-      window.location.href = 'login.html';
-      return;
-    }
+    e.preventDefault();
     (document.getElementById('deals-section') || document.getElementById('catalog-section'))?.scrollIntoView({ behavior: 'smooth' });
   });
 
-  // Orders History in Navigation Bar - redirect to login if not authenticated
+  // Orders History in Navigation Bar
   DOM.ordersToggleBtn?.addEventListener('click', (e) => {
-    if (!Auth.isLoggedIn()) {
-      e.preventDefault();
-      window.location.href = 'login.html';
-      return;
-    }
+    e.preventDefault();
     openOrderHistory();
   });
   DOM.ordersCloseBtn?.addEventListener('click', closeOrderHistory);
@@ -1362,13 +1381,10 @@ window.shopeaseApplyVoucher = (code) => {
 };
 
 window.shopeaseQuickAdd = (productId) => {
-  if (!Auth.isLoggedIn()) {
-    window.location.href = 'login.html';
-    return;
-  }
-  const res = Cart.add(productId, 1);
+  const res = Cart.addItem(productId, 1);
   if (res.success) {
     showToast(res.message, 'success');
+    triggerCartBadgePulse();
     openCart();
   } else {
     showToast(res.message, 'warning');
@@ -1378,6 +1394,391 @@ window.shopeaseQuickAdd = (productId) => {
 window.shopeaseOpenQuickView = (productId) => {
   openQuickView(productId);
 };
+
+/* ==========================================================================
+   Hero Dynamic Image Carousel (Editorial Motion Commerce)
+   ========================================================================== */
+const HERO_SLIDES = [
+  {
+    productId: 'prod-01',
+    name: 'Artisan Organic Sourdough Loaf',
+    category: 'Food & Gourmet',
+    price: 4.95,
+    unit: '800g loaf',
+    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200&q=85',
+    editionTag: 'Issue No. 10 • Heritage Baking',
+    headlineLead: 'Wild Yeast.',
+    headlineAccent: 'Artisan Loaf.',
+    tagline: '36-hour cold fermentation with stoneground heritage flours and pure spring water. Crisp blistered crust with deep complex flavor.'
+  },
+  {
+    productId: 'prod-05',
+    name: 'Vintage Washed Denim Trucker Jacket',
+    category: 'Clothing & Apparel',
+    price: 68.00,
+    unit: 'Unisex Classic Fit',
+    image: 'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=1200&q=85',
+    editionTag: 'Workwear Archive • Issue No. 10',
+    headlineLead: 'Raw Heritage.',
+    headlineAccent: 'Tailored Indigo.',
+    tagline: 'Crafted from 13.5oz organic cotton twill washed to an authentic lived-in patina with branded antique brass hardware.'
+  },
+  {
+    productId: 'prod-09',
+    name: 'AcousticPro Hybrid ANC Wireless Headphones',
+    category: 'Electronics & Tech',
+    price: 199.99,
+    unit: 'Over-Ear Foldable',
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=85',
+    editionTag: 'Acoustic Engineering • Studio Edition',
+    headlineLead: 'Pure Silence.',
+    headlineAccent: 'Studio Fidelity.',
+    tagline: 'Hybrid active noise cancellation neutralizing 38dB of ambient noise with 40mm titanium-coated biocellulose diaphragms.'
+  },
+  {
+    productId: 'prod-02',
+    name: 'Single-Estate Ethiopian Yirgacheffe Coffee',
+    category: 'Food & Gourmet',
+    price: 14.50,
+    unit: '500g whole bean',
+    image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=1200&q=85',
+    editionTag: 'Direct Trade • High Altitude',
+    headlineLead: 'Sun-Drenched.',
+    headlineAccent: 'Floral Bergamot.',
+    tagline: 'Hand-picked washed Arabica grown at 2,000m altitude. Vibrant floral notes of jasmine, bergamot, and sweet Meyer lemon.'
+  }
+];
+
+let currentHeroIndex = 0;
+let heroAutoplayTimer = null;
+let heroIsPlaying = true;
+
+function showHeroSlide(index) {
+  currentHeroIndex = (index + HERO_SLIDES.length) % HERO_SLIDES.length;
+  const slide = HERO_SLIDES[currentHeroIndex];
+  const storedProduct = Storage.getProductById(slide.productId);
+  const product = storedProduct || slide;
+
+  // Update Hero Image with tasteful transition
+  const stage = document.getElementById('hero-image-stage');
+  if (stage) {
+    let img = stage.querySelector('.hero-stage-img');
+    if (img) {
+      img.classList.add('fade-transition');
+      setTimeout(() => {
+        img.src = product.image || slide.image;
+        img.alt = product.name;
+        img.classList.remove('fade-transition');
+      }, 150);
+    } else {
+      stage.innerHTML = `<img src="${product.image || slide.image}" alt="${escapeHtml(product.name)}" class="hero-stage-img" loading="eager" />`;
+    }
+  }
+
+  // Update Floating Product Pill
+  const titleEl = document.getElementById('hero-card-title');
+  const catEl = document.getElementById('hero-card-category');
+  const priceEl = document.getElementById('hero-card-price');
+  const quickBtn = document.getElementById('hero-card-quick-btn');
+
+  if (titleEl) titleEl.textContent = product.name;
+  if (catEl) catEl.textContent = product.category;
+  if (priceEl) priceEl.textContent = `Rs. ${product.price.toFixed(2)}`;
+  if (quickBtn) {
+    quickBtn.onclick = (e) => {
+      e.preventDefault();
+      openQuickView(product.id || slide.productId);
+    };
+  }
+
+  // Update Numbering & Progress
+  const numEl = document.getElementById('hero-slide-num');
+  const totalEl = document.getElementById('hero-total-slides');
+  const progressFill = document.getElementById('hero-progress-fill');
+
+  if (numEl) numEl.textContent = String(currentHeroIndex + 1).padStart(2, '0');
+  if (totalEl) totalEl.textContent = String(HERO_SLIDES.length).padStart(2, '0');
+  if (progressFill) {
+    const pct = ((currentHeroIndex + 1) / HERO_SLIDES.length) * 100;
+    progressFill.style.width = `${pct}%`;
+  }
+
+  // Update Dot Indicator Pills
+  document.querySelectorAll('.hero-dot-btn').forEach((dot, idx) => {
+    const isActive = idx === currentHeroIndex;
+    dot.classList.toggle('active', isActive);
+    dot.setAttribute('aria-current', isActive ? 'true' : 'false');
+  });
+}
+
+function nextHeroSlide() {
+  showHeroSlide(currentHeroIndex + 1);
+}
+
+function prevHeroSlide() {
+  showHeroSlide(currentHeroIndex - 1);
+}
+
+function startHeroAutoplay() {
+  stopHeroAutoplay();
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) {
+    heroIsPlaying = false;
+    updateHeroPlayPauseBtn();
+    return;
+  }
+  heroAutoplayTimer = setInterval(() => {
+    nextHeroSlide();
+  }, 5500);
+  heroIsPlaying = true;
+  updateHeroPlayPauseBtn();
+}
+
+function stopHeroAutoplay() {
+  if (heroAutoplayTimer) {
+    clearInterval(heroAutoplayTimer);
+    heroAutoplayTimer = null;
+  }
+  heroIsPlaying = false;
+  updateHeroPlayPauseBtn();
+}
+
+function updateHeroPlayPauseBtn() {
+  const btn = document.getElementById('hero-play-pause-btn');
+  if (!btn) return;
+  btn.innerHTML = heroIsPlaying ? '⏸' : '▶';
+  btn.setAttribute('aria-label', heroIsPlaying ? 'Pause hero slideshow' : 'Play hero slideshow');
+  btn.setAttribute('title', heroIsPlaying ? 'Pause slideshow' : 'Play slideshow');
+}
+
+function initHeroSlider() {
+  showHeroSlide(0);
+
+  document.getElementById('hero-prev-btn')?.addEventListener('click', () => {
+    prevHeroSlide();
+    announce(`Hero slide: ${HERO_SLIDES[currentHeroIndex].name}`);
+  });
+
+  document.getElementById('hero-next-btn')?.addEventListener('click', () => {
+    nextHeroSlide();
+    announce(`Hero slide: ${HERO_SLIDES[currentHeroIndex].name}`);
+  });
+
+  document.getElementById('hero-play-pause-btn')?.addEventListener('click', () => {
+    if (heroIsPlaying) {
+      stopHeroAutoplay();
+      announce('Hero image slideshow paused.');
+    } else {
+      startHeroAutoplay();
+      announce('Hero image slideshow resumed.');
+    }
+  });
+
+  const heroStage = document.getElementById('hero-stage-wrapper');
+  heroStage?.addEventListener('mouseenter', () => {
+    if (heroIsPlaying && heroAutoplayTimer) clearInterval(heroAutoplayTimer);
+  });
+  heroStage?.addEventListener('mouseleave', () => {
+    if (heroIsPlaying) startHeroAutoplay();
+  });
+
+  document.querySelectorAll('.hero-dot-btn').forEach((dot, idx) => {
+    dot.addEventListener('click', () => {
+      showHeroSlide(idx);
+    });
+  });
+
+  startHeroAutoplay();
+}
+
+/* ==========================================================================
+   Interactive Product Spotlight (Editorial Exhibition)
+   ========================================================================== */
+const SPOTLIGHT_IDS = ['prod-09', 'prod-06', 'prod-10', 'prod-03'];
+let currentSpotlightIndex = 0;
+
+function renderProductSpotlight() {
+  const container = document.getElementById('spotlight-container');
+  if (!container) return;
+
+  const products = Storage.getProducts();
+  const currentId = SPOTLIGHT_IDS[currentSpotlightIndex];
+  const product = products.find(p => p.id === currentId) || products[0];
+  if (!product) return;
+
+  const isOutOfStock = product.stock <= 0;
+  const isLowStock = product.stock > 0 && product.stock <= 4;
+  const stars = '★'.repeat(Math.floor(product.rating)) + (product.rating % 1 >= 0.5 ? '½' : '');
+
+  const stockBadge = isOutOfStock
+    ? `<span class="badge badge-stock-out">Out of Stock</span>`
+    : isLowStock
+      ? `<span class="badge badge-stock-low">Only ${product.stock} left in stock</span>`
+      : `<span class="badge badge-stock-in">${product.stock} available in inventory</span>`;
+
+  container.innerHTML = `
+    <div class="spotlight-card">
+      <div class="spotlight-media-col">
+        <div class="spotlight-image-wrapper">
+          <img 
+            src="${product.image}" 
+            alt="${escapeHtml(product.name)}" 
+            class="spotlight-img"
+            loading="lazy"
+          />
+          <div class="spotlight-media-badge">
+            <span class="spotlight-edition-tag">Featured Studio Selection</span>
+          </div>
+        </div>
+      </div>
+      <div class="spotlight-info-col">
+        <div class="spotlight-header-meta">
+          <span class="spotlight-step-tag">Exhibit 0${currentSpotlightIndex + 1} / 0${SPOTLIGHT_IDS.length}</span>
+          <span class="badge badge-category">${product.category}</span>
+        </div>
+
+        <h3 class="spotlight-title">${escapeHtml(product.name)}</h3>
+
+        <div class="card-rating" style="margin-bottom:0.85rem;" aria-label="Rating: ${product.rating} stars">
+          <span>${stars}</span>
+          <strong>${product.rating.toFixed(1)}</strong>
+          <span class="review-count">(${product.reviewsCount} customer reviews)</span>
+        </div>
+
+        <p class="spotlight-description">${escapeHtml(product.description)}</p>
+
+        <div class="spotlight-specs-box">
+          <h4 class="spotlight-specs-title">Craft Highlights &amp; Specifications:</h4>
+          <ul class="spotlight-specs-list">
+            ${(product.features || []).slice(0, 3).map(f => `<li>${escapeHtml(f)}</li>`).join('')}
+          </ul>
+        </div>
+
+        <div class="spotlight-purchase-row">
+          <div class="spotlight-price-box">
+            <span class="spotlight-price">Rs. ${product.price.toFixed(2)}</span>
+            <span class="spotlight-unit">${escapeHtml(product.unit)}</span>
+          </div>
+          <div class="spotlight-stock-status">
+            ${stockBadge}
+          </div>
+        </div>
+
+        <div class="spotlight-actions">
+          <button 
+            type="button" 
+            class="btn btn-editorial-primary spotlight-add-btn" 
+            data-spotlight-add="${product.id}"
+            ${isOutOfStock ? 'disabled aria-disabled="true"' : ''}
+          >
+            <span>${isOutOfStock ? 'Currently Out of Stock' : 'Add to Shopping Basket →'}</span>
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-editorial-secondary spotlight-quick-btn" 
+            data-spotlight-quick="${product.id}"
+          >
+            View Full Specs
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  container.querySelector('.spotlight-add-btn')?.addEventListener('click', () => {
+    const res = Cart.addItem(product.id, 1);
+    if (res.success) {
+      showToast(res.message, 'success');
+      triggerCartBadgePulse();
+    } else {
+      showToast(res.message, 'warning');
+    }
+  });
+
+  container.querySelector('.spotlight-quick-btn')?.addEventListener('click', () => {
+    openQuickView(product.id);
+  });
+}
+
+function initProductSpotlight() {
+  renderProductSpotlight();
+
+  document.getElementById('spotlight-prev-btn')?.addEventListener('click', () => {
+    currentSpotlightIndex = (currentSpotlightIndex - 1 + SPOTLIGHT_IDS.length) % SPOTLIGHT_IDS.length;
+    renderProductSpotlight();
+    announce(`Spotlight exhibit changed to item ${currentSpotlightIndex + 1}`);
+  });
+
+  document.getElementById('spotlight-next-btn')?.addEventListener('click', () => {
+    currentSpotlightIndex = (currentSpotlightIndex + 1) % SPOTLIGHT_IDS.length;
+    renderProductSpotlight();
+    announce(`Spotlight exhibit changed to item ${currentSpotlightIndex + 1}`);
+  });
+}
+
+/* ==========================================================================
+   Cinematic Video / Media Strip Controller
+   ========================================================================== */
+function initCinematicMediaStrip() {
+  const strip = document.getElementById('cinematic-strip');
+  const btn = document.getElementById('video-motion-btn');
+  if (!strip || !btn) return;
+
+  let isPaused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (isPaused) {
+    strip.classList.add('is-paused');
+    btn.setAttribute('aria-pressed', 'true');
+    btn.innerHTML = '<span>▶ Resume Visual Motion</span>';
+  }
+
+  btn.addEventListener('click', () => {
+    isPaused = !isPaused;
+    strip.classList.toggle('is-paused', isPaused);
+    btn.setAttribute('aria-pressed', isPaused ? 'true' : 'false');
+    btn.innerHTML = isPaused ? '<span>▶ Resume Visual Motion</span>' : '<span>⏸ Pause Visual Motion</span>';
+    announce(isPaused ? 'Cinematic media motion paused.' : 'Cinematic media motion resumed.');
+    showToast(isPaused ? 'Visual motion paused' : 'Visual motion resumed', 'info');
+  });
+}
+
+/* ==========================================================================
+   Mobile Navigation Drawer Controller
+   ========================================================================== */
+function initMobileMenu() {
+  const menuBtn = document.getElementById('mobile-menu-btn');
+  const closeBtn = document.getElementById('mobile-menu-close-btn');
+  const drawer = document.getElementById('mobile-menu-drawer');
+  if (!menuBtn || !drawer) return;
+
+  function openMenu() {
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    menuBtn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+    closeBtn?.focus();
+    announce('Mobile navigation opened.');
+  }
+
+  function closeMenu() {
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    menuBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+    menuBtn.focus();
+  }
+
+  menuBtn.addEventListener('click', openMenu);
+  closeBtn?.addEventListener('click', closeMenu);
+  drawer.addEventListener('click', (e) => {
+    if (e.target === drawer) closeMenu();
+  });
+
+  drawer.querySelectorAll('a, button:not(#mobile-menu-close-btn)').forEach(el => {
+    el.addEventListener('click', () => {
+      closeMenu();
+    });
+  });
+}
 
 /**
  * Renders Authenticated Member Welcome Banner above catalog
@@ -1443,6 +1844,33 @@ document.addEventListener('DOMContentLoaded', () => {
   renderProductCatalog();
   updateCartUI();
   initEventListeners();
+
+  // Initialize Editorial Motion Commerce components
+  initHeroSlider();
+  initProductSpotlight();
+  initCinematicMediaStrip();
+  initMobileMenu();
+
+  // Handle incoming deep links (e.g. from Dashboard or Login redirect)
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const openParam = urlParams.get('open');
+    if (openParam === 'checkout') {
+      const cart = Cart.getCart();
+      if (cart && cart.length > 0) {
+        setTimeout(() => openCheckoutModal(), 250);
+      } else {
+        setTimeout(() => {
+          openCartDrawer();
+          showToast('Your shopping basket is empty. Add products before proceeding to checkout.', 'info');
+        }, 250);
+      }
+    } else if (openParam === 'cart') {
+      setTimeout(() => openCartDrawer(), 250);
+    }
+  } catch (err) {
+    console.debug('Deep link parsing:', err);
+  }
 
   // Newsletter Form Handler
   document.getElementById('newsletter-form')?.addEventListener('submit', (e) => {
