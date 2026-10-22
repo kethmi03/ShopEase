@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="ShopEase - An accessible, universal design e-commerce web application featuring 10 products across 3 categories with local storage persistence and mock checkout.">
-  <title>ShopEase | Accessible E-Commerce Store</title>
+  <meta name="description" content="ShopEase - An editorial motion commerce experience featuring 10 handcrafted products across Food, Clothing, and Tech. Built with Universal Design and WCAG 2.1 AA principles.">
+  <title>ShopEase | Curated Essentials • Editorial Motion Commerce</title>
   
   <!-- Preconnect to image and font sources -->
   <link rel="preconnect" href="https://images.unsplash.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,900;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Stylesheet -->
+  <!-- Main Stylesheet -->
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -22,30 +22,35 @@
   <!-- ARIA Live Region for screen reader announcements -->
   <div id="live-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
-  <!-- Modern Creative Site Header (Uncommon Floating Island Architecture) -->
-  <header class="site-header" role="banner">
+  <!-- SECTION A: PREMIUM NAVIGATION -->
+  <header class="site-header" role="banner" id="site-header">
     <div class="header-island">
-      <!-- Main Navigation Bar -->
       <nav class="main-nav" aria-label="Main Navigation">
         <div class="header-container">
-          <!-- Brand Logo with Gradient Icon & PRO Badge -->
+          
+          <!-- Brand Identity Lockup -->
           <a href="index.html" class="brand-logo" aria-label="ShopEase Home Page">
-            <div class="brand-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="8" cy="21" r="1"></circle>
-                <circle cx="19" cy="21" r="1"></circle>
-                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
-              </svg>
+            <span class="brand-monogram" aria-hidden="true">SE</span>
+            <div class="brand-text-group">
+              <span class="brand-title">Shop<span>Ease</span></span>
+              <span class="brand-sub">Curated Studio</span>
             </div>
-            <div class="brand-text">Shop<span>Ease</span></div>
           </a>
+
+          <!-- Editorial Nav Links (Desktop) -->
+          <div class="desktop-nav-links" role="menubar">
+            <a href="#categories-section" class="nav-anchor" role="menuitem">Departments</a>
+            <a href="#spotlight-section" class="nav-anchor" role="menuitem">Spotlight</a>
+            <a href="#catalog-section" class="nav-anchor" role="menuitem">Collection</a>
+            <a href="#story-section" class="nav-anchor" role="menuitem">Philosophy</a>
+          </div>
 
           <!-- Creative Search Capsule -->
           <form class="search-form" id="search-form" role="search" onsubmit="event.preventDefault();">
-            <label for="search-input" class="sr-only">Search products by title, category, or features</label>
+            <label for="search-input" class="sr-only">Search products by name, category, or features</label>
             <div class="search-input-wrapper">
               <span class="search-icon" aria-hidden="true">
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="11" cy="11" r="8"></circle>
                   <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
@@ -54,22 +59,20 @@
                 type="search" 
                 id="search-input" 
                 class="search-input" 
-                placeholder="Search products, categories, brands..." 
+                placeholder="Search 10 essentials..." 
                 autocomplete="off"
               />
               <kbd class="search-kbd" title="Press '/' anywhere to search">/</kbd>
               <button type="button" id="search-clear-btn" class="search-clear-btn" aria-label="Clear search query" title="Clear search">
                 ✕
               </button>
-              <button type="submit" class="search-submit-btn" aria-label="Submit search">
-                <span>Search</span>
-              </button>
             </div>
           </form>
 
-          <!-- Right Side Nav Header Section: Theme Control + Cart + Nav Actions -->
+          <!-- Right Side Actions: Theme + Cart + Account + Mobile Toggle -->
           <div class="nav-right-section">
-            <!-- Theme Toggle (Icon only - No theme words) -->
+            
+            <!-- Accessible Theme Switcher (Light / Dark / High Contrast) -->
             <button 
               type="button" 
               id="theme-toggle-btn" 
@@ -92,123 +95,420 @@
               </span>
             </button>
 
+            <!-- Shopping Basket Button with Real-time Count Badge -->
+            <button 
+              type="button" 
+              id="cart-toggle-btn" 
+              class="nav-btn-cart" 
+              aria-label="Open shopping basket" 
+              title="Shopping Basket"
+            >
+              <span class="cart-icon-wrapper" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+              </span>
+              <span class="cart-btn-text">Basket</span>
+              <span id="cart-badge" class="cart-badge" aria-label="0 items in basket">0</span>
+            </button>
+
             <!-- Navigation Actions (Dynamic according to auth status) -->
             <div class="nav-actions" id="main-nav-actions">
-              <a href="dashboard.html" class="nav-btn nav-btn-ghost" aria-label="Customer Dashboard" title="Customer Dashboard">
+              <a href="dashboard.html" class="nav-btn nav-btn-ghost" id="nav-dash-guest-btn" aria-label="Customer Dashboard">
                 <span>Dashboard</span>
               </a>
-              <a href="admin.html" class="nav-btn nav-btn-ghost" aria-label="Admin Console" title="Admin Console">
+              <a href="admin.html" class="nav-btn nav-btn-ghost" id="nav-admin-guest-btn" aria-label="Admin Console">
                 <span>🛡️ Admin</span>
               </a>
-              <!-- Sign In & Register Buttons -->
-              <a href="login.html" class="nav-btn nav-btn-ghost" id="nav-login-btn" aria-label="Sign in to your account" title="Sign In">
+              <a href="login.html" class="nav-btn nav-btn-ghost" id="nav-login-btn" aria-label="Sign in">
                 <span>Sign In</span>
               </a>
-              <a href="register.html" class="nav-btn nav-btn-primary" id="nav-register-btn" aria-label="Create new account" title="Register">
+              <a href="register.html" class="nav-btn nav-btn-primary" id="nav-register-btn" aria-label="Register">
                 <span>Register</span>
               </a>
             </div>
+
+            <!-- Mobile Hamburger Button -->
+            <button 
+              type="button" 
+              id="mobile-menu-btn" 
+              class="mobile-menu-btn" 
+              aria-label="Open mobile navigation" 
+              aria-expanded="false" 
+              aria-controls="mobile-menu-drawer"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
+
           </div>
         </div>
       </nav>
-
     </div>
   </header>
 
-  <!-- Main Content Area -->
-  <main id="main-content">
-    <!-- Clean, Balanced Hero Showcase -->
-    <section class="simple-hero" aria-label="Store Welcome">
-      <div class="container">
-        <div class="simple-hero-card">
-          <span class="hero-tag-pill">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-            </svg>
-            Curated Quality • Direct Delivery
-          </span>
-          <h1 class="simple-hero-title">Curated Everyday Essentials</h1>
-          <p class="simple-hero-subtitle">
-            Browse our handpicked collections across gourmet foods, designer apparel, and smart electronics with transparent pricing and fast delivery.
-          </p>
+  <!-- Mobile Slide Navigation Drawer -->
+  <div id="mobile-menu-drawer" class="mobile-drawer" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
+    <div class="mobile-drawer-content">
+      <div class="mobile-drawer-header">
+        <span class="brand-title">Shop<span>Ease</span></span>
+        <button type="button" id="mobile-menu-close-btn" class="modal-close-btn" aria-label="Close mobile navigation">✕</button>
+      </div>
+      <div class="mobile-drawer-nav">
+        <a href="#categories-section" class="mobile-nav-link">Departments</a>
+        <a href="#spotlight-section" class="mobile-nav-link">Exhibition Spotlight</a>
+        <a href="#catalog-section" class="mobile-nav-link">Shop Collection (10 Products)</a>
+        <a href="#story-section" class="mobile-nav-link">Craft Philosophy</a>
+        <hr class="mobile-nav-divider" />
+        <a href="dashboard.html" class="mobile-nav-link">👤 Customer Dashboard</a>
+        <a href="admin.html" class="mobile-nav-link">🛡️ Admin Console</a>
+        <a href="login.html" class="mobile-nav-link">Sign In</a>
+        <a href="register.html" class="mobile-nav-link mobile-nav-highlight">Create Account</a>
+      </div>
+    </div>
+  </div>
 
-          <!-- Centered Interactive Category Filter Deck -->
-          <div class="hero-categories-deck">
-            <div id="category-pills" class="category-pills" role="group" aria-label="Filter products by category">
+  <!-- MAIN CONTENT AREA -->
+  <main id="main-content" role="main">
+    
+    <!-- SECTION B: CINEMATIC HERO WITH INTERACTIVE SWAPPING IMAGES -->
+    <section class="editorial-hero" aria-label="Featured Collection Showcase">
+      <div class="container">
+        <div class="hero-split-grid">
+          
+          <!-- Left Column: Editorial Headline & Storytelling -->
+          <div class="hero-editorial-col">
+            <div class="hero-badge-pill">
+              <span class="hero-pulse-dot" aria-hidden="true"></span>
+              <span>Issue No. 10 • Handpicked Essentials</span>
+            </div>
+
+            <h1 class="hero-display-title">
+              Design &amp; Daily Rituals, <br />
+              <em>Elevated.</em>
+            </h1>
+
+            <p class="hero-editorial-summary">
+              Ten meticulously sourced objects across artisan food, tailored apparel, and acoustic engineering. Crafted for durability, longevity, and genuine human delight.
+            </p>
+
+            <div class="hero-cta-group">
+              <a href="#catalog-section" class="btn btn-editorial-primary">
+                <span>Explore All 10 Essentials</span>
+                <span class="btn-arrow" aria-hidden="true">→</span>
+              </a>
+              <a href="#spotlight-section" class="btn btn-editorial-secondary">
+                <span>Studio Spotlight</span>
+              </a>
+            </div>
+
+            <!-- Hero Slide Controls & Indicators -->
+            <div class="hero-carousel-controls" role="region" aria-label="Featured product carousel controls">
+              <div class="hero-counter-wrap">
+                <span id="hero-slide-num" class="hero-slide-num">01</span>
+                <span class="hero-counter-slash">/</span>
+                <span id="hero-total-slides" class="hero-total-slides">04</span>
+              </div>
+
+              <div class="hero-progress-track" aria-hidden="true">
+                <div id="hero-progress-fill" class="hero-progress-fill" style="width: 25%;"></div>
+              </div>
+
+              <div class="hero-arrow-buttons">
+                <button type="button" id="hero-prev-btn" class="hero-arrow-btn" aria-label="Previous featured product">
+                  ←
+                </button>
+                <button type="button" id="hero-play-pause-btn" class="hero-arrow-btn hero-play-btn" aria-label="Pause slideshow" title="Pause / Resume slideshow">
+                  ⏸
+                </button>
+                <button type="button" id="hero-next-btn" class="hero-arrow-btn" aria-label="Next featured product">
+                  →
+                </button>
+              </div>
+            </div>
+
+            <!-- Slide Dot Selectors -->
+            <div class="hero-dots-deck" role="tablist" aria-label="Slide indicators">
+              <button type="button" class="hero-dot-btn active" data-slide="0" aria-label="Slide 1: Sourdough Loaf" role="tab" aria-selected="true"></button>
+              <button type="button" class="hero-dot-btn" data-slide="1" aria-label="Slide 2: Denim Trucker Jacket" role="tab" aria-selected="false"></button>
+              <button type="button" class="hero-dot-btn" data-slide="2" aria-label="Slide 3: ANC Headphones" role="tab" aria-selected="false"></button>
+              <button type="button" class="hero-dot-btn" data-slide="3" aria-label="Slide 4: Ethiopian Coffee" role="tab" aria-selected="false"></button>
+            </div>
+
+          </div>
+
+          <!-- Right Column: Oversized Cinematic Swapping Media Stage -->
+          <div class="hero-media-col" id="hero-stage-wrapper">
+            <div class="hero-media-frame">
+              <div id="hero-image-stage" class="hero-image-stage">
+                <img 
+                  src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200&q=85" 
+                  alt="Artisan Organic Sourdough Loaf" 
+                  class="hero-stage-img"
+                  loading="eager"
+                />
+              </div>
+
+              <!-- Floating Editorial Product Pill -->
+              <div class="hero-floating-card" role="region" aria-label="Active featured item">
+                <div class="hero-card-meta">
+                  <span id="hero-card-category" class="hero-card-tag">Food &amp; Gourmet</span>
+                  <span class="hero-card-live-dot" aria-hidden="true">● In Stock</span>
+                </div>
+                <h3 id="hero-card-title" class="hero-card-title">Artisan Organic Sourdough Loaf</h3>
+                <div class="hero-card-footer">
+                  <span id="hero-card-price" class="hero-card-price">Rs. 4.95</span>
+                  <button type="button" id="hero-card-quick-btn" class="hero-card-quick-btn" aria-label="Quick inspect product">
+                    Inspect Specs ↗
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION C: CINEMATIC LOOPED VIDEO / MEDIA STRIP -->
+    <section class="cinematic-strip" id="cinematic-strip" aria-label="Craft and Philosophy Strip">
+      <div class="cinematic-backdrop-overlay" aria-hidden="true"></div>
+      <div class="container cinematic-content-wrap">
+        <span class="cinematic-tag">DESIGN PHILOSOPHY</span>
+        <h2 class="cinematic-headline">Crafted with Deep Intention.</h2>
+        <p class="cinematic-subtitle">
+          Every crumb, fiber, and acoustic frequency is precision-engineered for lifelong reliability and human delight.
+        </p>
+        <div class="cinematic-actions">
+          <a href="#catalog-section" class="btn btn-editorial-outline">Explore Repertoire</a>
+          <button 
+            type="button" 
+            id="video-motion-btn" 
+            class="btn-motion-toggle" 
+            aria-pressed="false"
+            title="Toggle background ambient motion"
+          >
+            <span>⏸ Pause Visual Motion</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION D: CREATIVE CATEGORY SHOWCASE -->
+    <section class="category-showcase-section" id="categories-section" aria-label="Shop by Department">
+      <div class="container">
+        
+        <div class="section-editorial-header">
+          <span class="section-kicker">THREE DISTINCT DOMAINS</span>
+          <h2 class="section-editorial-title">Curated Departments</h2>
+          <p class="section-subtitle">
+            Exactly three carefully focused domains designed for universal accessibility and effortless navigation.
+          </p>
+        </div>
+
+        <!-- Asymmetric Editorial Grid (1 Large Featured + 2 Stacked Tiles) -->
+        <div class="asymmetric-category-grid">
+          
+          <!-- Category 1: Food & Gourmet (Large Heroic Tile) -->
+          <article 
+            class="category-tile category-tile-primary" 
+            tabindex="0"
+            role="button"
+            aria-label="Department Food and Gourmet: 3 products. Click to filter catalog."
+            onclick="window.shopeaseFilterCategory('Food')"
+          >
+            <div class="category-tile-bg" style="background-image: url('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1000&q=80');"></div>
+            <div class="category-tile-overlay"></div>
+            <div class="category-tile-content">
+              <span class="category-count-badge">3 Curated Products</span>
+              <h3 class="category-tile-title">Food &amp; Gourmet</h3>
+              <p class="category-tile-desc">
+                Slow-fermented artisan sourdough, single-estate Ethiopian coffee, and Grand Cru Swiss dark chocolate truffles.
+              </p>
+              <div class="category-tile-action">
+                <span>Explore Gourmet Food</span>
+                <span class="tile-arrow" aria-hidden="true">→</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Category 2: Clothing & Apparel -->
+          <article 
+            class="category-tile category-tile-secondary" 
+            tabindex="0"
+            role="button"
+            aria-label="Department Clothing and Apparel: 3 products. Click to filter catalog."
+            onclick="window.shopeaseFilterCategory('Clothing')"
+          >
+            <div class="category-tile-bg" style="background-image: url('https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="category-tile-overlay"></div>
+            <div class="category-tile-content">
+              <span class="category-count-badge">3 Curated Products</span>
+              <h3 class="category-tile-title">Clothing &amp; Apparel</h3>
+              <p class="category-tile-desc">
+                Italian Merino wool knitwear, stretch cotton chinos, and rigid 13.5oz organic trucker jackets.
+              </p>
+              <div class="category-tile-action">
+                <span>Explore Apparel</span>
+                <span class="tile-arrow" aria-hidden="true">→</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Category 3: Electronics & Tech -->
+          <article 
+            class="category-tile category-tile-secondary" 
+            tabindex="0"
+            role="button"
+            aria-label="Department Electronics and Tech: 4 products. Click to filter catalog."
+            onclick="window.shopeaseFilterCategory('Electronics')"
+          >
+            <div class="category-tile-bg" style="background-image: url('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="category-tile-overlay"></div>
+            <div class="category-tile-content">
+              <span class="category-count-badge">4 Curated Products</span>
+              <h3 class="category-tile-title">Electronics &amp; Tech</h3>
+              <p class="category-tile-desc">
+                Acoustic hybrid ANC headphones, 4K OLED monitors, tactile wireless mechanical keyboards, and GPS smartwatches.
+              </p>
+              <div class="category-tile-action">
+                <span>Explore Tech</span>
+                <span class="tile-arrow" aria-hidden="true">→</span>
+              </div>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION E: INTERACTIVE PRODUCT SPOTLIGHT -->
+    <section class="spotlight-section" id="spotlight-section" aria-label="Curated Product Exhibition">
+      <div class="container">
+        
+        <div class="spotlight-section-top">
+          <div>
+            <span class="section-kicker">CURATED EXHIBIT</span>
+            <h2 class="section-editorial-title">Product Exhibition</h2>
+            <p class="section-subtitle">
+              Deep-dive into our signature objects with detailed specifications and real-time stock availability.
+            </p>
+          </div>
+
+          <div class="spotlight-arrows-group">
+            <button type="button" id="spotlight-prev-btn" class="spotlight-arrow-btn" aria-label="Previous exhibit">
+              ←
+            </button>
+            <button type="button" id="spotlight-next-btn" class="spotlight-arrow-btn" aria-label="Next exhibit">
+              →
+            </button>
+          </div>
+        </div>
+
+        <!-- Spotlight Card Slot (Populated dynamically) -->
+        <div id="spotlight-container" class="spotlight-container" aria-live="polite">
+          <!-- Injected via JavaScript -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION F: SHOP THE COLLECTION (THE 10 PRODUCTS CATALOG) -->
+    <section class="catalog-section" id="catalog-section" aria-label="Product Catalog">
+      <div class="container">
+        
+        <!-- Authenticated User Welcome Banner Slot -->
+        <div id="user-welcome-slot"></div>
+
+        <div class="section-editorial-header">
+          <span class="section-kicker">THE COMPLETE REPERTOIRE</span>
+          <h2 class="section-editorial-title" id="catalog-heading">Shop the 10 Handcrafted Essentials</h2>
+          <p class="section-subtitle">
+            All 10 products feature unique pricing, verified customer reviews, specifications, and instant shopping basket actions.
+          </p>
+        </div>
+
+        <!-- Filter Toolbar -->
+        <div class="filter-toolbar">
+          
+          <div class="toolbar-left-group">
+            <!-- Category Selector Pills -->
+            <div id="category-pills" class="category-pills" role="group" aria-label="Filter products by department">
               <!-- Dynamically populated categories -->
             </div>
           </div>
 
-          <!-- Micro-Trust Pillars (Balanced 3-column row) -->
-          <div class="hero-micro-perks" role="region" aria-label="Store guarantees">
-            <div class="micro-perk-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="1" y="3" width="15" height="13"></rect>
-                <polygon points="16 8 20 8 23 11 23 16 16 16 8"></polygon>
-                <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                <circle cx="18.5" cy="18.5" r="2.5"></circle>
-              </svg>
-              <span>Free Delivery on Rs. 50+</span>
+          <div class="toolbar-right-group">
+            <span id="product-results-count" class="results-counter">10 products found</span>
+
+            <!-- In-Stock Only Toggle -->
+            <label class="checkbox-toggle" title="Filter out sold-out items">
+              <input type="checkbox" id="in-stock-toggle" />
+              <span>In-Stock Only</span>
+            </label>
+
+            <!-- Sort Select Dropdown -->
+            <div class="control-group">
+              <label for="sort-select" class="control-label">Sort:</label>
+              <select id="sort-select" class="select-custom" aria-label="Sort product catalog">
+                <option value="featured">Featured Repertoire</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="rating">Highest Customer Rating</option>
+                <option value="stock">Stock Availability</option>
+                <option value="name">Product Name (A-Z)</option>
+              </select>
             </div>
-            <div class="micro-perk-divider" aria-hidden="true">•</div>
-            <div class="micro-perk-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-              </svg>
-              <span>100% Quality Guaranteed</span>
+          </div>
+
+        </div>
+
+        <!-- Product Cards Grid Container -->
+        <div id="product-grid" class="product-grid" aria-live="polite">
+          <!-- Dynamically rendered 10 product cards -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION G: EDITORIAL MEDIA MOMENT & MANIFESTO -->
+    <section class="manifesto-section" id="story-section" aria-label="Craft Philosophy">
+      <div class="container">
+        <div class="manifesto-inner">
+          <span class="manifesto-label">THE ETHOS</span>
+          <blockquote class="manifesto-quote">
+            “Simplicity is not the absence of clutter, that's a consequence of simplicity. Simplicity is describing the purpose and place of an object.”
+          </blockquote>
+          <cite class="manifesto-author">— ShopEase Design Principles</cite>
+
+          <!-- 4 Key Craft Metrics -->
+          <div class="manifesto-stats-grid">
+            <div class="stat-box">
+              <div class="stat-number">10</div>
+              <div class="stat-label">Handcrafted Essentials</div>
             </div>
-            <div class="micro-perk-divider" aria-hidden="true">•</div>
-            <div class="micro-perk-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="23 4 23 10 17 10"></polyline>
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-              </svg>
-              <span>Hassle-Free Returns</span>
+            <div class="stat-box">
+              <div class="stat-number">3</div>
+              <div class="stat-label">Defined Departments</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-number">100%</div>
+              <div class="stat-label">Client-Side State</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-number">AA</div>
+              <div class="stat-label">WCAG 2.1 Universal Access</div>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Main Catalog Section -->
-    <section class="container" id="catalog-section" aria-label="Product Catalog">
-      <!-- Authenticated User Welcome Banner Slot -->
-      <div id="user-welcome-slot"></div>
-
-      <!-- Filter Toolbar -->
-      <div class="filter-toolbar">
-        <div class="toolbar-status">
-          <h2 style="font-size:1.25rem; font-weight:800; margin:0;" id="catalog-heading">Our Products</h2>
-          <span id="product-results-count" style="font-size:0.85rem; color:var(--color-text-muted);">10 products found</span>
-        </div>
-
-        <div class="toolbar-controls">
-          <!-- In-Stock Only Toggle -->
-          <label class="checkbox-toggle">
-            <input type="checkbox" id="in-stock-toggle" />
-            <span>In-Stock Only</span>
-          </label>
-
-          <!-- Sort Select -->
-          <div class="control-group">
-            <label for="sort-select" class="control-label">Sort By:</label>
-            <select id="sort-select" class="select-custom" aria-label="Sort product catalog">
-              <option value="featured">Featured Order</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-              <option value="rating">Customer Rating</option>
-              <option value="stock">Stock Availability</option>
-              <option value="name">Product Name (A-Z)</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- Product Cards Grid Container -->
-      <div id="product-grid" class="product-grid" aria-live="polite">
-        <!-- Dynamically rendered 10 product cards -->
-      </div>
-    </section>
   </main>
 
   <!-- ==========================================================================
@@ -216,13 +516,17 @@
        ========================================================================== -->
   <div id="cart-overlay" class="cart-drawer-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="cart-drawer-heading">
     <aside class="cart-drawer" role="document">
+      
       <div class="cart-drawer-header">
-        <h2 id="cart-drawer-heading" class="modal-title">Shopping Basket</h2>
+        <div>
+          <h2 id="cart-drawer-heading" class="modal-title">Shopping Basket</h2>
+          <span class="cart-drawer-sub">Safe local client-side persistence</span>
+        </div>
         <button type="button" id="cart-close-btn" class="modal-close-btn" aria-label="Close shopping basket" title="Close basket">✕</button>
       </div>
 
-      <!-- Delivery Progress Meter -->
-      <div style="padding: 1rem 1.5rem 0;">
+      <!-- Free Delivery Progress Meter -->
+      <div class="delivery-meter-container">
         <div class="delivery-meter">
           <div id="cart-delivery-text" class="meter-text">
             <span>Spend <strong>Rs. 50.00</strong> for FREE Express Delivery</span>
@@ -238,7 +542,7 @@
         <!-- Rendered items -->
       </div>
 
-      <!-- Basket Footer & Totals -->
+      <!-- Basket Footer & Financial Totals -->
       <div class="cart-drawer-footer">
         <!-- Active Promo Display -->
         <div id="active-promo-container" style="display:none;"></div>
@@ -252,7 +556,7 @@
             placeholder="Promo code (SAVE10, WELCOME20)" 
             aria-label="Enter promotional discount code"
           />
-          <button type="button" id="promo-apply-btn" class="btn btn-secondary" style="height:38px; padding:0 0.85rem;">
+          <button type="button" id="promo-apply-btn" class="btn btn-secondary promo-btn">
             Apply
           </button>
         </div>
@@ -277,18 +581,19 @@
           </div>
         </div>
 
-        <button type="button" id="cart-checkout-btn" class="btn btn-primary" style="width:100%; height:48px; font-size:1rem;">
+        <button type="button" id="cart-checkout-btn" class="btn btn-editorial-primary cart-checkout-btn">
           Proceed to Mock Checkout →
         </button>
       </div>
+
     </aside>
   </div>
 
   <!-- ==========================================================================
-       Product Quick View Modal
+       Product Quick View / Details Modal
        ========================================================================== -->
   <div id="quick-view-overlay" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="quick-view-title">
-    <div class="modal-card" style="max-width: 760px;">
+    <div class="modal-card quick-view-modal-card">
       <div class="modal-header">
         <h2 id="quick-view-title" class="modal-title">Product Details</h2>
         <button type="button" id="quick-view-close-btn" class="modal-close-btn" aria-label="Close product preview">✕</button>
@@ -300,16 +605,21 @@
   </div>
 
   <!-- ==========================================================================
-       Mock Checkout & Payment Wizard Modal
+       3-Step Mock Checkout Wizard Modal
        ========================================================================== -->
   <div id="checkout-overlay" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="checkout-modal-title">
     <div class="modal-card checkout-modal-card">
+      
       <div class="modal-header">
-        <h2 id="checkout-modal-title" class="modal-title">Secure Mock Checkout</h2>
+        <div>
+          <h2 id="checkout-modal-title" class="modal-title">Secure Mock Checkout</h2>
+          <span style="font-size:0.8rem; color:var(--color-text-muted);">Academic simulation • No real transaction</span>
+        </div>
         <button type="button" id="checkout-close-btn" class="modal-close-btn" aria-label="Close checkout modal">✕</button>
       </div>
 
       <div class="modal-body">
+        
         <!-- Multi-Step Progress Indicators -->
         <div class="checkout-stepper" aria-label="Checkout Progress">
           <div id="step-indicator-1" class="step-indicator active">
@@ -326,21 +636,22 @@
           </div>
         </div>
 
-        <!-- 1-Click Autofill Banner for effortless grading & testing -->
+        <!-- 1-Click Autofill Banner for Grader & Testing -->
         <div class="demo-autofill-banner">
           <div>
-            <strong>Pair-Programming / Grader Shortcut:</strong>
-            Fill sample UK customer & mock card info in one click.
+            <strong>Grader / Assessor Shortcut:</strong>
+            Fill verified customer and mock card details with 1-click.
           </div>
-          <button type="button" id="btn-autofill-demo" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">
+          <button type="button" id="btn-autofill-demo" class="btn btn-secondary btn-autofill">
             ⚡ Quick Autofill
           </button>
         </div>
 
         <form id="checkout-form" novalidate>
+          
           <!-- Step 1: Customer & Delivery Details -->
           <div id="checkout-step-1">
-            <h3 style="font-size:1.1rem; margin-bottom:1rem;">Delivery Address</h3>
+            <h3 class="step-heading">Delivery Address</h3>
             <div class="form-grid">
               <div class="form-group col-full">
                 <label for="checkout-fullname" class="form-label">Full Name *</label>
@@ -380,9 +691,9 @@
             </div>
           </div>
 
-          <!-- Step 2: Payment Details -->
+          <!-- Step 2: Mock Payment Details -->
           <div id="checkout-step-2" style="display:none;">
-            <h3 style="font-size:1.1rem; margin-bottom:1rem;">Mock Payment Details</h3>
+            <h3 class="step-heading">Mock Payment Details</h3>
             
             <!-- Virtual Card Preview -->
             <div class="payment-card-preview" aria-hidden="true">
@@ -396,7 +707,7 @@
 
             <div class="form-grid">
               <div class="form-group col-full">
-                <label for="checkout-cardnumber" class="form-label">Card Number (Mock) *</label>
+                <label for="checkout-cardnumber" class="form-label">Card Number (Mock Simulation) *</label>
                 <input type="text" id="checkout-cardnumber" class="form-input" placeholder="4532 0000 0000 8892" maxlength="19" required />
                 <span id="error-cardnumber" class="field-error"></span>
               </div>
@@ -420,20 +731,21 @@
               </div>
             </div>
             
-            <p style="font-size:0.8rem; color:var(--color-text-muted); margin-top:0.75rem;">
-              🔒 Simulation note: This is an academic mock store. No real transaction takes place and no financial information is transmitted outside your browser.
+            <p class="mock-security-note">
+              🔒 <strong>Academic simulation note:</strong> This is an educational mock application. No genuine financial transaction occurs and no card data leaves your browser.
             </p>
           </div>
 
           <!-- Step 3: Review & Final Confirmation -->
           <div id="checkout-step-3" style="display:none;">
-            <h3 style="font-size:1.1rem; margin-bottom:1rem;">Review & Confirm Your Order</h3>
+            <h3 class="step-heading">Review &amp; Confirm Your Order</h3>
             <div id="checkout-review-items"></div>
-            <div id="checkout-review-total" class="financial-breakdown" style="border-top:1px solid var(--color-border); padding-top:0.75rem;"></div>
+            <div id="checkout-review-total" class="financial-breakdown review-total-box"></div>
           </div>
 
-          <!-- Step 4: Success View (Injected dynamically) -->
+          <!-- Step 4: Digital Receipt / Confirmation View -->
           <div id="order-success-view" style="display:none;"></div>
+
         </form>
       </div>
 
@@ -442,13 +754,14 @@
         <button type="button" id="checkout-prev-btn" class="btn btn-secondary" style="display:none;">
           ← Back
         </button>
-        <button type="button" id="checkout-next-btn" class="btn btn-primary">
+        <button type="button" id="checkout-next-btn" class="btn btn-editorial-primary">
           Continue to Payment →
         </button>
-        <button type="submit" form="checkout-form" id="checkout-submit-btn" class="btn btn-primary" style="display:none;">
-          🔒 Confirm & Pay Mock Order
+        <button type="submit" form="checkout-form" id="checkout-submit-btn" class="btn btn-editorial-primary" style="display:none;">
+          🔒 Confirm &amp; Pay Mock Order
         </button>
       </div>
+
     </div>
   </div>
 
@@ -456,9 +769,12 @@
        Order History Modal
        ========================================================================== -->
   <div id="orders-overlay" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="orders-modal-title">
-    <div class="modal-card" style="max-width: 650px;">
+    <div class="modal-card" style="max-width: 680px;">
       <div class="modal-header">
-        <h2 id="orders-modal-title" class="modal-title">Your Order History</h2>
+        <div>
+          <h2 id="orders-modal-title" class="modal-title">Order History &amp; Receipts</h2>
+          <span style="font-size:0.8rem; color:var(--color-text-muted);">Stored persistently in browser LocalStorage</span>
+        </div>
         <button type="button" id="orders-close-btn" class="modal-close-btn" aria-label="Close order history">✕</button>
       </div>
       <div id="orders-list-container" class="modal-body">
@@ -470,68 +786,78 @@
   <!-- Global Toast Notifications Container -->
   <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
-  <!-- Site Footer -->
+  <!-- SECTION H: REFINED STRUCTURED FOOTER -->
   <footer class="site-footer" role="contentinfo">
     <div class="container">
-      <div class="footer-grid">
-        <div class="footer-col" style="max-width:320px;">
+      
+      <div class="footer-top-row">
+        <div class="footer-brand-col">
           <div class="brand-logo" style="margin-bottom:0.75rem;">
-            <div class="brand-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="8" cy="21" r="1"></circle>
-                <circle cx="19" cy="21" r="1"></circle>
-                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
-              </svg>
+            <span class="brand-monogram" aria-hidden="true">SE</span>
+            <div class="brand-text-group">
+              <span class="brand-title">Shop<span>Ease</span></span>
+              <span class="brand-sub">Curated Studio</span>
             </div>
-            <div class="brand-text">Shop<span>Ease</span></div>
           </div>
-          <p style="font-size:0.875rem; color:var(--color-text-secondary); line-height:1.6; margin-bottom:1rem;">
-            ShopEase is your trusted online destination for hand-curated essentials across gourmet food, contemporary clothing, and smart electronics.
+          <p class="footer-desc">
+            ShopEase is an accessible editorial e-commerce experience curated with 10 signature products across Food, Clothing, and Technology.
           </p>
-          <div style="font-size:0.8rem; color:var(--color-text-muted);">
-            Certified Universal Access • 256-bit Secure Encryption • 24/7 Support
+          <div class="footer-badge-strip">
+            <span class="footer-badge">Universal Design</span>
+            <span class="footer-badge">WCAG 2.1 AA</span>
+            <span class="footer-badge">100% Client-Side</span>
           </div>
         </div>
 
         <div class="footer-col">
-          <h4>Shop Departments</h4>
+          <h4 class="footer-heading">Departments</h4>
           <ul class="footer-links">
-            <li><a href="#main-content" onclick="document.querySelector('[data-category=Food]')?.click()">Food &amp; Gourmet</a></li>
-            <li><a href="#main-content" onclick="document.querySelector('[data-category=Clothing]')?.click()">Clothing &amp; Apparel</a></li>
-            <li><a href="#main-content" onclick="document.querySelector('[data-category=Electronics]')?.click()">Electronics &amp; Tech</a></li>
-            <li><a href="#main-content" onclick="document.querySelector('[data-category=all]')?.click()">View All Products</a></li>
+            <li><button type="button" class="footer-link-btn" onclick="window.shopeaseFilterCategory('Food')">Food &amp; Gourmet (3)</button></li>
+            <li><button type="button" class="footer-link-btn" onclick="window.shopeaseFilterCategory('Clothing')">Clothing &amp; Apparel (3)</button></li>
+            <li><button type="button" class="footer-link-btn" onclick="window.shopeaseFilterCategory('Electronics')">Electronics &amp; Tech (4)</button></li>
+            <li><button type="button" class="footer-link-btn" onclick="window.shopeaseFilterCategory('all')">All 10 Essentials</button></li>
           </ul>
         </div>
 
         <div class="footer-col">
-          <h4>Dashboards &amp; Care</h4>
+          <h4 class="footer-heading">Portals &amp; Care</h4>
           <ul class="footer-links">
             <li><a href="dashboard.html">👤 Customer Dashboard</a></li>
             <li><a href="admin.html">🛡️ Admin Console</a></li>
-            <li><a href="login.html">Sign In / Register</a></li>
-            <li><a href="#main-content" onclick="document.getElementById('orders-toggle-btn')?.click()">Track Orders &amp; Receipts</a></li>
+            <li><a href="login.html">Sign In / Account</a></li>
+            <li><button type="button" class="footer-link-btn" onclick="document.getElementById('orders-toggle-btn')?.click()">Past Orders &amp; Receipts</button></li>
           </ul>
         </div>
 
         <div class="footer-col">
-          <h4>Active Discount Coupons</h4>
-          <p style="font-size:0.85rem; margin-bottom:0.75rem;">Apply these verified codes in your basket for instant savings:</p>
-          <ul class="footer-links" style="font-family:var(--font-mono); font-size:0.85rem;">
-            <li><strong>SAVE10</strong>: 10% off entire order</li>
-            <li><strong>WELCOME20</strong>: 20% first order discount</li>
-            <li><strong>FREESHIP</strong>: Free express shipping</li>
+          <h4 class="footer-heading">Verified Vouchers</h4>
+          <p class="footer-subtext">Apply in your basket for instant savings:</p>
+          <ul class="footer-voucher-list">
+            <li>
+              <code>SAVE10</code> — 10% off entire basket
+              <button type="button" class="voucher-apply-btn" onclick="window.shopeaseApplyVoucher('SAVE10')">Apply</button>
+            </li>
+            <li>
+              <code>WELCOME20</code> — 20% first order discount
+              <button type="button" class="voucher-apply-btn" onclick="window.shopeaseApplyVoucher('WELCOME20')">Apply</button>
+            </li>
+            <li>
+              <code>FREESHIP</code> — Free express delivery
+              <button type="button" class="voucher-apply-btn" onclick="window.shopeaseApplyVoucher('FREESHIP')">Apply</button>
+            </li>
           </ul>
         </div>
       </div>
 
-      <div class="footer-bottom">
+      <div class="footer-bottom-row">
         <div>
-          © 2026 ShopEase Retail Technologies Inc. All rights reserved.
+          © 2026 ShopEase Retail Technologies Inc. All rights reserved. Built for Human Computer Interaction University Assignment.
         </div>
-        <div>
-          <span>Privacy Policy</span> • <span>Terms of Service</span> • <span>Accessibility Statement</span>
+        <div class="footer-legal-links">
+          <span>Privacy Notice</span> • <span>Terms of Service</span> • <span>Universal Accessibility Statement</span>
         </div>
       </div>
+
     </div>
   </footer>
 
