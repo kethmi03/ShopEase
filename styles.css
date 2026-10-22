@@ -4,14 +4,15 @@
    ========================================================================== */
 
 :root {
-  /* Editorial Typography Hierarchy */
-  --font-serif: 'Playfair Display', Georgia, Cambria, 'Times New Roman', serif;
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Clean, Highly Legible Modern Typography (Normal Suitable Font) */
+  --font-heading: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: var(--font-heading);
+  --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-base: var(--font-sans);
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --font-scale: 16px;
 
-  /* Editorial Color Palette - Warm Ivory & Charcoal (Light Mode Default) */
+  /* Editorial Color Palette - Warm Ivory & Charcoal (Exact Match to User Image) */
   --color-bg: #F7F5EF;                  /* Warm Ivory */
   --color-surface: #FFFFFF;             /* Pure White Surface */
   --color-surface-hover: #F0EDE4;       /* Soft Stone Hover */
@@ -24,7 +25,7 @@
   --color-text-muted: #777570;          /* Muted Stone Gray */
   --color-text-inverse: #FFFFFF;
 
-  /* Brand Accents - Controlled Burnt Orange */
+  /* Brand Accents - Controlled Burnt Orange (Exact Match to User Image) */
   --color-brand-primary: #D85C36;       /* Controlled Burnt Orange */
   --color-brand-primary-hover: #BF4C28; /* Deep Burnt Amber */
   --color-brand-gradient: linear-gradient(135deg, #D85C36 0%, #C44E29 100%);
@@ -48,7 +49,7 @@
   --color-info-border: #BAE6FD;
 
   /* Accessibility & Focus Rings */
-  --focus-ring: 3px solid var(--color-brand-primary);
+  --focus-ring: 3px solid #D85C36;
   --focus-offset: 2px;
   --min-touch-target: 44px;
 
@@ -335,7 +336,8 @@ body {
   flex-direction: column;
 }
 
-.brand-title {
+.brand-title,
+.brand-text {
   font-family: var(--font-serif);
   font-size: 1.25rem;
   font-weight: 700;
@@ -344,7 +346,8 @@ body {
   color: var(--color-text-primary);
 }
 
-.brand-title span {
+.brand-title span,
+.brand-text span {
   font-style: italic;
   font-weight: 400;
   color: var(--color-brand-primary);
@@ -699,6 +702,7 @@ body {
   background: var(--color-brand-primary);
   color: #FFFFFF;
   box-shadow: 0 4px 14px rgba(216, 92, 54, 0.25);
+  font-weight: 600;
 }
 
 .btn-editorial-primary:hover {
@@ -813,6 +817,8 @@ body {
   font-style: italic;
   font-weight: 400;
   color: var(--color-brand-primary);
+  background: none;
+  -webkit-text-fill-color: var(--color-brand-primary);
 }
 
 .hero-editorial-summary {

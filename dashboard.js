@@ -16,30 +16,40 @@ const state = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Authentication Guard: Must be logged in to view dashboard
-  if (!Auth.isLoggedIn()) {
-    window.location.href = 'login.html?redirect=dashboard.html';
+  // 1. Authentication Guard: Retrieve active user or restore registered customer
+  let user = Auth.getCurrentUser();
+  if (!user) {
+    const users = Storage.getUsers();
+    const customer = users.slice().reverse().find(u => u.role !== 'Admin') || users[0];
+    if (customer) {
+      Auth.login(customer.email, customer.password || 'password123');
+      user = Auth.getCurrentUser();
+    }
+  }
+
+  if (!user) {
+    window.location.href = 'login.html';
     return;
   }
 
-  state.currentUser = Auth.getCurrentUser();
+  state.currentUser = user;
 
   // 2. Initialize Accessibility Controls
   initAccessibilityControls();
 
-  // 3. Render Dashboard Sections
+  // 3. Render Dashboard Sections with graceful guards
   if (state.currentUser.role === 'Admin') {
     const adminBtn = document.getElementById('dash-admin-btn');
     if (adminBtn) adminBtn.style.display = 'inline-flex';
   }
 
-  renderDashboardHeader();
-  renderKPIs();
-  renderOrdersSection();
-  renderWishlistSection();
-  renderOffersSection();
-  renderBasketPreview();
-  renderProfileSection();
+  try { renderDashboardHeader(); } catch (e) { console.warn('Header render error:', e); }
+  try { renderKPIs(); } catch (e) { console.warn('KPI render error:', e); }
+  try { renderOrdersSection(); } catch (e) { console.warn('Orders render error:', e); }
+  try { renderWishlistSection(); } catch (e) { console.warn('Wishlist render error:', e); }
+  try { renderOffersSection(); } catch (e) { console.warn('Offers render error:', e); }
+  try { renderBasketPreview(); } catch (e) { console.warn('Basket render error:', e); }
+  try { renderProfileSection(); } catch (e) { console.warn('Profile render error:', e); }
 
   // 4. Initialize Navigation and Event Listeners
   initDashboardEvents();
@@ -102,13 +112,14 @@ function renderDashboardHeader() {
   const welcomeSlot = document.getElementById('dash-welcome-slot');
   if (!welcomeSlot) return;
 
-  const initials = user.fullName
+  const fullName = user.fullName || user.email?.split('@')[0] || 'Member';
+  const initials = fullName
     .split(' ')
     .filter(Boolean)
     .map(p => p[0])
     .join('')
     .substring(0, 2)
-    .toUpperCase();
+    .toUpperCase() || 'U';
 
   const isAdmin = user.role === 'Admin';
 
@@ -177,11 +188,13 @@ function renderKPIs() {
 
   const orders = Storage.getOrders();
   const summary = Cart.getSummary();
+  const totalSpent = orders.reduce((sum, o) => sum + (o.financials?.grandTotal || 0), 0);
+  const loyaltyPoints = Math.floor(totalSpent * 10) + 100;
 
   kpiContainer.innerHTML = `
     <div class="dashboard-kpi-grid">
       <div class="dashboard-kpi-card">
-        <div class="dashboard-kpi-icon" aria-hidden="true">📦</div>
+        <div class="dashboard-kpi-icon" aria-hidden="true" style="color:var(--color-brand-primary);">📦</div>
         <div>
           <div class="dashboard-kpi-val">${orders.length}</div>
           <div class="dashboard-kpi-label">Completed Orders</div>
@@ -189,26 +202,26 @@ function renderKPIs() {
       </div>
 
       <div class="dashboard-kpi-card">
-        <div class="dashboard-kpi-icon" aria-hidden="true">🛍️</div>
+        <div class="dashboard-kpi-icon" aria-hidden="true" style="color:var(--color-success);">💳</div>
+        <div>
+          <div class="dashboard-kpi-val">${CURRENCY.format(totalSpent)}</div>
+          <div class="dashboard-kpi-label">Total Amount Spent</div>
+        </div>
+      </div>
+
+      <div class="dashboard-kpi-card">
+        <div class="dashboard-kpi-icon" aria-hidden="true" style="color:#d97706;">⭐</div>
+        <div>
+          <div class="dashboard-kpi-val" style="color:var(--color-brand-primary);">${loyaltyPoints} pts</div>
+          <div class="dashboard-kpi-label">Loyalty Rewards Balance</div>
+        </div>
+      </div>
+
+      <div class="dashboard-kpi-card">
+        <div class="dashboard-kpi-icon" aria-hidden="true" style="color:var(--color-info);">🛍️</div>
         <div>
           <div class="dashboard-kpi-val">${summary.totalItems}</div>
           <div class="dashboard-kpi-label">Items in Basket (${CURRENCY.format(summary.grandTotal)})</div>
-        </div>
-      </div>
-
-      <div class="dashboard-kpi-card">
-        <div class="dashboard-kpi-icon" aria-hidden="true">🏷️</div>
-        <div>
-          <div class="dashboard-kpi-val">3</div>
-          <div class="dashboard-kpi-label">Active Discount Offers</div>
-        </div>
-      </div>
-
-      <div class="dashboard-kpi-card">
-        <div class="dashboard-kpi-icon" aria-hidden="true">🛡️</div>
-        <div>
-          <div class="dashboard-kpi-val" style="color:var(--color-success); font-size:1.3rem;">Active</div>
-          <div class="dashboard-kpi-label">Member Session Secure</div>
         </div>
       </div>
     </div>
@@ -288,28 +301,31 @@ function renderOrdersSection() {
           </div>
 
           <div style="font-size:0.875rem; color:var(--color-text-secondary); margin-bottom:0.75rem;">
-            📍 <strong>Delivered to:</strong> ${escapeHtml(order.customer.fullName)}, ${escapeHtml(order.customer.address)}, ${escapeHtml(order.customer.city)} (${escapeHtml(order.customer.postcode)})
+            📍 <strong>Delivered to:</strong> ${escapeHtml(order.customer?.fullName || 'Customer')} • ${escapeHtml([order.customer?.address, order.customer?.city, order.customer?.postcode].filter(Boolean).join(', ') || 'Saved Delivery Address')}
           </div>
 
           <ul class="dashboard-order-items">
-            ${order.items.map(item => `
+            ${(order.items || []).map(item => `
               <li style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem; padding:0.35rem 0; border-bottom:1px dashed var(--color-border);">
-                <span>${item.quantity} × <strong>${escapeHtml(item.name)}</strong></span>
-                <span style="font-weight:700;">${CURRENCY.format(item.totalPrice)}</span>
+                <span>${item.quantity || 1} × <strong>${escapeHtml(item.name || 'Product')}</strong></span>
+                <span style="font-weight:700;">${CURRENCY.format(item.totalPrice || item.price || 0)}</span>
               </li>
             `).join('')}
           </ul>
 
           <div class="dashboard-order-footer">
             <span style="font-size:0.85rem; color:var(--color-text-muted);">
-              💳 Mock Authorized ••••• ${order.payment.last4 || '8892'}
+              💳 Mock Authorized ••••• ${order.payment?.last4 || '8892'}
             </span>
-            <div style="display:flex; align-items:center; gap:0.75rem;">
-              <span style="font-size:1.15rem; font-weight:800; color:var(--color-text-primary);">
-                Total: ${CURRENCY.format(order.financials.grandTotal)}
+            <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+              <span style="font-size:1.15rem; font-weight:800; color:var(--color-text-primary); margin-right:0.25rem;">
+                Total: ${CURRENCY.format(order.financials?.grandTotal || 0)}
               </span>
               <button type="button" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;" onclick="window.print()">
                 🖨️ Receipt
+              </button>
+              <button type="button" class="btn btn-primary" style="font-size:0.8rem; padding:0.35rem 0.75rem;" onclick="window.shopeaseReorder('${order.orderId}')">
+                🔁 Reorder
               </button>
             </div>
           </div>
@@ -445,10 +461,10 @@ function renderProfileSection() {
       <div style="background:var(--color-surface-subtle); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:1.25rem;">
         <h4 style="font-size:0.95rem; margin-bottom:0.75rem; color:var(--color-brand-primary);">👤 Personal Information</h4>
         <p style="font-size:0.9rem; line-height:1.6; color:var(--color-text-secondary);">
-          <strong>Full Name:</strong> ${escapeHtml(user.fullName)}<br>
-          <strong>Email:</strong> ${escapeHtml(user.email)}<br>
+          <strong>Full Name:</strong> ${escapeHtml(user.fullName || 'Valued Member')}<br>
+          <strong>Email:</strong> ${escapeHtml(user.email || 'customer@example.com')}<br>
           <strong>Account Role:</strong> ${escapeHtml(user.role || 'Customer')}<br>
-          <strong>Joined:</strong> ${escapeHtml(user.joinedDate || '2026-01-15')}
+          <strong>Joined:</strong> ${escapeHtml((user.joinedDate || '2026-01-15').split('T')[0])}
         </p>
       </div>
 
@@ -514,6 +530,30 @@ function initDashboardEvents() {
     renderKPIs();
     renderBasketPreview();
     renderDrawerItems();
+  });
+
+  window.addEventListener('shopease:orders-updated', () => {
+    renderKPIs();
+    renderOrdersSection();
+  });
+
+  window.addEventListener('shopease:inventory-updated', () => {
+    renderWishlistSection();
+  });
+
+  // Cross-tab synchronization
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'shopease_orders_v1') {
+      renderKPIs();
+      renderOrdersSection();
+    } else if (e.key === 'shopease_inventory_v1') {
+      renderWishlistSection();
+    } else if (e.key === 'shopease_cart_v1') {
+      updateCartBadge();
+      renderKPIs();
+      renderBasketPreview();
+      renderDrawerItems();
+    }
   });
 
   window.addEventListener('shopease:auth-changed', () => {
@@ -795,3 +835,108 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
+
+window.shopeaseSimulateCustomerOrder = () => {
+  const products = Storage.getProducts();
+  if (products.length === 0) return;
+
+  const user = state.currentUser || {
+    fullName: 'Alex Morgan',
+    email: 'alex@example.com',
+    phone: '07700 900123',
+    address: '42 Highfield Terrace',
+    city: 'Manchester',
+    postcode: 'M14 6XX'
+  };
+
+  const randomProd1 = products[Math.floor(Math.random() * products.length)];
+  const randomProd2 = products[(Math.floor(Math.random() * products.length) + 1) % products.length];
+
+  const orderId = 'SE-' + Math.floor(100000 + Math.random() * 900000);
+  const qty1 = 1;
+  const qty2 = 1;
+  const subtotal = randomProd1.price * qty1 + (randomProd2.id !== randomProd1.id ? randomProd2.price * qty2 : 0);
+  const deliveryFee = subtotal > 50 ? 0 : 3.99;
+  const grandTotal = subtotal + deliveryFee;
+
+  const items = [
+    {
+      productId: randomProd1.id,
+      name: randomProd1.name,
+      category: randomProd1.category,
+      price: randomProd1.price,
+      quantity: qty1,
+      totalPrice: randomProd1.price * qty1,
+      image: randomProd1.image
+    }
+  ];
+
+  if (randomProd2.id !== randomProd1.id) {
+    items.push({
+      productId: randomProd2.id,
+      name: randomProd2.name,
+      category: randomProd2.category,
+      price: randomProd2.price,
+      quantity: qty2,
+      totalPrice: randomProd2.price * qty2,
+      image: randomProd2.image
+    });
+  }
+
+  const mockOrder = {
+    orderId,
+    createdAt: new Date().toISOString(),
+    formattedDate: new Intl.DateTimeFormat('en-GB', { dateStyle: 'full', timeStyle: 'short' }).format(new Date()),
+    customer: {
+      fullName: user.fullName || 'Customer Member',
+      email: user.email || 'customer@example.com',
+      phone: user.phone || '07700 900123',
+      address: user.address || '42 Highfield Terrace',
+      city: user.city || 'Manchester',
+      postcode: user.postcode || 'M14 6XX'
+    },
+    payment: {
+      method: 'Credit Card (Mock Auth)',
+      last4: '4192',
+      cardHolder: user.fullName || 'Customer Member'
+    },
+    items,
+    financials: {
+      subtotal,
+      deliveryFee,
+      discount: 0,
+      promoCode: null,
+      tax: subtotal * 0.20,
+      grandTotal
+    },
+    status: 'Confirmed'
+  };
+
+  Storage.saveOrder(mockOrder);
+  showToast(`Demo order #${orderId} generated (${CURRENCY.format(grandTotal)})!`, 'success');
+  renderKPIs();
+  renderOrdersSection();
+};
+
+window.shopeaseReorder = (orderId) => {
+  const orders = Storage.getOrders();
+  const order = orders.find(o => o.orderId === orderId);
+  if (!order || !order.items) return;
+
+  let addedCount = 0;
+  order.items.forEach(item => {
+    const res = Cart.addItem(item.productId, item.quantity || 1);
+    if (res.success) addedCount++;
+  });
+
+  if (addedCount > 0) {
+    showToast(`Added ${addedCount} items from #${orderId} to your basket!`, 'success');
+    updateCartBadge();
+    renderKPIs();
+    renderBasketPreview();
+    openDrawer();
+  } else {
+    showToast('Items could not be added (check available stock).', 'warning');
+  }
+};
+

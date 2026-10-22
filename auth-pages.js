@@ -142,10 +142,22 @@ function initLoginForm() {
         showToast(result.message, 'success');
         announceToScreenReader(result.message);
 
-        // Redirect after brief pause
+        const successContainer = document.getElementById('login-success-message');
+        if (successContainer) {
+          successContainer.innerHTML = `<strong>✅ ${escapeHtml(result.message)}</strong><div style="font-size:0.8rem; margin-top:0.25rem;">Entering your dashboard...</div>`;
+          successContainer.style.display = 'block';
+        }
+
+        const emailLower = (result.user?.email || '').toLowerCase();
+        const isAdmin = result.user?.role === 'Admin' || emailLower === 'admin@gmail.com' || emailLower === 'admin@shopease.com' || emailLower.includes('admin');
+        submitBtn.innerHTML = isAdmin 
+          ? '<span>🛡️ Successfully Signed In! Entering Admin Console...</span>' 
+          : '<span>✅ Successfully Signed In! Entering Customer Dashboard...</span>';
+
+        // Redirect after clear visual confirmation
         setTimeout(() => {
           redirectAfterAuth();
-        }, 600);
+        }, 550);
       } else {
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<span>Sign In</span> <span>→</span>';
@@ -220,6 +232,35 @@ function initRegisterForm() {
     });
   }
 
+  // Role selection visual card feedback
+  const roleRadios = form.querySelectorAll('input[name="accountRole"]');
+  const customerCard = document.getElementById('role-customer-card');
+  const adminCard = document.getElementById('role-admin-card');
+
+  roleRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      if (radio.value === 'Admin') {
+        if (adminCard) {
+          adminCard.style.borderColor = 'var(--color-brand-primary)';
+          adminCard.style.borderWidth = '2px';
+        }
+        if (customerCard) {
+          customerCard.style.borderColor = 'var(--color-border)';
+          customerCard.style.borderWidth = '1px';
+        }
+      } else {
+        if (customerCard) {
+          customerCard.style.borderColor = 'var(--color-brand-primary)';
+          customerCard.style.borderWidth = '2px';
+        }
+        if (adminCard) {
+          adminCard.style.borderColor = 'var(--color-border)';
+          adminCard.style.borderWidth = '1px';
+        }
+      }
+    });
+  });
+
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     clearErrors();
@@ -261,6 +302,9 @@ function initRegisterForm() {
       hasError = true;
     }
 
+    const roleInput = form.querySelector('input[name="accountRole"]:checked');
+    const role = roleInput ? roleInput.value : 'Customer';
+
     if (hasError) return;
 
     submitBtn.disabled = true;
@@ -274,16 +318,29 @@ function initRegisterForm() {
         phone,
         address,
         city,
-        postcode
+        postcode,
+        role
       });
 
       if (result.success) {
         showToast(result.message, 'success');
         announceToScreenReader(result.message);
 
+        const successContainer = document.getElementById('register-success-message');
+        if (successContainer) {
+          successContainer.innerHTML = `<strong>✅ ${escapeHtml(result.message)}</strong><div style="font-size:0.8rem; margin-top:0.25rem;">Redirecting to your dashboard...</div>`;
+          successContainer.style.display = 'block';
+        }
+
+        const emailLower = (result.user?.email || '').toLowerCase();
+        const isAdmin = result.user?.role === 'Admin' || emailLower === 'admin@gmail.com' || emailLower === 'admin@shopease.com' || emailLower.includes('admin');
+        submitBtn.innerHTML = isAdmin 
+          ? '<span>🛡️ Successfully Registered! Entering Admin Console...</span>' 
+          : '<span>✅ Successfully Registered! Entering Customer Dashboard...</span>';
+
         setTimeout(() => {
           redirectAfterAuth();
-        }, 700);
+        }, 600);
       } else {
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<span>Create Account & Sign In</span> <span>→</span>';
@@ -353,14 +410,12 @@ function validatePasswordMatch() {
  * 1-Click Fast Fill for Register Page
  */
 function initRegisterDemoFill() {
-  const btn = document.getElementById('btn-fill-register-demo');
-  if (!btn) return;
-
-  btn.addEventListener('click', () => {
+  function fillData(role = 'Customer') {
     const randomId = Math.floor(100 + Math.random() * 900);
+    const isAdmin = role === 'Admin';
     const demo = {
-      name: `Jordan Parker ${randomId}`,
-      email: `jordan${randomId}@example.co.uk`,
+      name: isAdmin ? `Admin Manager ${randomId}` : `Jordan Parker ${randomId}`,
+      email: isAdmin ? `admin${randomId}@shopease.com` : `jordan${randomId}@example.co.uk`,
       phone: '07456 789012',
       address: '15 Victoria Crescent',
       city: 'Bristol',
@@ -394,28 +449,44 @@ function initRegisterDemoFill() {
     }
     if (terms) terms.checked = true;
 
+    // Set role radio
+    const radioToSelect = document.getElementById(isAdmin ? 'role-admin' : 'role-customer');
+    if (radioToSelect) {
+      radioToSelect.checked = true;
+      radioToSelect.dispatchEvent(new Event('change'));
+    }
+
     clearErrors();
-    showToast('Demo registration details filled!', 'info');
-    announceToScreenReader('Demo registration details automatically filled.');
-  });
+    showToast(`Sample ${role} details filled!`, 'info');
+    announceToScreenReader(`Sample ${role} details automatically filled.`);
+  }
+
+  document.getElementById('btn-fill-register-demo')?.addEventListener('click', () => fillData('Customer'));
+  document.getElementById('btn-fill-register-customer')?.addEventListener('click', () => fillData('Customer'));
+  document.getElementById('btn-fill-register-admin')?.addEventListener('click', () => fillData('Admin'));
 }
 
 function showAlreadyLoggedInBanner(user) {
   const container = document.getElementById('already-logged-in-banner');
   if (!container) return;
 
+  const isAdmin = user.role === 'Admin';
+  const targetHref = isAdmin ? 'admin.html' : 'dashboard.html';
+  const targetLabel = isAdmin ? '🛡️ Go to Admin Dashboard' : '👤 Go to Customer Dashboard';
+
   container.innerHTML = `
-    <div style="background-color:var(--color-info-bg); border:1px solid var(--color-info-border); border-radius:var(--radius-md); padding:1rem; margin-bottom:1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+    <div style="background-color:var(--color-surface); border:1px solid var(--color-border); border-left:4px solid var(--color-brand-primary); border-radius:var(--radius-md); padding:1rem; margin-bottom:1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; box-shadow:var(--shadow-sm);">
       <div>
         <div style="font-weight:700; color:var(--color-text-primary); font-size:0.95rem;">
-          👋 You are already logged in as <strong>${escapeHtml(user.fullName)}</strong>
+          👋 You are currently signed in as <strong>${escapeHtml(user.fullName)}</strong> (${escapeHtml(user.role || 'Customer')})
         </div>
         <div style="font-size:0.8rem; color:var(--color-text-muted);">
           ${escapeHtml(user.email)}
         </div>
       </div>
-      <div style="display:flex; gap:0.5rem;">
-        <a href="index.html" class="btn btn-primary" style="font-size:0.85rem; padding:0.4rem 0.85rem;">Go to Store</a>
+      <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <a href="${targetHref}" class="btn btn-primary" style="font-size:0.85rem; padding:0.4rem 0.85rem;">${targetLabel} →</a>
+        <a href="index.html" class="btn btn-secondary" style="font-size:0.85rem; padding:0.4rem 0.85rem;">Storefront</a>
         <button type="button" id="btn-banner-logout" class="btn btn-secondary" style="font-size:0.85rem; padding:0.4rem 0.85rem;">Sign Out</button>
       </div>
     </div>
@@ -451,18 +522,18 @@ function clearErrors() {
   if (loginErr) loginErr.style.display = 'none';
   const regErr = document.getElementById('register-error-message');
   if (regErr) regErr.style.display = 'none';
+  const loginSucc = document.getElementById('login-success-message');
+  if (loginSucc) loginSucc.style.display = 'none';
+  const regSucc = document.getElementById('register-success-message');
+  if (regSucc) regSucc.style.display = 'none';
 }
 
 function redirectAfterAuth() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const redirect = urlParams.get('redirect');
   const user = Auth.getCurrentUser();
+  const emailLower = (user?.email || '').toLowerCase();
+  const isAdmin = user && (user.role === 'Admin' || emailLower === 'admin@gmail.com' || emailLower === 'admin@shopease.com' || emailLower.includes('admin'));
 
-  if (redirect === 'checkout') {
-    window.location.href = 'index.html?open=checkout';
-  } else if (redirect) {
-    window.location.href = redirect;
-  } else if (user && user.role === 'Admin') {
+  if (isAdmin) {
     window.location.href = 'admin.html';
   } else {
     window.location.href = 'dashboard.html';

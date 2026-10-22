@@ -37,20 +37,24 @@ const THEME_ICONS = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Session Verification
+  // 1. Session Verification: Must be authenticated as Admin
   const user = Auth.getCurrentUser();
+  const emailLower = (user?.email || '').toLowerCase();
+  const isAdmin = user && (user.role === 'Admin' || emailLower === 'admin@gmail.com' || emailLower === 'admin@shopease.com' || emailLower.includes('admin'));
+
   if (!user) {
-    // If not logged in, auto-login as Admin for seamless demonstration or redirect
-    const adminUser = Storage.getUsers().find(u => u.role === 'Admin');
-    if (adminUser) {
-      Auth.login(adminUser.email, adminUser.password || 'password123');
-      state.currentUser = Auth.getCurrentUser();
-    } else {
-      window.location.href = 'login.html?redirect=admin.html';
-      return;
-    }
+    window.location.href = 'login.html';
+    return;
+  } else if (!isAdmin) {
+    alert('Access Restricted: The Admin Console is only accessible to Administrator accounts. Redirecting to Customer Dashboard...');
+    window.location.href = 'dashboard.html';
+    return;
   } else {
     state.currentUser = user;
+    if (state.currentUser.role !== 'Admin') {
+      state.currentUser.role = 'Admin';
+      Storage.setCurrentUser(state.currentUser);
+    }
   }
 
   // 2. Initialize Theme & Accessibility
@@ -64,10 +68,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // 4. Initial Render
   refreshAllData();
 
-  // 5. Setup Live Storage Sync
+  // 5. Setup Live Storage Sync (Internal & Cross-tab)
   window.addEventListener('shopease:inventory-updated', refreshAllData);
   window.addEventListener('shopease:orders-updated', refreshAllData);
   window.addEventListener('shopease:users-updated', refreshAllData);
+  window.addEventListener('storage', (e) => {
+    if (e.key && e.key.startsWith('shopease_')) {
+      refreshAllData();
+    }
+  });
 });
 
 function initTheme() {

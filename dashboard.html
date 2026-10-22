@@ -6,10 +6,10 @@
   <meta name="description" content="Customer Dashboard | ShopEase - Manage your orders, active promotional vouchers, shopping basket, and personal profile." />
   <title>Customer Dashboard | ShopEase</title>
 
-  <!-- Google Fonts: Playfair Display + Plus Jakarta Sans + JetBrains Mono -->
+  <!-- Google Fonts: Plus Jakarta Sans + Inter + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300..900;1,300..900&family=Plus+Jakarta+Sans:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <!-- Main Stylesheet -->
   <link rel="stylesheet" href="styles.css" />
@@ -29,14 +29,11 @@
         <div class="header-container" style="padding:0.25rem 0.5rem;">
           <!-- Brand Logo -->
           <a href="index.html" class="brand-logo" aria-label="ShopEase Home Page">
-            <div class="brand-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="8" cy="21" r="1"></circle>
-                <circle cx="19" cy="21" r="1"></circle>
-                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
-              </svg>
+            <span class="brand-monogram" aria-hidden="true">SE</span>
+            <div class="brand-text-group">
+              <span class="brand-title">Shop<span>Ease</span></span>
+              <span class="brand-sub">Curated Studio</span>
             </div>
-            <div class="brand-text">Shop<span>Ease</span></div>
           </a>
 
           <!-- Right Side Nav Header Section: Theme Control + Authenticated Action Buttons -->
@@ -66,8 +63,8 @@
 
             <!-- Authenticated Navigation Action Buttons -->
             <div class="nav-actions">
-              <!-- Admin Console Link -->
-              <a href="admin.html" id="dash-admin-btn" class="nav-btn nav-btn-ghost" aria-label="Open Admin Console" title="Switch to Admin Console">
+              <!-- Admin Console Link (shown only for verified Administrator accounts) -->
+              <a href="admin.html" id="dash-admin-btn" class="nav-btn nav-btn-ghost" aria-label="Open Admin Console" title="Switch to Admin Console" style="display:none;">
                 <span>🛡️ Admin Console</span>
               </a>
 
@@ -141,8 +138,8 @@
           <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.6rem;" onclick="window.shopeaseSwitchAccount('sarah@example.com')">
             ⭐ Sarah (VIP Member)
           </button>
-          <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.6rem; border-color:var(--color-brand-primary);" onclick="window.shopeaseSwitchAccount('admin@shopease.com')">
-            🛡️ Admin (System Admin)
+          <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.6rem; border-color:var(--color-brand-primary);" onclick="window.shopeaseSwitchAccount('admin@gmail.com')">
+            🛡️ Admin (admin@gmail.com)
           </button>
         </div>
       </div>
@@ -176,9 +173,14 @@
       <section class="dashboard-section" id="dash-orders-section" aria-label="Order History">
         <div class="dashboard-section-title">
           <span>📦 My Orders & Purchase History</span>
-          <a href="index.html#catalog-section" class="btn btn-secondary" style="font-size:0.8rem; padding:0.3rem 0.75rem;">
-            + Shop New Items
-          </a>
+          <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+            <button type="button" class="btn btn-secondary" style="font-size:0.8rem; padding:0.3rem 0.75rem;" onclick="window.shopeaseSimulateCustomerOrder()">
+              ⚡ + Quick Demo Order
+            </button>
+            <a href="index.html#catalog-section" class="btn btn-secondary" style="font-size:0.8rem; padding:0.3rem 0.75rem;">
+              + Shop Storefront
+            </a>
+          </div>
         </div>
         <div id="dash-orders-container"></div>
       </section>

@@ -9,7 +9,7 @@
   <!-- Preconnect to font sources -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300..900;1,300..900&family=Plus+Jakarta+Sans:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Stylesheet -->
   <link rel="stylesheet" href="styles.css">
@@ -27,14 +27,11 @@
       <nav class="main-nav" aria-label="Registration Navigation">
         <div class="header-container" style="padding:0.25rem 0.5rem;">
           <a href="index.html" class="brand-logo" aria-label="ShopEase Home Page">
-            <div class="brand-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="8" cy="21" r="1"></circle>
-                <circle cx="19" cy="21" r="1"></circle>
-                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
-              </svg>
+            <span class="brand-monogram" aria-hidden="true">SE</span>
+            <div class="brand-text-group">
+              <span class="brand-title">Shop<span>Ease</span></span>
+              <span class="brand-sub">Curated Studio</span>
             </div>
-            <div class="brand-text">Shop<span>Ease</span></div>
           </a>
 
           <div class="nav-right-section">
@@ -64,12 +61,6 @@
             <a href="index.html" class="nav-btn nav-btn-ghost" aria-label="Return to store homepage">
               <span>Shop Catalog</span>
             </a>
-            <a href="dashboard.html" class="nav-btn nav-btn-ghost" aria-label="Customer Dashboard">
-              <span>Customer Dashboard</span>
-            </a>
-            <a href="admin.html" class="nav-btn nav-btn-ghost" aria-label="Admin Console">
-              <span>🛡️ Admin Console</span>
-            </a>
           </div>
         </div>
       </nav>
@@ -84,30 +75,29 @@
         <a href="index.html" class="back-to-store-link" aria-label="Back to ShopEase catalog">
           ← Back to Shop
         </a>
-        <button 
-          type="button" 
-          id="btn-fill-register-demo" 
-          class="btn btn-secondary" 
-          style="font-size:0.8rem; padding:0.35rem 0.75rem; display:inline-flex; align-items:center; gap:0.4rem;"
-          title="Autofill sample registration fields for quick demonstration"
-        >
-          <span>Autofill Sample User</span>
-        </button>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+          <button 
+            type="button" 
+            id="btn-fill-register-customer" 
+            class="btn btn-secondary" 
+            style="font-size:0.8rem; padding:0.35rem 0.75rem; display:inline-flex; align-items:center; gap:0.4rem;"
+            title="Autofill sample customer registration"
+          >
+            <span>⚡ Autofill Sample Details</span>
+          </button>
+        </div>
       </div>
 
       <div class="auth-header">
-        <a href="index.html" class="brand-logo" aria-label="ShopEase Home Page">
-          <div class="brand-icon" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="8" cy="21" r="1"></circle>
-              <circle cx="19" cy="21" r="1"></circle>
-              <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
-            </svg>
+        <a href="index.html" class="brand-logo" aria-label="ShopEase Home Page" style="justify-content:center; margin-bottom:0.75rem;">
+          <span class="brand-monogram" aria-hidden="true">SE</span>
+          <div class="brand-text-group" style="text-align:left;">
+            <span class="brand-title">Shop<span>Ease</span></span>
+            <span class="brand-sub">Curated Studio</span>
           </div>
-          <div class="brand-text">Shop<span>Ease</span></div>
         </a>
         <h1 class="auth-title">Create Your Account</h1>
-        <p class="auth-subtitle">Join ShopEase for seamless shopping, orders tracking, and fast checkout.</p>
+        <p class="auth-subtitle">Join ShopEase for seamless shopping, personal orders tracking, and member vouchers.</p>
       </div>
 
       <!-- Authentication Navigation Tabs -->
@@ -123,8 +113,12 @@
       <!-- General Error Display Container -->
       <div id="register-error-message" class="toast toast-danger" style="display:none; margin-bottom:1.25rem; font-size:0.875rem;" role="alert"></div>
 
+      <!-- General Success Display Container -->
+      <div id="register-success-message" class="toast toast-success" style="display:none; margin-bottom:1.25rem; font-size:0.875rem;" role="status"></div>
+
       <!-- Registration Form -->
       <form id="register-form" novalidate>
+        <input type="hidden" name="accountRole" id="role-customer" value="Customer" />
         <div class="form-grid">
           <!-- Full Name -->
           <div class="form-group col-full">
