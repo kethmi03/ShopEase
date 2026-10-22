@@ -66,6 +66,11 @@
 
             <!-- Authenticated Navigation Action Buttons -->
             <div class="nav-actions">
+              <!-- Admin Console Link (Visible for Admins) -->
+              <a href="admin.html" id="dash-admin-btn" class="nav-btn nav-btn-primary" style="display:none; background:var(--color-brand-primary); color:#ffffff; font-weight:700;" aria-label="Open Admin Console">
+                <span>🛡️ Admin Console</span>
+              </a>
+
               <!-- Shop Catalog link -->
               <a href="index.html" class="nav-btn nav-btn-ghost" aria-label="Return to store catalog">
                 <span>Shop Catalog</span>
@@ -124,8 +129,36 @@
   <!-- Main Customer Dashboard Content -->
   <main id="main-content" class="dashboard-container">
     <div class="container">
+      <!-- 0. Fast Demo Profile Switcher -->
+      <div class="profile-fast-switcher" id="profile-fast-switcher" style="margin-bottom:1.25rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; padding:0.6rem 1rem; border-radius:var(--radius-md); background:var(--color-surface-subtle); border:1px dashed var(--color-border-strong);">
+        <div style="font-size:0.8rem; font-weight:600; color:var(--color-text-secondary); display:flex; align-items:center; gap:0.4rem;">
+          <span>⚡ Fast Switch Demo Profile:</span>
+        </div>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+          <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.6rem;" onclick="window.shopeaseSwitchAccount('alex@example.com')">
+            👤 Alex (Customer)
+          </button>
+          <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.6rem;" onclick="window.shopeaseSwitchAccount('sarah@example.com')">
+            ⭐ Sarah (VIP Member)
+          </button>
+          <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.6rem; border-color:var(--color-brand-primary);" onclick="window.shopeaseSwitchAccount('admin@shopease.com')">
+            🛡️ Admin (System Admin)
+          </button>
+        </div>
+      </div>
+
       <!-- 1. Customer Welcome Hero Banner -->
       <div id="dash-welcome-slot"></div>
+
+      <!-- Quick Navigation Jump Pills -->
+      <nav class="dashboard-quick-nav" aria-label="Dashboard Jump Links" style="margin:1.25rem 0; display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <a href="#dash-kpi-container" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">📊 Overview</a>
+        <a href="#dash-orders-section" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">📦 My Orders</a>
+        <a href="#dash-wishlist-section" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">💖 Saved Wishlist</a>
+        <a href="#dash-offers-section" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">🏷️ Vouchers</a>
+        <a href="#dash-basket-section" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">🛍️ Active Basket</a>
+        <a href="#dash-profile-section" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">👤 Profile & Address</a>
+      </nav>
 
       <!-- 2. KPI Summary Cards Grid -->
       <div id="dash-kpi-container"></div>
@@ -150,7 +183,16 @@
         <div id="dash-orders-container"></div>
       </section>
 
-      <!-- 5. Active Basket Overview -->
+      <!-- 5. Saved Wishlist Section -->
+      <section class="dashboard-section" id="dash-wishlist-section" aria-label="Saved Wishlist Items">
+        <div class="dashboard-section-title">
+          <span>💖 My Saved Wishlist Items</span>
+          <span id="dash-wishlist-count" style="font-size:0.85rem; color:var(--color-text-muted); font-weight:normal;">0 items saved</span>
+        </div>
+        <div id="dash-wishlist-container"></div>
+      </section>
+
+      <!-- 6. Active Basket Overview -->
       <section class="dashboard-section" id="dash-basket-section" aria-label="Shopping Basket Overview">
         <div class="dashboard-section-title">
           <span>🛍️ Current Shopping Basket</span>
@@ -161,7 +203,7 @@
         <div id="dash-basket-container"></div>
       </section>
 
-      <!-- 6. Profile & Delivery Address Management -->
+      <!-- 7. Profile & Delivery Address Management -->
       <section class="dashboard-section" id="dash-profile-section" aria-label="Customer Profile Details">
         <div class="dashboard-section-title">
           <span>👤 Account Information & Delivery Address</span>

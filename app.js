@@ -1288,7 +1288,13 @@ function renderNavBar() {
     return;
   }
 
+  const isAdmin = currentUser && currentUser.role === 'Admin';
   container.innerHTML = `
+    ${isAdmin ? `
+      <a href="admin.html" class="nav-btn nav-btn-primary" id="nav-admin-btn" aria-label="Admin Dashboard" title="Open Admin Console" style="background:var(--color-brand-primary); color:#ffffff; font-weight:600;">
+        <span>🛡️ Admin Console</span>
+      </a>
+    ` : ''}
     <a href="dashboard.html" class="nav-btn nav-btn-dashboard" id="nav-dashboard-btn" aria-label="Customer Dashboard" title="View Customer Dashboard">
       <span>Dashboard</span>
     </a>

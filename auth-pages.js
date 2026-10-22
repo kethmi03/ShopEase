@@ -456,11 +456,14 @@ function clearErrors() {
 function redirectAfterAuth() {
   const urlParams = new URLSearchParams(window.location.search);
   const redirect = urlParams.get('redirect');
+  const user = Auth.getCurrentUser();
 
   if (redirect === 'checkout') {
     window.location.href = 'index.html?open=checkout';
   } else if (redirect) {
     window.location.href = redirect;
+  } else if (user && user.role === 'Admin') {
+    window.location.href = 'admin.html';
   } else {
     window.location.href = 'dashboard.html';
   }

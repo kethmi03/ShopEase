@@ -41,6 +41,18 @@ export const DEFAULT_USERS = [
     postcode: 'M14 6XX',
     role: 'VIP Member',
     joinedDate: '2026-02-20'
+  },
+  {
+    id: 'user_admin',
+    fullName: 'Admin Manager',
+    email: 'admin@shopease.com',
+    password: 'password123',
+    phone: '07000 999888',
+    address: 'ShopEase Headquarters, 1 Tech Square',
+    city: 'London',
+    postcode: 'EC1A 1BB',
+    role: 'Admin',
+    joinedDate: '2026-01-01'
   }
 ];
 
@@ -103,11 +115,41 @@ export const Storage = {
    */
   getProducts() {
     let inventory = getItem(STORAGE_KEYS.INVENTORY, null);
-    if (!inventory || !Array.isArray(inventory) || inventory.length !== INITIAL_PRODUCTS.length) {
+    if (!inventory || !Array.isArray(inventory) || inventory.length < INITIAL_PRODUCTS.length) {
       inventory = JSON.parse(JSON.stringify(INITIAL_PRODUCTS));
       setItem(STORAGE_KEYS.INVENTORY, inventory);
     }
     return inventory;
+  },
+
+  /**
+   * Saves updated product array to localStorage
+   */
+  saveProducts(products) {
+    setItem(STORAGE_KEYS.INVENTORY, products);
+    window.dispatchEvent(new CustomEvent('shopease:inventory-updated', { detail: { products } }));
+    return products;
+  },
+
+  /**
+   * Updates an existing product's fields
+   */
+  updateProduct(id, updatedFields) {
+    const products = this.getProducts();
+    const idx = products.findIndex(p => p.id === id);
+    if (idx !== -1) {
+      products[idx] = { ...products[idx], ...updatedFields };
+      this.saveProducts(products);
+      return products[idx];
+    }
+    return null;
+  },
+
+  /**
+   * Directly sets stock count for a product
+   */
+  updateStock(id, newStock) {
+    return this.updateProduct(id, { stock: Math.max(0, parseInt(newStock, 10) || 0) });
   },
 
   /**
@@ -263,5 +305,72 @@ export const Storage = {
   clearCurrentUser() {
     setItem(STORAGE_KEYS.CURRENT_USER, null);
     window.dispatchEvent(new CustomEvent('shopease:auth-changed', { detail: { user: null } }));
+  },
+
+  /**
+   * Admin Operations: Orders management
+   */
+  saveOrders(orders) {
+    setItem(STORAGE_KEYS.ORDERS, orders);
+    window.dispatchEvent(new CustomEvent('shopease:orders-updated', { detail: { orders } }));
+    return orders;
+  },
+
+  updateOrderStatus(orderId, newStatus) {
+    const orders = this.getOrders();
+    const order = orders.find(o => o.orderId === orderId);
+    if (order) {
+      order.status = newStatus;
+      this.saveOrders(orders);
+      return order;
+    }
+    return null;
+  },
+
+  deleteOrder(orderId) {
+    let orders = this.getOrders();
+    orders = orders.filter(o => o.orderId !== orderId);
+    this.saveOrders(orders);
+    return orders;
+  },
+
+  /**
+   * Admin Operations: User role management
+   */
+  updateUserRole(userId, newRole) {
+    const users = this.getUsers();
+    const user = users.find(u => u.id === userId);
+    if (user) {
+      user.role = newRole;
+      this.saveUsers(users);
+      // If updating currently logged in user, refresh session
+      const current = this.getCurrentUser();
+      if (current && current.id === userId) {
+        current.role = newRole;
+        this.setCurrentUser(current);
+      }
+      return user;
+    }
+    return null;
+  },
+
+  deleteUser(userId) {
+    let users = this.getUsers();
+    users = users.filter(u => u.id !== userId);
+    this.saveUsers(users);
+    return users;
+  },
+
+  addUser(userData) {
+    const users = this.getUsers();
+    const newUser = {
+      id: 'user_' + Date.now(),
+      joinedDate: new Date().toISOString().split('T')[0],
+      role: 'Customer',
+      ...userData
+    };
+    users.push(newUser);
+    this.saveUsers(users);
+    return newUser;
   }
 };

@@ -28,9 +28,15 @@ document.addEventListener('DOMContentLoaded', () => {
   initAccessibilityControls();
 
   // 3. Render Dashboard Sections
+  if (state.currentUser.role === 'Admin') {
+    const adminBtn = document.getElementById('dash-admin-btn');
+    if (adminBtn) adminBtn.style.display = 'inline-flex';
+  }
+
   renderDashboardHeader();
   renderKPIs();
   renderOrdersSection();
+  renderWishlistSection();
   renderOffersSection();
   renderBasketPreview();
   renderProfileSection();
@@ -104,7 +110,24 @@ function renderDashboardHeader() {
     .substring(0, 2)
     .toUpperCase();
 
+  const isAdmin = user.role === 'Admin';
+
   welcomeSlot.innerHTML = `
+    ${isAdmin ? `
+      <div style="background:linear-gradient(135deg, rgba(37,99,235,0.12), rgba(79,70,229,0.12)); border:1px solid rgba(37,99,235,0.3); border-radius:var(--radius-md); padding:0.85rem 1.25rem; margin-bottom:1.25rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.75rem;">
+        <div style="display:flex; align-items:center; gap:0.75rem;">
+          <span style="font-size:1.6rem;" aria-hidden="true">🛡️</span>
+          <div>
+            <div style="font-weight:700; color:var(--color-brand-primary); font-size:1rem;">Administrator Privileges Active</div>
+            <div style="font-size:0.825rem; color:var(--color-text-secondary);">You have administrative rights to manage store inventory, orders, customer accounts, and promotions.</div>
+          </div>
+        </div>
+        <a href="admin.html" class="btn btn-primary" style="font-size:0.85rem; padding:0.45rem 1rem; font-weight:700; text-decoration:none;">
+          Launch Admin Console →
+        </a>
+      </div>
+    ` : ''}
+
     <div class="dashboard-hero">
       <div class="dashboard-user-info">
         <div class="dashboard-avatar-large" aria-hidden="true">${initials}</div>
@@ -124,7 +147,13 @@ function renderDashboardHeader() {
       </div>
 
       <div class="dashboard-hero-actions">
-        <a href="index.html#catalog-section" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:0.4rem;">
+        ${isAdmin ? `
+          <a href="admin.html" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:0.4rem; background:linear-gradient(135deg, #1e40af, #3b82f6); color:#fff; text-decoration:none;">
+            <span>🛡️</span>
+            <span>Admin Console</span>
+          </a>
+        ` : ''}
+        <a href="index.html#catalog-section" class="btn btn-secondary" style="display:inline-flex; align-items:center; gap:0.4rem; text-decoration:none;">
           <span>🛍️</span>
           <span>Explore Products</span>
         </a>
@@ -212,18 +241,49 @@ function renderOrdersSection() {
   }
 
   container.innerHTML = `
-    <div style="display:flex; flex-direction:column; gap:1rem;">
-      ${orders.map(order => `
+    <div style="display:flex; flex-direction:column; gap:1.25rem;">
+      ${orders.map(order => {
+        const status = order.status || 'Confirmed';
+        const isDelivered = /delivered/i.test(status);
+        const isShipped = /shipped|dispatched/i.test(status) || isDelivered;
+        const isProcessing = /processing/i.test(status) || isShipped;
+
+        return `
         <article class="dashboard-order-card" aria-label="Order receipt ${order.orderId}">
           <div class="dashboard-order-header">
             <div>
-              <strong style="color:var(--color-brand-primary); font-size:1.05rem;">${order.orderId}</strong>
-              <span style="display:inline-block; margin-left:0.5rem; font-size:0.75rem; padding:0.2rem 0.6rem; background:var(--color-success-bg); color:var(--color-success); border-radius:var(--radius-full); font-weight:bold;">
-                ${order.status}
+              <strong style="color:var(--color-brand-primary); font-size:1.1rem; font-family:var(--font-mono);">${order.orderId}</strong>
+              <span style="display:inline-block; margin-left:0.5rem; font-size:0.75rem; padding:0.25rem 0.65rem; background:${isDelivered ? 'var(--color-success-bg)' : isShipped ? 'var(--color-info-bg)' : 'var(--color-warning-bg)'}; color:${isDelivered ? 'var(--color-success)' : isShipped ? 'var(--color-info)' : 'var(--color-warning)'}; border-radius:var(--radius-full); font-weight:bold;">
+                ● ${escapeHtml(status)}
               </span>
             </div>
             <div style="font-size:0.85rem; color:var(--color-text-muted);">
               📅 ${order.formattedDate}
+            </div>
+          </div>
+
+          <!-- Order Status Timeline Tracker -->
+          <div style="margin: 0.75rem 0 1rem; padding: 0.75rem; background: var(--color-surface-subtle); border-radius: var(--radius-sm); border: 1px solid var(--color-border);">
+            <div style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--color-text-muted); margin-bottom:0.5rem;">
+              Shipment Progress Tracker
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.25rem; text-align: center; font-size: 0.75rem;">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:0.2rem; color: var(--color-success); font-weight:600;">
+                <div style="width:20px; height:20px; border-radius:50%; background:var(--color-success); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px;">✓</div>
+                <span>Confirmed</span>
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:0.2rem; color: ${isProcessing ? 'var(--color-success)' : 'var(--color-text-muted)'}; font-weight:${isProcessing ? '600' : 'normal'};">
+                <div style="width:20px; height:20px; border-radius:50%; background:${isProcessing ? 'var(--color-success)' : 'var(--color-border)'}; color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px;">${isProcessing ? '✓' : '2'}</div>
+                <span>Processing</span>
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:0.2rem; color: ${isShipped ? 'var(--color-success)' : 'var(--color-text-muted)'}; font-weight:${isShipped ? '600' : 'normal'};">
+                <div style="width:20px; height:20px; border-radius:50%; background:${isShipped ? 'var(--color-success)' : 'var(--color-border)'}; color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px;">${isShipped ? '✓' : '3'}</div>
+                <span>Dispatched</span>
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:0.2rem; color: ${isDelivered ? 'var(--color-success)' : 'var(--color-text-muted)'}; font-weight:${isDelivered ? '600' : 'normal'};">
+                <div style="width:20px; height:20px; border-radius:50%; background:${isDelivered ? 'var(--color-success)' : 'var(--color-border)'}; color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px;">${isDelivered ? '✓' : '4'}</div>
+                <span>Delivered</span>
+              </div>
             </div>
           </div>
 
@@ -244,7 +304,7 @@ function renderOrdersSection() {
             <span style="font-size:0.85rem; color:var(--color-text-muted);">
               💳 Mock Authorized ••••• ${order.payment.last4 || '8892'}
             </span>
-            <div style="display:flex; align-items:center; gap:1rem;">
+            <div style="display:flex; align-items:center; gap:0.75rem;">
               <span style="font-size:1.15rem; font-weight:800; color:var(--color-text-primary);">
                 Total: ${CURRENCY.format(order.financials.grandTotal)}
               </span>
@@ -254,7 +314,8 @@ function renderOrdersSection() {
             </div>
           </div>
         </article>
-      `).join('')}
+      `;
+      }).join('')}
     </div>
   `;
 }
@@ -599,6 +660,99 @@ window.shopeaseSaveAddress = (e) => {
 
 window.shopeaseCloseAddressModal = () => {
   closeAddressModal();
+};
+
+/**
+ * Renders Saved Wishlist Section
+ */
+function renderWishlistSection() {
+  const container = document.getElementById('dash-wishlist-container');
+  const countSpan = document.getElementById('dash-wishlist-count');
+  if (!container) return;
+
+  const wishlistIds = Storage.getWishlist();
+  const allProducts = Storage.getProducts();
+  const wishlistItems = allProducts.filter(p => wishlistIds.includes(p.id));
+
+  if (countSpan) {
+    countSpan.textContent = `${wishlistItems.length} item${wishlistItems.length === 1 ? '' : 's'} saved`;
+  }
+
+  if (wishlistItems.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state" style="padding:2.5rem 1.5rem; text-align:center; background:var(--color-surface); border:1px dashed var(--color-border); border-radius:var(--radius-md);">
+        <div style="font-size:2.5rem; margin-bottom:0.75rem;" aria-hidden="true">🤍</div>
+        <h3 style="font-size:1.2rem; margin-bottom:0.4rem;">Your Wishlist is Empty</h3>
+        <p style="color:var(--color-text-secondary); max-width:400px; margin:0 auto 1.25rem; font-size:0.9rem;">
+          Save products you love by clicking the heart button on any item in our store.
+        </p>
+        <a href="index.html#catalog-section" class="btn btn-secondary" style="padding:0.5rem 1.2rem; text-decoration:none;">
+          🛍️ Browse Products
+        </a>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = `
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:1rem;">
+      ${wishlistItems.map(item => `
+        <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:1rem; display:flex; flex-direction:column; justify-content:space-between; gap:0.75rem;">
+          <div style="display:flex; gap:0.75rem; align-items:center;">
+            <img src="${item.image}" alt="${escapeHtml(item.name)}" style="width:56px; height:56px; object-fit:cover; border-radius:var(--radius-sm); border:1px solid var(--color-border);" />
+            <div>
+              <span style="font-size:0.7rem; text-transform:uppercase; font-weight:700; color:var(--color-brand-primary);">${item.category}</span>
+              <div style="font-weight:700; font-size:0.9rem; line-height:1.2; margin-top:0.15rem; color:var(--color-text-primary);">${escapeHtml(item.name)}</div>
+              <div style="font-weight:800; font-size:1rem; color:var(--color-text-primary); margin-top:0.25rem;">${CURRENCY.format(item.price)}</div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; padding-top:0.5rem; border-top:1px solid var(--color-border);">
+            <button type="button" class="btn btn-primary" style="font-size:0.8rem; padding:0.35rem 0.75rem; flex:1;" onclick="window.shopeaseAddWishlistToCart('${item.id}')">
+              🛒 Add to Basket
+            </button>
+            <button type="button" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.6rem; color:var(--color-danger);" onclick="window.shopeaseRemoveWishlist('${item.id}')" title="Remove from wishlist">
+              ✕
+            </button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// Global Wishlist and Profile Switch Handlers
+window.shopeaseAddWishlistToCart = (productId) => {
+  const res = Cart.addItem(productId, 1);
+  if (res.success) {
+    showToast(`Added to basket! (${res.item.name})`, 'success');
+    updateCartBadge();
+    renderBasketPreview();
+    renderKPIs();
+  } else {
+    showToast(res.message, 'warning');
+  }
+};
+
+window.shopeaseRemoveWishlist = (productId) => {
+  Storage.toggleWishlist(productId);
+  showToast('Removed from wishlist', 'info');
+  renderWishlistSection();
+};
+
+window.shopeaseSwitchAccount = (email) => {
+  const users = Storage.getUsers();
+  const u = users.find(x => x.email.toLowerCase() === email.toLowerCase());
+  if (u) {
+    Auth.login(u.email, u.password || 'password123');
+    showToast(`Switched active profile to ${u.fullName} (${u.role})`, 'success');
+    setTimeout(() => {
+      if (u.role === 'Admin') {
+        window.location.href = 'admin.html';
+      } else {
+        window.location.reload();
+      }
+    }, 250);
+  }
 };
 
 function showToast(message, type = 'info') {
