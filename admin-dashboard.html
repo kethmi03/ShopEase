@@ -84,6 +84,13 @@
                 <span>Reports</span>
               </button>
             </li>
+            <li>
+              <button type="button" class="admin-nav-btn" data-tab="users" role="tab" aria-selected="false">
+                <span aria-hidden="true">👥</span>
+                <span>Users</span>
+                <span class="admin-nav-badge" id="badge-users-count">4</span>
+              </button>
+            </li>
           </ul>
 
           <!-- Right: Theme Toggle & Logout -->
@@ -639,6 +646,100 @@
         </div>
       </section>
 
+      <!-- =========================================================================
+           TAB 7: USERS & CUSTOMERS DIRECTORY
+           - List all registered users
+           - User profile details: Name, Email, Phone, Address, Role, Joined Date
+           - Order stats: Order count, Total Spend
+           - Search & Filter by Role / Keyword
+           - View Detailed User Profile Modal
+           ========================================================================= -->
+      <section id="panel-users" class="admin-panel" aria-label="Users and Customers Directory">
+        <div class="admin-header-bar">
+          <div>
+            <h1 class="admin-page-title">Users &amp; Customers Directory</h1>
+            <p class="admin-page-subtitle">View and manage all registered store customers, administrators, contact details, and order activity.</p>
+          </div>
+          <div style="display:flex; gap:0.65rem; align-items:center;">
+            <button type="button" class="btn btn-secondary" onclick="window.adminRefreshUsers()">
+              <span>🔄 Refresh List</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Users Summary KPI Grid -->
+        <div class="dashboard-kpi-grid" style="margin-bottom: 2rem;">
+          <div class="dashboard-kpi-card">
+            <div class="dashboard-kpi-icon" aria-hidden="true" style="background: rgba(37, 99, 235, 0.15); color: var(--color-brand-primary);">👥</div>
+            <div>
+              <div class="dashboard-kpi-val" id="users-kpi-total">0</div>
+              <div class="dashboard-kpi-label">Total Registered Accounts</div>
+            </div>
+          </div>
+          <div class="dashboard-kpi-card">
+            <div class="dashboard-kpi-icon" aria-hidden="true" style="background: rgba(16, 185, 129, 0.15); color: var(--color-success);">🛍️</div>
+            <div>
+              <div class="dashboard-kpi-val" id="users-kpi-customers">0</div>
+              <div class="dashboard-kpi-label">Customer Accounts</div>
+            </div>
+          </div>
+          <div class="dashboard-kpi-card">
+            <div class="dashboard-kpi-icon" aria-hidden="true" style="background: rgba(216, 92, 54, 0.15); color: var(--color-brand-primary);">🛡️</div>
+            <div>
+              <div class="dashboard-kpi-val" id="users-kpi-admins">0</div>
+              <div class="dashboard-kpi-label">Store Administrators</div>
+            </div>
+          </div>
+          <div class="dashboard-kpi-card">
+            <div class="dashboard-kpi-icon" aria-hidden="true" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">📦</div>
+            <div>
+              <div class="dashboard-kpi-val" id="users-kpi-active-buyers">0</div>
+              <div class="dashboard-kpi-label">Buyers with Orders</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Users Table Card with Toolbar -->
+        <div class="admin-table-card">
+          <div class="admin-table-toolbar">
+            <div class="admin-table-filters" style="width: 100%; display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; flex: 1; max-width: 600px;">
+                <div class="search-input-wrapper" style="flex: 1; min-width: 220px;">
+                  <span class="search-icon" aria-hidden="true">🔍</span>
+                  <input type="search" id="filter-users-search" class="search-input" placeholder="Search by name, email, phone, city..." aria-label="Search users" />
+                </div>
+                <select id="filter-users-role" class="form-input" style="width: auto; height: 38px; padding: 0 1rem; border-radius: var(--radius-full); font-size: 0.85rem;" aria-label="Filter by role">
+                  <option value="ALL">All Roles</option>
+                  <option value="Customer">Customers</option>
+                  <option value="Admin">Administrators</option>
+                  <option value="VIP Member">VIP Members</option>
+                </select>
+              </div>
+              <span id="users-table-count" style="font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted);">Showing 0 users</span>
+            </div>
+          </div>
+
+          <div class="admin-table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th scope="col">User / Customer</th>
+                  <th scope="col">Email &amp; Phone</th>
+                  <th scope="col">Delivery Address</th>
+                  <th scope="col">Role</th>
+                  <th scope="col">Joined Date</th>
+                  <th scope="col">Order Activity</th>
+                  <th scope="col" style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-tbody">
+                <!-- Dynamically populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -795,6 +896,25 @@
           <button type="submit" class="btn btn-primary">Save Category</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- 5. View User Profile & Order History Modal -->
+  <div id="modal-user-details" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true"
+    aria-labelledby="modal-user-heading">
+    <div class="modal-container" style="max-width: 620px;">
+      <div class="modal-header">
+        <h3 id="modal-user-heading" class="modal-title">Customer Profile &amp; Order History</h3>
+        <button type="button" class="modal-close-btn" onclick="window.adminCloseModals()"
+          aria-label="Close dialog">✕</button>
+      </div>
+      <div class="modal-body" id="user-modal-content" style="padding: 1.5rem;">
+        <!-- Injected by JS -->
+      </div>
+      <div
+        style="display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1rem 1.5rem; border-top: 1px solid var(--color-border); background: var(--color-surface-subtle);">
+        <button type="button" class="btn btn-primary" onclick="window.adminCloseModals()">Done</button>
+      </div>
     </div>
   </div>
 

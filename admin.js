@@ -32,6 +32,10 @@ const state = {
     stock: 'ALL'
   },
   categoryTableFilter: 'ALL',
+  userFilter: {
+    search: '',
+    role: 'ALL'
+  },
   categoryNames: {
     'Food': 'Food & Gourmet',
     'Clothing': 'Clothing & Apparel',
@@ -86,6 +90,20 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('storage', (e) => {
     if (e.key && e.key.startsWith('shopease_')) {
       refreshAllData();
+    }
+  });
+
+  // 6. Setup Modal Backdrop & Escape Dismiss
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        window.adminCloseModals();
+      }
+    });
+  });
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      window.adminCloseModals();
     }
   });
 });
@@ -186,6 +204,16 @@ function initFilterListeners() {
     state.inventoryFilter.stock = e.target.value;
     renderInventoryTable();
   });
+
+  // User Filters
+  document.getElementById('filter-users-search')?.addEventListener('input', (e) => {
+    state.userFilter.search = e.target.value.toLowerCase().trim();
+    renderUsersTable();
+  });
+  document.getElementById('filter-users-role')?.addEventListener('change', (e) => {
+    state.userFilter.role = e.target.value;
+    renderUsersTable();
+  });
 }
 
 function refreshAllData() {
@@ -197,22 +225,27 @@ function refreshAllData() {
   renderOrdersTable();
   renderInventoryTable();
   renderReportsSection();
+  renderUsersKPIs();
+  renderUsersTable();
   updateBadges();
 }
 
 function updateBadges() {
   const products = Storage.getProducts();
   const orders = Storage.getOrders();
+  const users = Storage.getUsers();
 
   const prodBadge = document.getElementById('badge-products-count');
   const catBadge = document.getElementById('badge-categories-count');
   const orderBadge = document.getElementById('badge-orders-count');
   const invBadge = document.getElementById('badge-inventory-count');
+  const userBadge = document.getElementById('badge-users-count');
 
   if (prodBadge) prodBadge.textContent = products.length;
   if (catBadge) catBadge.textContent = '3';
   if (orderBadge) orderBadge.textContent = orders.length;
   if (invBadge) invBadge.textContent = products.length;
+  if (userBadge) userBadge.textContent = users.length;
 }
 
 /**
@@ -1002,81 +1035,115 @@ window.adminUpdateOrderStatus = function (orderId, newStatus) {
 };
 
 window.adminViewInvoice = function (orderId) {
-  const order = Storage.getOrderById(orderId);
-  if (!order) return;
+  let order = null;
+  if (typeof Storage.getOrderById === 'function') {
+    order = Storage.getOrderById(orderId);
+  }
+  if (!order) {
+    const orders = Storage.getOrders();
+    order = orders.find(o => String(o.orderId || '').trim().toLowerCase() === String(orderId || '').trim().toLowerCase());
+  }
+
+  if (!order) {
+    showToast(`Order #${orderId} not found in database.`, 'warning');
+    return;
+  }
 
   const content = document.getElementById('invoice-modal-content');
-  const items = order.items || [];
-  const fin = order.financials || {};
+  if (!content) return;
+
+  const items = order.items && order.items.length > 0 
+    ? order.items 
+    : [{ name: 'Store Order Line Item', quantity: 1, price: order.financials?.grandTotal || 0, totalPrice: order.financials?.grandTotal || 0 }];
+  const fin = order.financials || { grandTotal: 0, subtotal: 0, deliveryFee: 0 };
+  const cust = order.customer || {};
+  const pay = order.payment || {};
 
   content.innerHTML = `
     <div style="font-size:0.875rem;">
-      <div style="display:flex; justify-content:space-between; margin-bottom:1.25rem; border-bottom:1px solid var(--color-border); padding-bottom:1rem;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.25rem; border-bottom:1px solid var(--color-border); padding-bottom:1rem;">
         <div>
-          <strong style="font-size:1.2rem; color:var(--color-brand-primary);">ShopEase Studio</strong>
-          <div style="font-size:0.75rem; color:var(--color-text-muted);">Client-Side Store Tax Invoice</div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span class="brand-monogram" style="width:28px; height:28px; font-size:0.75rem;">SE</span>
+            <strong style="font-size:1.25rem; color:var(--color-text-primary); font-family:var(--font-serif);">Shop<span>Ease</span> Store</strong>
+          </div>
+          <div style="font-size:0.75rem; color:var(--color-text-muted); margin-top:0.25rem;">Official Store Receipt &amp; Tax Invoice</div>
         </div>
         <div style="text-align:right;">
-          <div style="font-family:var(--font-mono); font-weight:700; color:var(--color-text-primary);">${order.orderId}</div>
-          <div style="font-size:0.75rem; color:var(--color-text-muted);">${order.formattedDate || 'Recent'}</div>
+          <div style="font-family:var(--font-mono); font-weight:800; color:var(--color-brand-primary); font-size:1.05rem;">${escapeHtml(order.orderId)}</div>
+          <div style="font-size:0.75rem; color:var(--color-text-muted); margin-top:0.2rem;">${escapeHtml(order.formattedDate || (order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'Recent'))}</div>
         </div>
       </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.25rem; background:var(--color-surface-subtle); padding:0.85rem; border-radius:var(--radius-sm);">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.25rem; background:var(--color-surface-subtle); padding:1rem; border-radius:var(--radius-md); border:1px solid var(--color-border);">
         <div>
-          <strong style="display:block; margin-bottom:0.25rem;">Customer Details:</strong>
-          <div>${escapeHtml(order.customer?.fullName)}</div>
-          <div style="color:var(--color-text-muted); font-size:0.8rem;">${escapeHtml(order.customer?.email)}</div>
-          <div style="color:var(--color-text-muted); font-size:0.8rem;">${escapeHtml(order.customer?.address)}</div>
+          <strong style="display:block; margin-bottom:0.35rem; font-size:0.75rem; text-transform:uppercase; color:var(--color-text-muted); letter-spacing:0.04em;">Billed To:</strong>
+          <div style="font-weight:700; color:var(--color-text-primary); font-size:0.92rem;">${escapeHtml(cust.fullName || 'Valued Customer')}</div>
+          <div style="color:var(--color-text-secondary); font-size:0.82rem; margin-top:0.15rem;">${escapeHtml(cust.email || 'N/A')}</div>
+          <div style="color:var(--color-text-muted); font-size:0.82rem; margin-top:0.15rem;">${escapeHtml(cust.address || 'Standard Delivery')}</div>
+          ${cust.phone ? `<div style="color:var(--color-text-muted); font-size:0.82rem; margin-top:0.15rem;">${escapeHtml(cust.phone)}</div>` : ''}
         </div>
         <div>
-          <strong style="display:block; margin-bottom:0.25rem;">Payment &amp; Status:</strong>
-          <div>Method: ${order.payment?.method || 'Demo Card (Paid)'}</div>
-          <div>Status: <span style="font-weight:700; color:var(--color-success);">${order.status}</span></div>
+          <strong style="display:block; margin-bottom:0.35rem; font-size:0.75rem; text-transform:uppercase; color:var(--color-text-muted); letter-spacing:0.04em;">Payment &amp; Status:</strong>
+          <div style="font-size:0.85rem;"><span style="color:var(--color-text-muted);">Method:</span> <strong>${escapeHtml(pay.method || 'Card (Demo)')}</strong></div>
+          <div style="margin-top:0.4rem; font-size:0.85rem;">
+            <span style="color:var(--color-text-muted); display:inline-block; margin-right:0.35rem;">Status:</span>
+            <span class="status-badge ${getStatusBadgeClass(order.status)}">${escapeHtml(order.status || 'Confirmed')}</span>
+          </div>
         </div>
       </div>
 
       <table style="width:100%; border-collapse:collapse; margin-bottom:1.25rem; font-size:0.85rem;">
         <thead>
-          <tr style="border-bottom:1px solid var(--color-border); color:var(--color-text-muted);">
-            <th style="padding:0.4rem 0; text-align:left;">Item</th>
-            <th style="padding:0.4rem 0; text-align:center;">Qty</th>
-            <th style="padding:0.4rem 0; text-align:right;">Unit Price</th>
-            <th style="padding:0.4rem 0; text-align:right;">Total</th>
+          <tr style="border-bottom:1.5px solid var(--color-border); color:var(--color-text-muted); font-size:0.75rem; text-transform:uppercase;">
+            <th style="padding:0.5rem 0; text-align:left;">Item Description</th>
+            <th style="padding:0.5rem 0; text-align:center;">Qty</th>
+            <th style="padding:0.5rem 0; text-align:right;">Unit Price</th>
+            <th style="padding:0.5rem 0; text-align:right;">Total</th>
           </tr>
         </thead>
         <tbody>
           ${items.map(it => `
             <tr style="border-bottom:1px dashed var(--color-border);">
-              <td style="padding:0.4rem 0;">${escapeHtml(it.name)}</td>
-              <td style="padding:0.4rem 0; text-align:center;">${it.quantity}</td>
-              <td style="padding:0.4rem 0; text-align:right;">${CURRENCY.format(it.price || 0)}</td>
-              <td style="padding:0.4rem 0; text-align:right; font-weight:700;">${CURRENCY.format(it.totalPrice || it.price * it.quantity)}</td>
+              <td style="padding:0.6rem 0; color:var(--color-text-primary); font-weight:600;">
+                ${escapeHtml(it.name || 'Store Item')}
+              </td>
+              <td style="padding:0.6rem 0; text-align:center; font-family:var(--font-mono);">${it.quantity || 1}</td>
+              <td style="padding:0.6rem 0; text-align:right; font-family:var(--font-mono);">${CURRENCY.format(it.price || 0)}</td>
+              <td style="padding:0.6rem 0; text-align:right; font-weight:700; font-family:var(--font-mono); color:var(--color-text-primary);">${CURRENCY.format(it.totalPrice || (it.price || 0) * (it.quantity || 1))}</td>
             </tr>
           `).join('')}
         </tbody>
       </table>
 
-      <div style="display:flex; flex-direction:column; gap:0.35rem; font-size:0.85rem; text-align:right;">
+      <div style="display:flex; flex-direction:column; gap:0.4rem; font-size:0.85rem; border-top:1px solid var(--color-border); padding-top:0.75rem;">
         <div style="display:flex; justify-content:space-between;">
           <span style="color:var(--color-text-muted);">Subtotal:</span>
-          <strong>${CURRENCY.format(fin.subtotal || 0)}</strong>
+          <strong style="font-family:var(--font-mono);">${CURRENCY.format(fin.subtotal !== undefined ? fin.subtotal : (fin.grandTotal || 0))}</strong>
         </div>
+        ${fin.discount ? `
+          <div style="display:flex; justify-content:space-between; color:var(--color-success);">
+            <span>Promotional Discount:</span>
+            <span style="font-family:var(--font-mono); font-weight:700;">-${CURRENCY.format(fin.discount)}</span>
+          </div>
+        ` : ''}
         <div style="display:flex; justify-content:space-between;">
           <span style="color:var(--color-text-muted);">Standard Delivery:</span>
-          <span>${fin.deliveryFee === 0 ? 'FREE' : CURRENCY.format(fin.deliveryFee || 0)}</span>
+          <span style="font-family:var(--font-mono);">${!fin.deliveryFee ? 'FREE' : CURRENCY.format(fin.deliveryFee)}</span>
         </div>
-        <div style="display:flex; justify-content:space-between; font-size:1.1rem; font-weight:800; border-top:1px solid var(--color-border); padding-top:0.5rem; color:var(--color-brand-primary);">
+        <div style="display:flex; justify-content:space-between; font-size:1.15rem; font-weight:800; border-top:2px solid var(--color-border); padding-top:0.6rem; color:var(--color-brand-primary); margin-top:0.25rem;">
           <span>Grand Total:</span>
-          <span>${CURRENCY.format(fin.grandTotal || 0)}</span>
+          <span style="font-family:var(--font-mono);">${CURRENCY.format(fin.grandTotal || 0)}</span>
         </div>
       </div>
     </div>
   `;
 
   const modal = document.getElementById('modal-order-invoice');
-  modal.style.display = 'flex';
-  modal.classList.add('open');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.classList.add('open');
+  }
 };
 
 window.adminDeleteOrder = function (orderId) {
@@ -1237,6 +1304,247 @@ window.adminSwitchUser = function (email) {
   if (target) {
     Auth.login(target.email, target.password || 'password123');
     window.location.href = 'customer-dashboard.html';
+  }
+};
+
+/**
+ * =========================================================================
+ * 7. USERS & CUSTOMERS DIRECTORY
+ * =========================================================================
+ */
+function renderUsersKPIs() {
+  const users = Storage.getUsers();
+  const orders = Storage.getOrders();
+
+  const totalEl = document.getElementById('users-kpi-total');
+  const custEl = document.getElementById('users-kpi-customers');
+  const adminEl = document.getElementById('users-kpi-admins');
+  const activeBuyersEl = document.getElementById('users-kpi-active-buyers');
+
+  const customerCount = users.filter(u => u.role !== 'Admin').length;
+  const adminCount = users.filter(u => u.role === 'Admin').length;
+
+  const buyerEmails = new Set(orders.map(o => (o.customer?.email || '').toLowerCase()));
+  const activeBuyers = users.filter(u => buyerEmails.has((u.email || '').toLowerCase())).length;
+
+  if (totalEl) totalEl.textContent = users.length;
+  if (custEl) custEl.textContent = customerCount;
+  if (adminEl) adminEl.textContent = adminCount;
+  if (activeBuyersEl) activeBuyersEl.textContent = activeBuyers;
+}
+
+function renderUsersTable() {
+  const tbody = document.getElementById('users-table-tbody');
+  const countEl = document.getElementById('users-table-count');
+  if (!tbody) return;
+
+  const users = Storage.getUsers();
+  const orders = Storage.getOrders();
+
+  // Filter
+  const filtered = users.filter(u => {
+    const q = state.userFilter.search;
+    const matchSearch = !q ||
+      (u.fullName || '').toLowerCase().includes(q) ||
+      (u.email || '').toLowerCase().includes(q) ||
+      (u.phone || '').toLowerCase().includes(q) ||
+      (u.city || '').toLowerCase().includes(q) ||
+      (u.address || '').toLowerCase().includes(q);
+
+    const matchRole = state.userFilter.role === 'ALL' || u.role === state.userFilter.role;
+    return matchSearch && matchRole;
+  });
+
+  if (countEl) {
+    countEl.textContent = `Showing ${filtered.length} of ${users.length} users`;
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align:center; padding: 2.5rem; color: var(--color-text-muted);">
+          No users match the current search filter.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(u => {
+    // Calculate customer order activity
+    const userOrders = orders.filter(o => 
+      (o.customer?.email || '').toLowerCase() === (u.email || '').toLowerCase() ||
+      (o.userId && o.userId === u.id)
+    );
+    const userTotalSpent = userOrders.reduce((acc, o) => acc + (o.financials?.grandTotal || 0), 0);
+
+    const initials = (u.fullName || 'User')
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
+
+    let roleBadge = `<span class="badge" style="background:rgba(37, 99, 235, 0.1); color:#2563eb; font-weight:600; padding:0.25rem 0.65rem; border-radius:var(--radius-full); font-size:0.75rem;">🛍️ Customer</span>`;
+    if (u.role === 'Admin') {
+      roleBadge = `<span class="badge" style="background:rgba(216, 92, 54, 0.12); color:var(--color-brand-primary); font-weight:700; padding:0.25rem 0.65rem; border-radius:var(--radius-full); font-size:0.75rem;">🛡️ Admin</span>`;
+    } else if (u.role === 'VIP Member') {
+      roleBadge = `<span class="badge" style="background:rgba(139, 92, 246, 0.12); color:#8b5cf6; font-weight:700; padding:0.25rem 0.65rem; border-radius:var(--radius-full); font-size:0.75rem;">⭐ VIP Member</span>`;
+    }
+
+    const fullAddr = [u.address, u.city, u.postcode].filter(Boolean).join(', ') || 'Not specified';
+
+    return `
+      <tr>
+        <td>
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <div style="width:36px; height:36px; border-radius:50%; background:var(--color-surface-hover); border:1px solid var(--color-border); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.8rem; color:var(--color-text-primary); flex-shrink:0;">
+              ${initials}
+            </div>
+            <div>
+              <strong style="color:var(--color-text-primary); font-size:0.9rem; display:block;">${escapeHtml(u.fullName || 'Anonymous')}</strong>
+              <span style="font-size:0.75rem; color:var(--color-text-muted); font-family:var(--font-mono);">${escapeHtml(u.id || '')}</span>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div style="display:flex; flex-direction:column; gap:0.2rem;">
+            <a href="mailto:${escapeHtml(u.email)}" style="color:var(--color-brand-primary); font-size:0.85rem; font-weight:500; text-decoration:none;">${escapeHtml(u.email)}</a>
+            <span style="font-size:0.78rem; color:var(--color-text-muted);">${escapeHtml(u.phone || 'No phone')}</span>
+          </div>
+        </td>
+        <td>
+          <span style="font-size:0.85rem; color:var(--color-text-secondary); max-width:220px; display:inline-block;" title="${escapeHtml(fullAddr)}">
+            ${escapeHtml(fullAddr)}
+          </span>
+        </td>
+        <td>
+          ${roleBadge}
+        </td>
+        <td>
+          <span style="font-size:0.82rem; color:var(--color-text-muted); font-family:var(--font-mono);">
+            ${escapeHtml(u.joinedDate || '2026-01-01')}
+          </span>
+        </td>
+        <td>
+          <div style="display:flex; flex-direction:column; gap:0.15rem;">
+            <span style="font-size:0.85rem; font-weight:600; color:var(--color-text-primary);">${userOrders.length} ${userOrders.length === 1 ? 'order' : 'orders'}</span>
+            <span style="font-size:0.8rem; font-weight:700; color:var(--color-success); font-family:var(--font-mono);">${CURRENCY.format(userTotalSpent)}</span>
+          </div>
+        </td>
+        <td style="text-align:right;">
+          <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:0.35rem 0.75rem; border-radius:var(--radius-full);" onclick="window.adminViewUserModal('${escapeHtml(u.id || u.email)}')">
+            <span>👁️ Details</span>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+window.adminRefreshUsers = function () {
+  refreshAllData();
+  showToast('Users directory refreshed successfully.', 'success');
+};
+
+window.adminViewUserModal = function (identifier) {
+  const users = Storage.getUsers();
+  const orders = Storage.getOrders();
+  const user = users.find(u => u.id === identifier || u.email?.toLowerCase() === identifier.toLowerCase());
+
+  if (!user) {
+    showToast('User profile not found.', 'danger');
+    return;
+  }
+
+  const userOrders = orders.filter(o => 
+    (o.customer?.email || '').toLowerCase() === (user.email || '').toLowerCase() ||
+    (o.userId && o.userId === user.id)
+  );
+  const totalSpent = userOrders.reduce((acc, o) => acc + (o.financials?.grandTotal || 0), 0);
+
+  const container = document.getElementById('user-modal-content');
+  if (!container) return;
+
+  const fullAddr = [user.address, user.city, user.postcode].filter(Boolean).join(', ') || 'No address provided';
+
+  container.innerHTML = `
+    <div style="display:flex; align-items:center; gap:1rem; padding-bottom:1.25rem; border-bottom:1px solid var(--color-border); margin-bottom:1.25rem;">
+      <div style="width:54px; height:54px; border-radius:50%; background:var(--color-brand-primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.25rem; font-weight:700; flex-shrink:0;">
+        ${(user.fullName || 'U').charAt(0).toUpperCase()}
+      </div>
+      <div style="flex:1;">
+        <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+          <h4 style="margin:0; font-size:1.15rem; color:var(--color-text-primary); font-family:var(--font-serif);">${escapeHtml(user.fullName || 'User')}</h4>
+          <span style="font-size:0.75rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:var(--radius-full); background:var(--color-surface-subtle); border:1px solid var(--color-border);">
+            ${escapeHtml(user.role || 'Customer')}
+          </span>
+        </div>
+        <p style="margin:0.2rem 0 0 0; font-size:0.8rem; color:var(--color-text-muted); font-family:var(--font-mono);">User ID: ${escapeHtml(user.id || 'N/A')} • Member since ${escapeHtml(user.joinedDate || '2026-01-01')}</p>
+      </div>
+    </div>
+
+    <!-- Contact & Details Grid -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem; background:var(--color-surface-subtle); padding:1rem; border-radius:var(--radius-md); border:1px solid var(--color-border);">
+      <div>
+        <label style="font-size:0.75rem; color:var(--color-text-muted); font-weight:600; text-transform:uppercase;">Email Address</label>
+        <div style="font-size:0.9rem; font-weight:600; color:var(--color-text-primary); margin-top:0.2rem;">${escapeHtml(user.email)}</div>
+      </div>
+      <div>
+        <label style="font-size:0.75rem; color:var(--color-text-muted); font-weight:600; text-transform:uppercase;">Phone Number</label>
+        <div style="font-size:0.9rem; font-weight:600; color:var(--color-text-primary); margin-top:0.2rem;">${escapeHtml(user.phone || 'N/A')}</div>
+      </div>
+      <div style="grid-column: span 2;">
+        <label style="font-size:0.75rem; color:var(--color-text-muted); font-weight:600; text-transform:uppercase;">Delivery Address</label>
+        <div style="font-size:0.9rem; color:var(--color-text-secondary); margin-top:0.2rem;">${escapeHtml(fullAddr)}</div>
+      </div>
+    </div>
+
+    <!-- Order History Header -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+      <strong style="font-size:0.95rem; color:var(--color-text-primary);">Customer Order History (${userOrders.length})</strong>
+      <span style="font-size:0.85rem; font-weight:700; color:var(--color-success); font-family:var(--font-mono);">Lifetime Spend: ${CURRENCY.format(totalSpent)}</span>
+    </div>
+
+    <!-- Orders Mini-List -->
+    ${userOrders.length === 0 ? `
+      <div style="padding:1.5rem; text-align:center; background:var(--color-surface); border:1px dashed var(--color-border); border-radius:var(--radius-sm); color:var(--color-text-muted); font-size:0.85rem;">
+        No purchase orders placed by this customer yet.
+      </div>
+    ` : `
+      <div style="max-height:220px; overflow-y:auto; border:1px solid var(--color-border); border-radius:var(--radius-sm);">
+        <table class="admin-table" style="font-size:0.82rem; margin:0;">
+          <thead>
+            <tr>
+              <th scope="col">Order ID</th>
+              <th scope="col">Date</th>
+              <th scope="col">Items</th>
+              <th scope="col">Total</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${userOrders.map(o => `
+              <tr>
+                <td><strong style="color:var(--color-brand-primary); font-family:var(--font-mono);">${escapeHtml(o.orderId)}</strong></td>
+                <td>${escapeHtml(o.formattedDate || 'Recent')}</td>
+                <td>${o.items?.length || 1} item(s)</td>
+                <td><strong style="font-family:var(--font-mono);">${CURRENCY.format(o.financials?.grandTotal || 0)}</strong></td>
+                <td>
+                  <span class="status-badge ${getStatusBadgeClass(o.status)}">${escapeHtml(o.status || 'Pending')}</span>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `}
+  `;
+
+  const modal = document.getElementById('modal-user-details');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.classList.add('open');
   }
 };
 
