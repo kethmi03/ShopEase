@@ -97,7 +97,8 @@ All persistent data is saved under namespaced keys in the browser's `window.loca
 4. **Customer Dashboard & Navigation States**:
    - **Visitor Nav (Unauthenticated)**: Displays **About Us**, **Sign In**, and **Register**.
    - **Customer Nav (Authenticated)**: Displays **Dashboard**, **My Offers**, **Basket** (with live count badge), **My Orders**, and **Logout**.
-   - **Customer Dashboard (dashboard.html)**: Complete member account management portal with KPIs, order receipts, active vouchers, and editable delivery details.
+   - **Customer Dashboard (customer-dashboard.html)**: Complete member account management portal with KPIs, order receipts, active vouchers, and editable delivery details.
+   - **Admin Dashboard (admin-dashboard.html)**: Store administration console for product inventory, order fulfillment, customers, and promotions.
 
 ---
 

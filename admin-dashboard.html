@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" data-font-size="normal">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="ShopEase Admin Dashboard - Clean, simple, and intuitive store management for products, categories, orders, inventory, and sales reports." />
+  <title>Admin Dashboard | ShopEase</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans + Inter + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300..900;1,300..900&family=Plus+Jakarta+Sans:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <!-- Skip Link -->
+  <a href="#admin-main" class="skip-link">Skip to Admin Dashboard Content</a>
+
+  <!-- ARIA Live Announcer -->
+  <div id="live-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- SECTION A: UNIFIED SINGLE FLOATING ISLAND HEADER & NAVBAR -->
+  <header class="site-header" role="banner" id="site-header">
+    <div class="header-island admin-header-island">
+      <nav class="main-nav" aria-label="Admin Console Navigation">
+        <div class="header-container admin-unified-container">
+          <!-- Left: Brand Logo -->
+          <div class="admin-brand-group">
+            <a href="customer-dashboard.html" class="brand-logo" aria-label="ShopEase Storefront">
+              <span class="brand-monogram" aria-hidden="true">SE</span>
+              <div class="brand-text-group">
+                <span class="brand-title">Shop<span>Ease</span></span>
+                <span class="brand-sub">Admin Console</span>
+              </div>
+            </a>
+          </div>
+
+          <!-- Center: Unified Module Navigation Tabs (Dashboard, Products, Categories, Orders, Inventory, Reports) -->
+          <ul class="admin-nav-tabs" role="tablist" aria-label="Admin Navigation Tabs">
+            <li>
+              <button type="button" class="admin-nav-btn active" data-tab="dashboard" role="tab" aria-selected="true">
+                <span aria-hidden="true">📊</span>
+                <span>Dashboard</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="admin-nav-btn" data-tab="products" role="tab" aria-selected="false">
+                <span aria-hidden="true">📦</span>
+                <span>Products</span>
+                <span class="admin-nav-badge" id="badge-products-count">10</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="admin-nav-btn" data-tab="categories" role="tab" aria-selected="false">
+                <span aria-hidden="true">🏷️</span>
+                <span>Categories</span>
+                <span class="admin-nav-badge" id="badge-categories-count">3</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="admin-nav-btn" data-tab="orders" role="tab" aria-selected="false">
+                <span aria-hidden="true">🧾</span>
+                <span>Orders</span>
+                <span class="admin-nav-badge" id="badge-orders-count">4</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="admin-nav-btn" data-tab="inventory" role="tab" aria-selected="false">
+                <span aria-hidden="true">📊</span>
+                <span>Inventory</span>
+                <span class="admin-nav-badge" id="badge-inventory-count">10</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="admin-nav-btn" data-tab="reports" role="tab" aria-selected="false">
+                <span aria-hidden="true">📈</span>
+                <span>Reports</span>
+              </button>
+            </li>
+          </ul>
+
+          <!-- Right: Theme Toggle & Logout -->
+          <div class="nav-right-section" style="gap: 0.65rem;">
+            <!-- Theme Toggle -->
+            <button type="button" id="theme-toggle-btn" class="theme-toggle-btn" aria-label="Toggle color theme"
+              title="Switch color theme">
+              <span id="theme-icon" class="theme-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="5"></circle>
+                  <line x1="12" y1="1" x2="12" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="23"></line>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                  <line x1="1" y1="12" x2="3" y2="12"></line>
+                  <line x1="21" y1="12" x2="23" y2="12"></line>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+              </span>
+            </button>
+
+            <!-- Logout Action -->
+            <div class="nav-actions">
+              <button type="button" id="admin-logout-btn" class="nav-btn nav-btn-primary" title="Sign Out"
+                style="height: 38px; padding: 0 1.25rem; font-weight: 600; font-size: 0.85rem; border-radius: var(--radius-full);">
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Admin Main Workspace: Full Width Balanced Layout -->
+  <div class="admin-layout">
+
+    <!-- Main Workspace Content -->
+    <main id="admin-main" class="admin-content" role="main">
+
+      <!-- =========================================================================
+           TAB 1: DASHBOARD OVERVIEW
+           - Total Products: 10
+           - Total Categories: 3
+           - Total Orders
+           - Total Sales
+           - Pending / Completed Orders
+           - Low-stock products
+           ========================================================================= -->
+      <section id="panel-dashboard" class="admin-panel active" aria-label="Dashboard Overview">
+        <div class="admin-header-bar" style="margin-bottom: 2rem;">
+          <div>
+            <h1 class="admin-page-title" style="font-size: 2.2rem; line-height: 1.15;">Dashboard <em
+                style="font-style: italic; color: var(--color-brand-primary);">Overview</em></h1>
+            <p class="admin-page-subtitle" style="font-size: 0.95rem; margin-top: 0.35rem;">Quick summary of store
+              products, orders, sales revenue, and stock health.</p>
+          </div>
+          <div style="display: flex; gap: 0.65rem; flex-wrap: wrap; align-items: center;">
+            <button type="button" class="btn btn-primary"
+              style="border-radius: var(--radius-full); padding: 0.6rem 1.35rem; font-size: 0.85rem; font-weight: 600;"
+              onclick="window.adminOpenAddProductModal()">
+              <span>+ Add / Replace Product</span>
+            </button>
+            <button type="button" class="btn btn-secondary"
+              style="border-radius: var(--radius-full); padding: 0.6rem 1.15rem; font-size: 0.85rem; font-weight: 600;"
+              onclick="window.adminRestockAll()">
+              <span>🔄 Restock All</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 6 Simple KPI Cards -->
+        <div class="dashboard-kpi-grid" style="margin-bottom: 2rem;">
+          <!-- 1. Total Products -->
+          <div class="dashboard-kpi-card">
+            <div class="dashboard-kpi-icon" aria-hidden="true"
+              style="background: rgba(37, 99, 235, 0.15); color: var(--color-brand-primary);">📦</div>
+            <div>
+              <div class="dashboard-kpi-val" id="kpi-total-products">10</div>
+              <div class="dashboard-kpi-label">Total Products</div>
+            </div>
+          </div>
+
+          <!-- 2. Total Categories -->
+          <div class="dashboard-kpi-card">
+            <div class="dashboard-kpi-icon" aria-hidden="true"
+              style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">🏷️</div>
+            <div>
+              <div class="dashboard-kpi-val" id="kpi-total-categories">3</div>
+              <div class="dashboard-kpi-label">Categories (Food, Clothes, Tech)</div>
+            </div>
+          </div>
+
+          <!-- 3. Total Orders -->
+          <div class="dashboard-kpi-card">
+            <div class="dashboard-kpi-icon" aria-hidden="true"
+              style="background: rgba(16, 185, 129, 0.15); color: var(--color-success);">🧾</div>
+            <div>
+              <div class="dashboard-kpi-val" id="kpi-total-orders">0</div>
+              <div class="dashboard-kpi-label">Total Customer Orders</div>
+            </div>
+          </div>
+
+          <!-- 4. Total Sales -->
+          <div class="dashboard-kpi-card">
+            <div class="dashboard-kpi-icon" aria-hidden="true"
+              style="background: rgba(16, 185, 129, 0.15); color: var(--color-success);">💰</div>
+            <div>
+              <div class="dashboard-kpi-val" id="kpi-total-sales">Rs. 0.00</div>
+              <div class="dashboard-kpi-label">Total Sales Revenue</div>
+            </div>
+          </div>
+
+          <!-- 5. Pending / Completed Orders -->
+          <div class="dashboard-kpi-card">
+            <div class="dashboard-kpi-icon" aria-hidden="true"
+              style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">⏱️</div>
+            <div>
+              <div class="dashboard-kpi-val" id="kpi-order-status-split">0 / 0</div>
+              <div class="dashboard-kpi-label">Pending / Completed Orders</div>
+            </div>
+          </div>
+
+          <!-- 6. Low-stock Products -->
+          <div class="dashboard-kpi-card">
+            <div class="dashboard-kpi-icon" aria-hidden="true"
+              style="background: rgba(245, 158, 11, 0.15); color: var(--color-warning);">⚠️</div>
+            <div>
+              <div class="dashboard-kpi-val" id="kpi-low-stock-count" style="color: var(--color-warning);">0</div>
+              <div class="dashboard-kpi-label">Low Stock Items (≤10 units)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1. Recent Orders Card (Full Width) -->
+        <div class="admin-table-card" style="margin-bottom: 2rem;">
+          <div class="admin-table-toolbar">
+            <strong style="color: var(--color-text-primary); font-size: 0.95rem;">📦 Recent Customer Orders</strong>
+            <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;"
+              onclick="window.adminSwitchTab('orders')">
+              View All Orders →
+            </button>
+          </div>
+          <div class="admin-table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th style="min-width: 140px;">Order ID</th>
+                  <th>Customer Details</th>
+                  <th>Total Amount</th>
+                  <th>Order Status</th>
+                  <th style="text-align: right; min-width: 100px;">Invoice</th>
+                </tr>
+              </thead>
+              <tbody id="overview-orders-tbody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 2. Low Stock Alert Card (Positioned Underneath Recent Orders) -->
+        <div class="admin-table-card" style="margin-bottom: 2rem;">
+          <div class="admin-table-toolbar">
+            <strong style="color: var(--color-text-primary); font-size: 0.95rem;">📊 Low Stock Alert (Products Needing
+              Attention)</strong>
+            <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;"
+              onclick="window.adminSwitchTab('inventory')">
+              Manage Full Inventory →
+            </button>
+          </div>
+          <div class="admin-table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th style="min-width: 220px;">Product Name &amp; Code</th>
+                  <th>Category</th>
+                  <th>Stock Remaining</th>
+                  <th>Status</th>
+                  <th style="text-align: right; min-width: 110px;">Quick Restock</th>
+                </tr>
+              </thead>
+              <tbody id="overview-stock-tbody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           TAB 2: PRODUCT MANAGEMENT
+           - Products 10 table
+           - Add Product
+           - Edit Product
+           - Delete Product
+           - Update price & stock
+           - Image & description edit
+           - 10-product limit guard
+           ========================================================================= -->
+      <section id="panel-products" class="admin-panel" aria-label="Product Management">
+        <div class="admin-header-bar">
+          <div>
+            <h1 class="admin-page-title">Product Management</h1>
+            <p class="admin-page-subtitle">View all 10 products, edit prices, update stock quantities, or modify
+              details.</p>
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-primary" onclick="window.adminOpenAddProductModal()">
+              <span>+ Add / Replace Product</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="admin-table-card">
+          <!-- Filter Toolbar -->
+          <div class="admin-table-toolbar">
+            <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; flex: 1;">
+              <input type="search" id="filter-products-search" class="form-input"
+                placeholder="🔍 Search products by name or code..."
+                style="max-width: 280px; height: 38px; font-size: 0.85rem;" />
+              <select id="filter-products-category" class="form-input"
+                style="max-width: 170px; height: 38px; font-size: 0.85rem;">
+                <option value="ALL">All Categories</option>
+                <option value="Food">Food &amp; Gourmet</option>
+                <option value="Clothing">Clothing &amp; Apparel</option>
+                <option value="Electronics">Electronics &amp; Tech</option>
+              </select>
+              <select id="filter-products-stock" class="form-input"
+                style="max-width: 170px; height: 38px; font-size: 0.85rem;">
+                <option value="ALL">All Stock Levels</option>
+                <option value="IN">In Stock (>10)</option>
+                <option value="LOW">Low Stock (≤10)</option>
+                <option value="OUT">Out of Stock (0)</option>
+              </select>
+            </div>
+            <span style="font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted);"
+              id="products-table-count">10 Products</span>
+          </div>
+
+          <!-- Clean Products Table -->
+          <div class="admin-table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th style="min-width: 220px;">Product Name &amp; ID</th>
+                  <th>Category</th>
+                  <th>Unit Price</th>
+                  <th>Stock Quantity</th>
+                  <th>Stock Status</th>
+                  <th style="text-align: right; min-width: 140px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="products-tbody">
+                <!-- Rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           TAB 3: CATEGORY MANAGEMENT
+           - Categories 3 display
+           - Products per category
+           - Edit category name
+           - Product count per category
+           - 3 category limit guard
+           ========================================================================= -->
+      <section id="panel-categories" class="admin-panel" aria-label="Category Management">
+        <div class="admin-header-bar">
+          <div>
+            <h1 class="admin-page-title">Category Management</h1>
+            <p class="admin-page-subtitle">The store contains exactly 3 categories: Food &amp; Gourmet, Clothing &amp;
+              Apparel, and Electronics &amp; Tech.</p>
+          </div>
+        </div>
+
+        <!-- 3 Category Cards Grid -->
+        <div
+          style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;"
+          id="categories-cards-grid">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Clean Unified Category Products Table -->
+        <div class="admin-table-card">
+          <div class="admin-table-toolbar">
+            <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+              <strong style="color: var(--color-text-primary); font-size: 0.95rem;">📦 Products Grouped by
+                Department</strong>
+              <select id="filter-category-table-select" class="form-input"
+                style="height: 34px; font-size: 0.8rem; width: auto;"
+                onchange="window.adminFilterCategoryTable(this.value)">
+                <option value="ALL">Show All Categories (10)</option>
+                <option value="Food">Food &amp; Gourmet (3)</option>
+                <option value="Clothing">Clothing &amp; Apparel (3)</option>
+                <option value="Electronics">Electronics &amp; Tech (4)</option>
+              </select>
+            </div>
+            <span style="font-size: 0.8rem; color: var(--color-text-muted);">Click Edit to update any product</span>
+          </div>
+          <div class="admin-table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Department</th>
+                  <th>Price</th>
+                  <th>Available Stock</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="category-products-tbody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           TAB 4: ORDER MANAGEMENT
+           - All customer orders
+           - Order ID and date
+           - Ordered items and quantities
+           - Order total
+           - Payment status
+           - Order status update (Pending, Confirmed, Completed, Cancelled)
+           ========================================================================= -->
+      <section id="panel-orders" class="admin-panel" aria-label="Order Management">
+        <div class="admin-header-bar">
+          <div>
+            <h1 class="admin-page-title">Order Management</h1>
+            <p class="admin-page-subtitle">View all customer orders, update order status, and view printable invoices.
+            </p>
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary" onclick="window.adminSeedSampleOrders()">
+              <span>⚡ Add Sample Orders</span>
+            </button>
+            <button type="button" class="btn btn-primary" onclick="window.adminSimulateOrder()">
+              <span>+ Simulate Test Order</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="admin-table-card">
+          <!-- Simple Order Search and Status Filter Toolbar -->
+          <div class="admin-table-toolbar">
+            <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; flex: 1;">
+              <input type="search" id="filter-orders-search" class="form-input"
+                placeholder="🔍 Search by Order ID (e.g. SE-...) or Customer name..."
+                style="max-width: 320px; height: 38px; font-size: 0.85rem;" />
+              <select id="filter-orders-status" class="form-input"
+                style="max-width: 190px; height: 38px; font-size: 0.85rem;">
+                <option value="ALL">All Order Statuses</option>
+                <option value="Pending">⏳ Pending</option>
+                <option value="Confirmed">● Confirmed</option>
+                <option value="Processing">⚙️ Processing</option>
+                <option value="Completed">✅ Completed</option>
+                <option value="Cancelled">❌ Cancelled</option>
+              </select>
+            </div>
+            <span style="font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted);"
+              id="orders-table-count">0 Orders</span>
+          </div>
+
+          <!-- Clean Orders Table -->
+          <div class="admin-table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Order Date</th>
+                  <th>Customer</th>
+                  <th>Items Ordered</th>
+                  <th>Total Amount</th>
+                  <th>Payment</th>
+                  <th>Order Status</th>
+                  <th style="text-align: right; min-width: 140px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="orders-tbody">
+                <!-- Rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           TAB 5: INVENTORY / STOCK MANAGEMENT
+           - Available stock quantity
+           - Stock update
+           - Low-stock warning
+           - Out-of-stock status
+           - Out-of-stock cart protection
+           ========================================================================= -->
+      <section id="panel-inventory" class="admin-panel" aria-label="Inventory & Stock Management">
+        <div class="admin-header-bar">
+          <div>
+            <h1 class="admin-page-title">Inventory &amp; Stock Management</h1>
+            <p class="admin-page-subtitle">Track available stock levels, update product quantities, and manage low-stock
+              warnings.</p>
+          </div>
+          <button type="button" class="btn btn-secondary" onclick="window.adminRestockAll()">
+            <span>🔄 Reset All Stock to Factory Defaults</span>
+          </button>
+        </div>
+
+        <!-- Automatic Cart Protection Note -->
+        <div
+          style="background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-left: 4px solid var(--color-brand-primary); border-radius: var(--radius-md); padding: 0.85rem 1.25rem; margin-bottom: 1.5rem; font-size: 0.85rem; line-height: 1.5;">
+          <strong>🛡️ Out-of-Stock Protection Active:</strong> When any product stock reaches <code>0 units</code>,
+          customers cannot add it to their cart. The storefront button is automatically disabled.
+        </div>
+
+        <div class="admin-table-card">
+          <!-- Toolbar with search and filter -->
+          <div class="admin-table-toolbar">
+            <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; flex: 1;">
+              <input type="search" id="filter-inventory-search" class="form-input"
+                placeholder="🔍 Search inventory by product name..."
+                style="max-width: 280px; height: 38px; font-size: 0.85rem;" />
+              <select id="filter-inventory-stock" class="form-input"
+                style="max-width: 180px; height: 38px; font-size: 0.85rem;">
+                <option value="ALL">All Stock Levels</option>
+                <option value="IN">In Stock (>10)</option>
+                <option value="LOW">Low Stock Warning (≤10)</option>
+                <option value="OUT">Out of Stock (0)</option>
+              </select>
+            </div>
+            <span style="font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted);"
+              id="inventory-table-count">10 Products Tracked</span>
+          </div>
+
+          <!-- Clean Inventory Table -->
+          <div class="admin-table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Product Name &amp; ID</th>
+                  <th>Category</th>
+                  <th>Available Stock</th>
+                  <th>Stock Status</th>
+                  <th style="min-width: 180px;">Quick Stock Update</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-tbody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           TAB 6: SALES & REPORTS
+           - Total orders
+           - Total sales amount
+           - Most popular products
+           - Category-wise sales
+           - Completed and pending payments
+           ========================================================================= -->
+      <section id="panel-reports" class="admin-panel" aria-label="Sales & Reports">
+        <div class="admin-header-bar">
+          <div>
+            <h1 class="admin-page-title">Sales &amp; Store Reports</h1>
+            <p class="admin-page-subtitle">Automatic sales analytics calculated in JavaScript directly from customer
+              orders.</p>
+          </div>
+          <button type="button" class="btn btn-secondary" onclick="window.print()">
+            <span>🖨️ Print Sales Report</span>
+          </button>
+        </div>
+
+        <!-- Sales KPI Summary Cards -->
+        <div class="dashboard-kpi-grid" style="margin-bottom: 2rem;">
+          <div class="dashboard-kpi-card">
+            <div class="dashboard-kpi-icon" aria-hidden="true"
+              style="background: rgba(16, 185, 129, 0.15); color: var(--color-success);">💰</div>
+            <div>
+              <div class="dashboard-kpi-val" id="rep-total-sales">Rs. 0.00</div>
+              <div class="dashboard-kpi-label">Total Sales Revenue</div>
+            </div>
+          </div>
+          <div class="dashboard-kpi-card">
+            <div class="dashboard-kpi-icon" aria-hidden="true"
+              style="background: rgba(37, 99, 235, 0.15); color: var(--color-brand-primary);">🧾</div>
+            <div>
+              <div class="dashboard-kpi-val" id="rep-total-orders">0</div>
+              <div class="dashboard-kpi-label">Total Orders Placed</div>
+            </div>
+          </div>
+          <div class="dashboard-kpi-card">
+            <div class="dashboard-kpi-icon" aria-hidden="true"
+              style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">📊</div>
+            <div>
+              <div class="dashboard-kpi-val" id="rep-avg-order">Rs. 0.00</div>
+              <div class="dashboard-kpi-label">Average Order Value</div>
+            </div>
+          </div>
+          <div class="dashboard-kpi-card">
+            <div class="dashboard-kpi-icon" aria-hidden="true"
+              style="background: rgba(245, 158, 11, 0.15); color: var(--color-warning);">💳</div>
+            <div>
+              <div class="dashboard-kpi-val" id="rep-payments-status">0 Paid / 0 Pending</div>
+              <div class="dashboard-kpi-label">Payment Breakdown</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2 Side-by-Side Analytics Tables -->
+        <div
+          style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+          <!-- Most Popular Products Leaderboard -->
+          <div class="admin-table-card" style="margin-bottom: 0;">
+            <div class="admin-table-toolbar">
+              <strong style="color: var(--color-text-primary); font-size: 0.95rem;">🏆 Most Popular Products (By Units
+                Sold)</strong>
+            </div>
+            <div class="admin-table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Product</th>
+                    <th>Units Sold</th>
+                    <th>Revenue</th>
+                  </tr>
+                </thead>
+                <tbody id="rep-popular-products-tbody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Category-wise Sales Breakdown -->
+          <div class="admin-table-card" style="margin-bottom: 0;">
+            <div class="admin-table-toolbar">
+              <strong style="color: var(--color-text-primary); font-size: 0.95rem;">🏷️ Category-wise Sales
+                Distribution</strong>
+            </div>
+            <div style="padding: 1.25rem;" id="rep-category-sales-container">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- =========================================================================
+       MODALS
+       ========================================================================= -->
+
+  <!-- 1. Edit Product Modal -->
+  <div id="modal-edit-product" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true"
+    aria-labelledby="modal-edit-product-heading">
+    <div class="modal-container" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 id="modal-edit-product-heading" class="modal-title">Edit Product Details</h3>
+        <button type="button" class="modal-close-btn" onclick="window.adminCloseModals()"
+          aria-label="Close dialog">✕</button>
+      </div>
+      <form class="modal-body" onsubmit="window.adminSaveProductEdit(event)">
+        <input type="hidden" id="edit-prod-id" />
+        <div class="form-group">
+          <label for="edit-prod-name" class="form-label">Product Name *</label>
+          <input type="text" id="edit-prod-name" class="form-input" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="edit-prod-category" class="form-label">Category *</label>
+            <select id="edit-prod-category" class="form-input" required>
+              <option value="Food">Food &amp; Gourmet</option>
+              <option value="Clothing">Clothing &amp; Apparel</option>
+              <option value="Electronics">Electronics &amp; Tech</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-prod-price" class="form-label">Unit Price (Rs.) *</label>
+            <input type="number" id="edit-prod-price" class="form-input" step="0.01" min="0.01" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="edit-prod-stock" class="form-label">Available Stock Quantity *</label>
+          <input type="number" id="edit-prod-stock" class="form-input" min="0" required />
+        </div>
+        <div class="form-group">
+          <label for="edit-prod-image" class="form-label">Product Image URL</label>
+          <input type="url" id="edit-prod-image" class="form-input" placeholder="https://..." />
+        </div>
+        <div class="form-group">
+          <label for="edit-prod-description" class="form-label">Product Description</label>
+          <textarea id="edit-prod-description" class="form-input" rows="3"></textarea>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem;">
+          <button type="button" class="btn btn-secondary" onclick="window.adminCloseModals()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Add / Replace Product Modal (Guarded to exactly 10 products) -->
+  <div id="modal-add-product" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true"
+    aria-labelledby="modal-add-product-heading">
+    <div class="modal-container" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 id="modal-add-product-heading" class="modal-title">+ Add / Replace Product</h3>
+        <button type="button" class="modal-close-btn" onclick="window.adminCloseModals()"
+          aria-label="Close dialog">✕</button>
+      </div>
+      <form class="modal-body" onsubmit="window.adminSaveNewProduct(event)">
+        <div
+          style="font-size: 0.8rem; color: var(--color-brand-primary); background: rgba(37, 99, 235, 0.08); padding: 0.6rem 0.8rem; border-radius: var(--radius-sm); margin-bottom: 1rem; border: 1px solid var(--color-border);">
+          ℹ️ The catalogue strictly maintains 10 products. Adding this new product will assign or replace a slot.
+        </div>
+        <div class="form-group">
+          <label for="add-prod-slot" class="form-label">Slot to Replace *</label>
+          <select id="add-prod-slot" class="form-input" required>
+            <!-- Populated by JS -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="add-prod-name" class="form-label">Product Name *</label>
+          <input type="text" id="add-prod-name" class="form-input" placeholder="e.g. Wireless ANC Earbuds" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="add-prod-category" class="form-label">Category *</label>
+            <select id="add-prod-category" class="form-input" required>
+              <option value="Food">Food &amp; Gourmet</option>
+              <option value="Clothing">Clothing &amp; Apparel</option>
+              <option value="Electronics" selected>Electronics &amp; Tech</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="add-prod-price" class="form-label">Unit Price (Rs.) *</label>
+            <input type="number" id="add-prod-price" class="form-input" step="0.01" min="0.01" placeholder="49.99"
+              required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="add-prod-stock" class="form-label">Initial Stock Quantity *</label>
+          <input type="number" id="add-prod-stock" class="form-input" min="1" value="20" required />
+        </div>
+        <div class="form-group">
+          <label for="add-prod-image" class="form-label">Product Image URL</label>
+          <input type="url" id="add-prod-image" class="form-input" placeholder="https://images.unsplash.com/..." />
+        </div>
+        <div class="form-group">
+          <label for="add-prod-description" class="form-label">Product Description</label>
+          <textarea id="add-prod-description" class="form-input" rows="3"
+            placeholder="Specifications and key features..."></textarea>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem;">
+          <button type="button" class="btn btn-secondary" onclick="window.adminCloseModals()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save to Catalogue</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. View Order Invoice Modal -->
+  <div id="modal-order-invoice" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true"
+    aria-labelledby="modal-invoice-heading">
+    <div class="modal-container" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3 id="modal-invoice-heading" class="modal-title">Tax Invoice Details</h3>
+        <button type="button" class="modal-close-btn" onclick="window.adminCloseModals()"
+          aria-label="Close dialog">✕</button>
+      </div>
+      <div class="modal-body" id="invoice-modal-content" style="padding: 1.5rem;">
+        <!-- Injected by JS -->
+      </div>
+      <div
+        style="display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1rem 1.5rem; border-top: 1px solid var(--color-border); background: var(--color-surface-subtle);">
+        <button type="button" class="btn btn-secondary" onclick="window.print()">🖨️ Print Invoice</button>
+        <button type="button" class="btn btn-primary" onclick="window.adminCloseModals()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Edit Category Modal -->
+  <div id="modal-edit-category" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true"
+    aria-labelledby="modal-edit-cat-heading">
+    <div class="modal-container" style="max-width: 460px;">
+      <div class="modal-header">
+        <h3 id="modal-edit-cat-heading" class="modal-title">Rename Category</h3>
+        <button type="button" class="modal-close-btn" onclick="window.adminCloseModals()"
+          aria-label="Close dialog">✕</button>
+      </div>
+      <form class="modal-body" onsubmit="window.adminSaveCategoryEdit(event)">
+        <input type="hidden" id="edit-cat-key" />
+        <div class="form-group">
+          <label for="edit-cat-name" class="form-label">Category Title *</label>
+          <input type="text" id="edit-cat-name" class="form-input" required />
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem;">
+          <button type="button" class="btn btn-secondary" onclick="window.adminCloseModals()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Admin Controller Script -->
+  <script type="module" src="admin.js"></script>
+</body>
+
+</html>

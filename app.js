@@ -1297,12 +1297,6 @@ function renderNavBar() {
 
   if (!user) {
     container.innerHTML = `
-      <a href="dashboard.html" class="nav-btn nav-btn-ghost" id="nav-dash-guest-btn" aria-label="Customer Dashboard" title="Customer Dashboard">
-        <span>Dashboard</span>
-      </a>
-      <a href="admin.html" class="nav-btn nav-btn-ghost" id="nav-admin-guest-btn" aria-label="Admin Console" title="Admin Console">
-        <span>🛡️ Admin</span>
-      </a>
       <a href="login.html" class="nav-btn nav-btn-ghost" id="nav-login-btn" aria-label="Sign in to your account" title="Sign In">
         <span>Sign In</span>
       </a>
@@ -1315,12 +1309,15 @@ function renderNavBar() {
 
   const isAdmin = user && user.role === 'Admin';
   container.innerHTML = `
-    <a href="dashboard.html" class="nav-btn nav-btn-dashboard" id="nav-dashboard-btn" aria-label="Customer Dashboard" title="View Customer Dashboard">
-      <span>Dashboard</span>
-    </a>
-    <a href="admin.html" class="nav-btn nav-btn-primary" id="nav-admin-btn" aria-label="Admin Dashboard" title="Open Admin Console" style="background:var(--color-brand-primary); color:#ffffff; font-weight:600;">
-      <span>🛡️ Admin</span>
-    </a>
+    ${isAdmin ? `
+      <a href="admin-dashboard.html" class="nav-btn nav-btn-primary" id="nav-admin-btn" aria-label="Admin Dashboard" title="Open Admin Console" style="background:var(--color-brand-primary); color:#ffffff; font-weight:600;">
+        <span>🛡️ Admin Console</span>
+      </a>
+    ` : `
+      <a href="customer-dashboard.html" class="nav-btn nav-btn-dashboard" id="nav-dashboard-btn" aria-label="Customer Dashboard" title="View Customer Dashboard">
+        <span>👤 Dashboard</span>
+      </a>
+    `}
 
     <button 
       type="button" 
