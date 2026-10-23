@@ -1,20 +1,25 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light" data-font-size="normal">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="ShopEase - An editorial motion commerce experience featuring 10 handcrafted products across Food, Clothing, and Tech. Built with Universal Design and WCAG 2.1 AA principles.">
+  <meta name="description"
+    content="ShopEase - An editorial motion commerce experience featuring 10 handcrafted products across Food, Clothing, and Tech. Built with Universal Design and WCAG 2.1 AA principles.">
   <title>ShopEase | Curated Essentials • Editorial Motion Commerce</title>
-  
+
   <!-- Preconnect to image and font sources -->
   <link rel="preconnect" href="https://images.unsplash.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300..900;1,300..900&family=Plus+Jakarta+Sans:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300..900;1,300..900&family=Plus+Jakarta+Sans:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
   <!-- Main Stylesheet -->
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
   <!-- Accessibility: Skip Link for keyboard & screen reader users -->
   <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -27,7 +32,7 @@
     <div class="header-island">
       <nav class="main-nav" aria-label="Main Navigation">
         <div class="header-container">
-          
+
           <!-- Brand Identity Lockup -->
           <a href="index.html" class="brand-logo" aria-label="ShopEase Home Page">
             <span class="brand-monogram" aria-hidden="true">SE</span>
@@ -50,20 +55,17 @@
             <label for="search-input" class="sr-only">Search products by name, category, or features</label>
             <div class="search-input-wrapper">
               <span class="search-icon" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="11" cy="11" r="8"></circle>
                   <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
               </span>
-              <input 
-                type="search" 
-                id="search-input" 
-                class="search-input" 
-                placeholder="Search 10 essentials..." 
-                autocomplete="off"
-              />
+              <input type="search" id="search-input" class="search-input" placeholder="Search 10 essentials..."
+                autocomplete="off" />
               <kbd class="search-kbd" title="Press '/' anywhere to search">/</kbd>
-              <button type="button" id="search-clear-btn" class="search-clear-btn" aria-label="Clear search query" title="Clear search">
+              <button type="button" id="search-clear-btn" class="search-clear-btn" aria-label="Clear search query"
+                title="Clear search">
                 ✕
               </button>
             </div>
@@ -71,17 +73,13 @@
 
           <!-- Right Side Actions: Theme + Cart + Account + Mobile Toggle -->
           <div class="nav-right-section">
-            
+
             <!-- Accessible Theme Switcher (Light / Dark / High Contrast) -->
-            <button 
-              type="button" 
-              id="theme-toggle-btn" 
-              class="theme-toggle-btn" 
-              aria-label="Toggle color theme" 
-              title="Switch color theme"
-            >
+            <button type="button" id="theme-toggle-btn" class="theme-toggle-btn" aria-label="Toggle color theme"
+              title="Switch color theme">
               <span id="theme-icon" class="theme-icon" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="12" cy="12" r="5"></circle>
                   <line x1="12" y1="1" x2="12" y2="3"></line>
                   <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -96,15 +94,11 @@
             </button>
 
             <!-- Shopping Basket Button with Real-time Count Badge -->
-            <button 
-              type="button" 
-              id="cart-toggle-btn" 
-              class="nav-btn-cart" 
-              aria-label="Open shopping basket" 
-              title="Shopping Basket"
-            >
+            <button type="button" id="cart-toggle-btn" class="nav-btn-cart" aria-label="Open shopping basket"
+              title="Shopping Basket">
               <span class="cart-icon-wrapper" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
                   <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
                   <line x1="3" y1="6" x2="21" y2="6"></line>
                   <path d="M16 10a4 4 0 0 1-8 0"></path>
@@ -125,15 +119,10 @@
             </div>
 
             <!-- Mobile Hamburger Button -->
-            <button 
-              type="button" 
-              id="mobile-menu-btn" 
-              class="mobile-menu-btn" 
-              aria-label="Open mobile navigation" 
-              aria-expanded="false" 
-              aria-controls="mobile-menu-drawer"
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button type="button" id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Open mobile navigation"
+              aria-expanded="false" aria-controls="mobile-menu-drawer">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
                 <line x1="3" y1="6" x2="21" y2="6"></line>
                 <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -147,11 +136,13 @@
   </header>
 
   <!-- Mobile Slide Navigation Drawer -->
-  <div id="mobile-menu-drawer" class="mobile-drawer" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
+  <div id="mobile-menu-drawer" class="mobile-drawer" aria-hidden="true" role="dialog" aria-modal="true"
+    aria-label="Mobile Navigation">
     <div class="mobile-drawer-content">
       <div class="mobile-drawer-header">
         <span class="brand-title">Shop<span>Ease</span></span>
-        <button type="button" id="mobile-menu-close-btn" class="modal-close-btn" aria-label="Close mobile navigation">✕</button>
+        <button type="button" id="mobile-menu-close-btn" class="modal-close-btn"
+          aria-label="Close mobile navigation">✕</button>
       </div>
       <div class="mobile-drawer-nav">
         <a href="#categories-section" class="mobile-nav-link">Departments</a>
@@ -167,12 +158,12 @@
 
   <!-- MAIN CONTENT AREA -->
   <main id="main-content" role="main">
-    
+
     <!-- SECTION B: CINEMATIC HERO WITH INTERACTIVE SWAPPING IMAGES -->
     <section class="editorial-hero" aria-label="Featured Collection Showcase">
       <div class="container">
         <div class="hero-split-grid">
-          
+
           <!-- Left Column: Editorial Headline & Storytelling -->
           <div class="hero-editorial-col">
             <div class="hero-badge-pill">
@@ -186,7 +177,8 @@
             </h1>
 
             <p class="hero-editorial-summary">
-              Ten meticulously sourced objects across artisan food, tailored apparel, and acoustic engineering. Crafted for durability, longevity, and genuine human delight.
+              Ten meticulously sourced objects across artisan food, tailored apparel, and acoustic engineering. Crafted
+              for durability, longevity, and genuine human delight.
             </p>
 
             <div class="hero-cta-group">
@@ -215,7 +207,8 @@
                 <button type="button" id="hero-prev-btn" class="hero-arrow-btn" aria-label="Previous featured product">
                   ←
                 </button>
-                <button type="button" id="hero-play-pause-btn" class="hero-arrow-btn hero-play-btn" aria-label="Pause slideshow" title="Pause / Resume slideshow">
+                <button type="button" id="hero-play-pause-btn" class="hero-arrow-btn hero-play-btn"
+                  aria-label="Pause slideshow" title="Pause / Resume slideshow">
                   ⏸
                 </button>
                 <button type="button" id="hero-next-btn" class="hero-arrow-btn" aria-label="Next featured product">
@@ -226,10 +219,14 @@
 
             <!-- Slide Dot Selectors -->
             <div class="hero-dots-deck" role="tablist" aria-label="Slide indicators">
-              <button type="button" class="hero-dot-btn active" data-slide="0" aria-label="Slide 1: Sourdough Loaf" role="tab" aria-selected="true"></button>
-              <button type="button" class="hero-dot-btn" data-slide="1" aria-label="Slide 2: Denim Trucker Jacket" role="tab" aria-selected="false"></button>
-              <button type="button" class="hero-dot-btn" data-slide="2" aria-label="Slide 3: ANC Headphones" role="tab" aria-selected="false"></button>
-              <button type="button" class="hero-dot-btn" data-slide="3" aria-label="Slide 4: Ethiopian Coffee" role="tab" aria-selected="false"></button>
+              <button type="button" class="hero-dot-btn active" data-slide="0" aria-label="Slide 1: Sourdough Loaf"
+                role="tab" aria-selected="true"></button>
+              <button type="button" class="hero-dot-btn" data-slide="1" aria-label="Slide 2: Denim Trucker Jacket"
+                role="tab" aria-selected="false"></button>
+              <button type="button" class="hero-dot-btn" data-slide="2" aria-label="Slide 3: ANC Headphones" role="tab"
+                aria-selected="false"></button>
+              <button type="button" class="hero-dot-btn" data-slide="3" aria-label="Slide 4: Ethiopian Coffee"
+                role="tab" aria-selected="false"></button>
             </div>
 
           </div>
@@ -238,12 +235,8 @@
           <div class="hero-media-col" id="hero-stage-wrapper">
             <div class="hero-media-frame">
               <div id="hero-image-stage" class="hero-image-stage">
-                <img 
-                  src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200&q=85" 
-                  alt="Artisan Organic Sourdough Loaf" 
-                  class="hero-stage-img"
-                  loading="eager"
-                />
+                <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200&q=85"
+                  alt="Artisan Organic Sourdough Loaf" class="hero-stage-img" loading="eager" />
               </div>
 
               <!-- Floating Editorial Product Pill -->
@@ -255,7 +248,8 @@
                 <h3 id="hero-card-title" class="hero-card-title">Artisan Organic Sourdough Loaf</h3>
                 <div class="hero-card-footer">
                   <span id="hero-card-price" class="hero-card-price">Rs. 4.95</span>
-                  <button type="button" id="hero-card-quick-btn" class="hero-card-quick-btn" aria-label="Quick inspect product">
+                  <button type="button" id="hero-card-quick-btn" class="hero-card-quick-btn"
+                    aria-label="Quick inspect product">
                     Inspect Specs ↗
                   </button>
                 </div>
@@ -267,34 +261,299 @@
       </div>
     </section>
 
-    <!-- SECTION C: CINEMATIC LOOPED VIDEO / MEDIA STRIP -->
-    <section class="cinematic-strip" id="cinematic-strip" aria-label="Craft and Philosophy Strip">
+    <!-- SECTION C: PROMOTIONS, BRANDS & DISCOUNTS SWAPPING PANEL -->
+    <section class="cinematic-strip promo-swap-strip" id="cinematic-strip" aria-label="Brand Promotions, Discounts, and Deals Panel">
       <div class="cinematic-backdrop-overlay" aria-hidden="true"></div>
-      <div class="container cinematic-content-wrap">
-        <span class="cinematic-tag">DESIGN PHILOSOPHY</span>
-        <h2 class="cinematic-headline">Crafted with Deep Intention.</h2>
-        <p class="cinematic-subtitle">
-          Every crumb, fiber, and acoustic frequency is precision-engineered for lifelong reliability and human delight.
-        </p>
-        <div class="cinematic-actions">
-          <a href="#catalog-section" class="btn btn-editorial-outline">Explore Repertoire</a>
-          <button 
-            type="button" 
-            id="video-motion-btn" 
-            class="btn-motion-toggle" 
-            aria-pressed="false"
-            title="Toggle background ambient motion"
-          >
-            <span>⏸ Pause Visual Motion</span>
-          </button>
+      
+      <div class="container promo-strip-container">
+        
+        <!-- Left Column: Editorial Banner Context & Controls -->
+        <div class="promo-strip-sidebar">
+          <div class="promo-kicker-wrap">
+            <span class="promo-kicker-dot" aria-hidden="true"></span>
+            <span class="cinematic-tag promo-kicker-text">CURATED PROMOTIONS &amp; BRANDS</span>
+          </div>
+          <h2 class="cinematic-headline promo-strip-title">Exclusive Partner Drops</h2>
+          <p class="cinematic-subtitle promo-strip-subtitle">
+            Limited-run discounts, flagship brand drops, and direct promotional vouchers updated live daily.
+          </p>
+
+          <!-- Interactive Controls & Motion Toggle -->
+          <div class="promo-strip-controls">
+            <div class="promo-deck-arrows">
+              <button type="button" id="promo-prev-btn" class="promo-arrow-btn" aria-label="Previous promotional card">
+                <span aria-hidden="true">←</span>
+              </button>
+              <div class="promo-deck-dots" id="promo-deck-dots" role="tablist" aria-label="Promotional card dots">
+                <button type="button" role="tab" class="promo-dot active" data-index="0" aria-label="Card 1: Acoustic Labs" aria-selected="true"></button>
+                <button type="button" role="tab" class="promo-dot" data-index="1" aria-label="Card 2: SmartPulse" aria-selected="false"></button>
+                <button type="button" role="tab" class="promo-dot" data-index="2" aria-label="Card 3: ErgoPro" aria-selected="false"></button>
+                <button type="button" role="tab" class="promo-dot" data-index="3" aria-label="Card 4: Biella Threads" aria-selected="false"></button>
+                <button type="button" role="tab" class="promo-dot" data-index="4" aria-label="Card 5: Grand Cru" aria-selected="false"></button>
+              </div>
+              <button type="button" id="promo-next-btn" class="promo-arrow-btn" aria-label="Next promotional card">
+                <span aria-hidden="true">→</span>
+              </button>
+            </div>
+
+            <div class="cinematic-actions promo-actions-row">
+              <button 
+                type="button" 
+                id="video-motion-btn" 
+                class="btn-motion-toggle promo-motion-btn" 
+                aria-pressed="false"
+                title="Toggle promotional card motion"
+              >
+                <span>⏸ Pause Visual Motion</span>
+              </button>
+            </div>
+          </div>
         </div>
+
+        <!-- Right Column: Modern Creative Swapping Card Stage -->
+        <div class="promo-strip-stage">
+          <div class="promo-swap-deck" id="promo-swap-deck" role="region" aria-label="Promotional Cards Deck" tabindex="0">
+            
+            <!-- Card 1: ACOUSTIC LABS -->
+            <article class="promo-card promo-card--active" data-index="0" data-product-id="prod-09">
+              <div class="promo-card-visual">
+                <img 
+                  src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80" 
+                  alt="AcousticPro Hybrid ANC Headphones"
+                  class="promo-card-img"
+                  loading="lazy"
+                />
+                <div class="promo-timer-pill" aria-label="Time remaining for offer">
+                  <span class="timer-dot"></span>
+                  <span class="timer-digits" data-countdown="14380">03:59:40</span>
+                </div>
+              </div>
+
+              <div class="promo-card-content">
+                <div class="promo-card-header">
+                  <span class="promo-brand-badge">◈ ACOUSTIC LABS</span>
+                  <span class="promo-discount-badge badge-orange">⚡ 40% OFF FLASH</span>
+                </div>
+                
+                <h3 class="promo-card-title">AcousticPro Hybrid ANC</h3>
+                <p class="promo-card-desc">Titanium 38dB noise cancellation with 50-hour audiophile battery.</p>
+
+                <div class="promo-card-footer">
+                  <div class="promo-price-block">
+                    <span class="promo-price-deal">Rs. 119.99</span>
+                    <span class="promo-price-old">Rs. 199.99</span>
+                  </div>
+                  
+                  <div class="promo-code-btn" role="button" tabindex="0" title="Click to copy voucher code" onclick="navigator.clipboard?.writeText('SAVE10'); if(window.shopeaseToast){window.shopeaseToast('Voucher SAVE10 copied to clipboard!', 'success');}">
+                    <span>VOUCHER:</span> <strong>SAVE10</strong>
+                  </div>
+                </div>
+
+                <div class="promo-card-actions">
+                  <button type="button" class="btn btn-outline-compact" onclick="window.shopeaseOpenQuickView('prod-09')">
+                    <span>Inspect Specs ↗</span>
+                  </button>
+                  <button type="button" class="btn btn-primary-compact" onclick="window.shopeaseQuickAdd('prod-09')">
+                    <span>Claim Deal +</span>
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 2: SMARTPULSE LABS -->
+            <article class="promo-card" data-index="1" data-product-id="prod-08">
+              <div class="promo-card-visual">
+                <img 
+                  src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80" 
+                  alt="SmartPulse GPS & Health Tracker Watch"
+                  class="promo-card-img"
+                  loading="lazy"
+                />
+                <div class="promo-timer-pill" aria-label="Time remaining for offer">
+                  <span class="timer-dot"></span>
+                  <span class="timer-digits" data-countdown="21580">05:59:40</span>
+                </div>
+              </div>
+
+              <div class="promo-card-content">
+                <div class="promo-card-header">
+                  <span class="promo-brand-badge">❖ SMARTPULSE LABS</span>
+                  <span class="promo-discount-badge badge-green">🔥 30% VIP OFFER</span>
+                </div>
+                
+                <h3 class="promo-card-title">SmartPulse GPS Watch</h3>
+                <p class="promo-card-desc">1.43" AMOLED retina display with clinical ECG &amp; 5ATM water rating.</p>
+
+                <div class="promo-card-footer">
+                  <div class="promo-price-block">
+                    <span class="promo-price-deal">Rs. 111.30</span>
+                    <span class="promo-price-old">Rs. 159.00</span>
+                  </div>
+                  
+                  <div class="promo-code-btn" role="button" tabindex="0" title="Click to copy voucher code" onclick="navigator.clipboard?.writeText('WELCOME20'); if(window.shopeaseToast){window.shopeaseToast('Voucher WELCOME20 copied!', 'success');}">
+                    <span>VOUCHER:</span> <strong>WELCOME20</strong>
+                  </div>
+                </div>
+
+                <div class="promo-card-actions">
+                  <button type="button" class="btn btn-outline-compact" onclick="window.shopeaseOpenQuickView('prod-08')">
+                    <span>Inspect Specs ↗</span>
+                  </button>
+                  <button type="button" class="btn btn-primary-compact" onclick="window.shopeaseQuickAdd('prod-08')">
+                    <span>Claim Deal +</span>
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 3: ERGOPRO SYSTEMS -->
+            <article class="promo-card" data-index="2" data-product-id="prod-07">
+              <div class="promo-card-visual">
+                <img 
+                  src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=600&q=80" 
+                  alt="ErgoPro Wireless Mechanical Keyboard"
+                  class="promo-card-img"
+                  loading="lazy"
+                />
+                <div class="promo-timer-pill" aria-label="Time remaining for offer">
+                  <span class="timer-dot"></span>
+                  <span class="timer-digits" data-countdown="9800">02:43:20</span>
+                </div>
+              </div>
+
+              <div class="promo-card-content">
+                <div class="promo-card-header">
+                  <span class="promo-brand-badge">▲ ERGOPRO SYSTEMS</span>
+                  <span class="promo-discount-badge badge-purple">⚡ 25% EXCLUSIVE</span>
+                </div>
+                
+                <h3 class="promo-card-title">ErgoPro Tri-Mode Mech</h3>
+                <p class="promo-card-desc">Hot-swap tactile switches, CNC aluminium frame, sound silicone gasket.</p>
+
+                <div class="promo-card-footer">
+                  <div class="promo-price-block">
+                    <span class="promo-price-deal">Rs. 89.62</span>
+                    <span class="promo-price-old">Rs. 119.50</span>
+                  </div>
+                  
+                  <div class="promo-code-btn" role="button" tabindex="0" title="Click to copy voucher code" onclick="navigator.clipboard?.writeText('FREESHIP'); if(window.shopeaseToast){window.shopeaseToast('Voucher FREESHIP copied!', 'success');}">
+                    <span>VOUCHER:</span> <strong>FREESHIP</strong>
+                  </div>
+                </div>
+
+                <div class="promo-card-actions">
+                  <button type="button" class="btn btn-outline-compact" onclick="window.shopeaseOpenQuickView('prod-07')">
+                    <span>Inspect Specs ↗</span>
+                  </button>
+                  <button type="button" class="btn btn-primary-compact" onclick="window.shopeaseQuickAdd('prod-07')">
+                    <span>Claim Deal +</span>
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 4: BIELLA THREADS -->
+            <article class="promo-card" data-index="3" data-product-id="prod-06">
+              <div class="promo-card-visual">
+                <img 
+                  src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=600&q=80" 
+                  alt="Pure Italian Merino Wool Knit Jumper"
+                  class="promo-card-img"
+                  loading="lazy"
+                />
+                <div class="promo-timer-pill" aria-label="Time remaining for offer">
+                  <span class="timer-dot"></span>
+                  <span class="timer-digits" data-countdown="32400">08:59:50</span>
+                </div>
+              </div>
+
+              <div class="promo-card-content">
+                <div class="promo-card-header">
+                  <span class="promo-brand-badge">◈ BIELLA THREADS</span>
+                  <span class="promo-discount-badge badge-amber">✨ 35% BATCH DROP</span>
+                </div>
+                
+                <h3 class="promo-card-title">Italian Wool Jumper</h3>
+                <p class="promo-card-desc">Spun in Biella, Italy. 19.5μ Extrafine Merino with natural temperature control.</p>
+
+                <div class="promo-card-footer">
+                  <div class="promo-price-block">
+                    <span class="promo-price-deal">Rs. 55.57</span>
+                    <span class="promo-price-old">Rs. 85.50</span>
+                  </div>
+                  
+                  <div class="promo-code-btn" role="button" tabindex="0" title="Click to copy voucher code" onclick="navigator.clipboard?.writeText('SAVE10'); if(window.shopeaseToast){window.shopeaseToast('Voucher SAVE10 copied!', 'success');}">
+                    <span>VOUCHER:</span> <strong>SAVE10</strong>
+                  </div>
+                </div>
+
+                <div class="promo-card-actions">
+                  <button type="button" class="btn btn-outline-compact" onclick="window.shopeaseOpenQuickView('prod-06')">
+                    <span>Inspect Specs ↗</span>
+                  </button>
+                  <button type="button" class="btn btn-primary-compact" onclick="window.shopeaseQuickAdd('prod-06')">
+                    <span>Claim Deal +</span>
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 5: GRAND CRU RESERVE -->
+            <article class="promo-card" data-index="4" data-product-id="prod-03">
+              <div class="promo-card-visual">
+                <img 
+                  src="https://images.unsplash.com/photo-1549007994-cb92caebd54b?auto=format&fit=crop&w=600&q=80" 
+                  alt="Luxury Swiss Dark Chocolate Truffle Box"
+                  class="promo-card-img"
+                  loading="lazy"
+                />
+                <div class="promo-timer-pill" aria-label="Time remaining for offer">
+                  <span class="timer-dot"></span>
+                  <span class="timer-digits" data-countdown="18000">04:59:50</span>
+                </div>
+              </div>
+
+              <div class="promo-card-content">
+                <div class="promo-card-header">
+                  <span class="promo-brand-badge">❖ GRAND CRU RESERVE</span>
+                  <span class="promo-discount-badge badge-rose">🎁 BOGO 50% OFF</span>
+                </div>
+                
+                <h3 class="promo-card-title">Swiss Truffle Assortment</h3>
+                <p class="promo-card-desc">72% Ecuadorian Grand Cru infused with Brittany sea-salt caramel &amp; vanilla.</p>
+
+                <div class="promo-card-footer">
+                  <div class="promo-price-block">
+                    <span class="promo-price-deal">Rs. 16.50</span>
+                    <span class="promo-price-old">Rs. 22.00</span>
+                  </div>
+                  
+                  <div class="promo-code-btn" role="button" tabindex="0" title="Click to copy voucher code" onclick="navigator.clipboard?.writeText('WELCOME20'); if(window.shopeaseToast){window.shopeaseToast('Voucher WELCOME20 copied!', 'success');}">
+                    <span>VOUCHER:</span> <strong>WELCOME20</strong>
+                  </div>
+                </div>
+
+                <div class="promo-card-actions">
+                  <button type="button" class="btn btn-outline-compact" onclick="window.shopeaseOpenQuickView('prod-03')">
+                    <span>Inspect Specs ↗</span>
+                  </button>
+                  <button type="button" class="btn btn-primary-compact" onclick="window.shopeaseQuickAdd('prod-03')">
+                    <span>Claim Deal +</span>
+                  </button>
+                </div>
+              </div>
+            </article>
+
+          </div>
+        </div>
+
       </div>
     </section>
 
     <!-- SECTION D: CREATIVE CATEGORY SHOWCASE -->
     <section class="category-showcase-section" id="categories-section" aria-label="Shop by Department">
       <div class="container">
-        
+
         <div class="section-editorial-header">
           <span class="section-kicker">THREE DISTINCT DOMAINS</span>
           <h2 class="section-editorial-title">Curated Departments</h2>
@@ -305,22 +564,21 @@
 
         <!-- Asymmetric Editorial Grid (1 Large Featured + 2 Stacked Tiles) -->
         <div class="asymmetric-category-grid">
-          
+
           <!-- Category 1: Food & Gourmet (Large Heroic Tile) -->
-          <article 
-            class="category-tile category-tile-primary" 
-            tabindex="0"
-            role="button"
+          <article class="category-tile category-tile-primary" tabindex="0" role="button"
             aria-label="Department Food and Gourmet: 3 products. Click to filter catalog."
-            onclick="window.shopeaseFilterCategory('Food')"
-          >
-            <div class="category-tile-bg" style="background-image: url('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1000&q=80');"></div>
+            onclick="window.shopeaseFilterCategory('Food')">
+            <div class="category-tile-bg"
+              style="background-image: url('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1000&q=80');">
+            </div>
             <div class="category-tile-overlay"></div>
             <div class="category-tile-content">
               <span class="category-count-badge">3 Curated Products</span>
               <h3 class="category-tile-title">Food &amp; Gourmet</h3>
               <p class="category-tile-desc">
-                Slow-fermented artisan sourdough, single-estate Ethiopian coffee, and Grand Cru Swiss dark chocolate truffles.
+                Slow-fermented artisan sourdough, single-estate Ethiopian coffee, and Grand Cru Swiss dark chocolate
+                truffles.
               </p>
               <div class="category-tile-action">
                 <span>Explore Gourmet Food</span>
@@ -330,14 +588,12 @@
           </article>
 
           <!-- Category 2: Clothing & Apparel -->
-          <article 
-            class="category-tile category-tile-secondary" 
-            tabindex="0"
-            role="button"
+          <article class="category-tile category-tile-secondary" tabindex="0" role="button"
             aria-label="Department Clothing and Apparel: 3 products. Click to filter catalog."
-            onclick="window.shopeaseFilterCategory('Clothing')"
-          >
-            <div class="category-tile-bg" style="background-image: url('https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=800&q=80');"></div>
+            onclick="window.shopeaseFilterCategory('Clothing')">
+            <div class="category-tile-bg"
+              style="background-image: url('https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=800&q=80');">
+            </div>
             <div class="category-tile-overlay"></div>
             <div class="category-tile-content">
               <span class="category-count-badge">3 Curated Products</span>
@@ -353,20 +609,19 @@
           </article>
 
           <!-- Category 3: Electronics & Tech -->
-          <article 
-            class="category-tile category-tile-secondary" 
-            tabindex="0"
-            role="button"
+          <article class="category-tile category-tile-secondary" tabindex="0" role="button"
             aria-label="Department Electronics and Tech: 4 products. Click to filter catalog."
-            onclick="window.shopeaseFilterCategory('Electronics')"
-          >
-            <div class="category-tile-bg" style="background-image: url('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80');"></div>
+            onclick="window.shopeaseFilterCategory('Electronics')">
+            <div class="category-tile-bg"
+              style="background-image: url('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80');">
+            </div>
             <div class="category-tile-overlay"></div>
             <div class="category-tile-content">
               <span class="category-count-badge">4 Curated Products</span>
               <h3 class="category-tile-title">Electronics &amp; Tech</h3>
               <p class="category-tile-desc">
-                Acoustic hybrid ANC headphones, 4K OLED monitors, tactile wireless mechanical keyboards, and GPS smartwatches.
+                Acoustic hybrid ANC headphones, 4K OLED monitors, tactile wireless mechanical keyboards, and GPS
+                smartwatches.
               </p>
               <div class="category-tile-action">
                 <span>Explore Tech</span>
@@ -382,7 +637,7 @@
     <!-- SECTION E: INTERACTIVE PRODUCT SPOTLIGHT -->
     <section class="spotlight-section" id="spotlight-section" aria-label="Curated Product Exhibition">
       <div class="container">
-        
+
         <div class="spotlight-section-top">
           <div>
             <span class="section-kicker">CURATED EXHIBIT</span>
@@ -413,7 +668,7 @@
     <!-- SECTION F: SHOP THE COLLECTION (THE 10 PRODUCTS CATALOG) -->
     <section class="catalog-section" id="catalog-section" aria-label="Product Catalog">
       <div class="container">
-        
+
         <!-- Authenticated User Welcome Banner Slot -->
         <div id="user-welcome-slot"></div>
 
@@ -421,13 +676,14 @@
           <span class="section-kicker">THE COMPLETE REPERTOIRE</span>
           <h2 class="section-editorial-title" id="catalog-heading">Shop the 10 Handcrafted Essentials</h2>
           <p class="section-subtitle">
-            All 10 products feature unique pricing, verified customer reviews, specifications, and instant shopping basket actions.
+            All 10 products feature unique pricing, verified customer reviews, specifications, and instant shopping
+            basket actions.
           </p>
         </div>
 
         <!-- Filter Toolbar -->
         <div class="filter-toolbar">
-          
+
           <div class="toolbar-left-group">
             <!-- Category Selector Pills -->
             <div id="category-pills" class="category-pills" role="group" aria-label="Filter products by department">
@@ -474,7 +730,8 @@
         <div class="manifesto-inner">
           <span class="manifesto-label">THE ETHOS</span>
           <blockquote class="manifesto-quote">
-            “Simplicity is not the absence of clutter, that's a consequence of simplicity. Simplicity is describing the purpose and place of an object.”
+            “Simplicity is not the absence of clutter, that's a consequence of simplicity. Simplicity is describing the
+            purpose and place of an object.”
           </blockquote>
           <cite class="manifesto-author">— ShopEase Design Principles</cite>
 
@@ -506,15 +763,17 @@
   <!-- ==========================================================================
        Shopping Basket Drawer (Slide-Over)
        ========================================================================== -->
-  <div id="cart-overlay" class="cart-drawer-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="cart-drawer-heading">
+  <div id="cart-overlay" class="cart-drawer-overlay" aria-hidden="true" role="dialog" aria-modal="true"
+    aria-labelledby="cart-drawer-heading">
     <aside class="cart-drawer" role="document">
-      
+
       <div class="cart-drawer-header">
         <div>
           <h2 id="cart-drawer-heading" class="modal-title">Shopping Basket</h2>
           <span class="cart-drawer-sub">Safe local client-side persistence</span>
         </div>
-        <button type="button" id="cart-close-btn" class="modal-close-btn" aria-label="Close shopping basket" title="Close basket">✕</button>
+        <button type="button" id="cart-close-btn" class="modal-close-btn" aria-label="Close shopping basket"
+          title="Close basket">✕</button>
       </div>
 
       <!-- Free Delivery Progress Meter -->
@@ -541,13 +800,8 @@
 
         <!-- Promo Code Input Form -->
         <div class="promo-form">
-          <input 
-            type="text" 
-            id="promo-input" 
-            class="promo-input" 
-            placeholder="Promo code (SAVE10, WELCOME20)" 
-            aria-label="Enter promotional discount code"
-          />
+          <input type="text" id="promo-input" class="promo-input" placeholder="Promo code (SAVE10, WELCOME20)"
+            aria-label="Enter promotional discount code" />
           <button type="button" id="promo-apply-btn" class="btn btn-secondary promo-btn">
             Apply
           </button>
@@ -584,11 +838,13 @@
   <!-- ==========================================================================
        Product Quick View / Details Modal
        ========================================================================== -->
-  <div id="quick-view-overlay" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="quick-view-title">
+  <div id="quick-view-overlay" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true"
+    aria-labelledby="quick-view-title">
     <div class="modal-card quick-view-modal-card">
       <div class="modal-header">
         <h2 id="quick-view-title" class="modal-title">Product Details</h2>
-        <button type="button" id="quick-view-close-btn" class="modal-close-btn" aria-label="Close product preview">✕</button>
+        <button type="button" id="quick-view-close-btn" class="modal-close-btn"
+          aria-label="Close product preview">✕</button>
       </div>
       <div id="quick-view-content" class="modal-body">
         <!-- Injected product details -->
@@ -599,19 +855,22 @@
   <!-- ==========================================================================
        3-Step Mock Checkout Wizard Modal
        ========================================================================== -->
-  <div id="checkout-overlay" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="checkout-modal-title">
+  <div id="checkout-overlay" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true"
+    aria-labelledby="checkout-modal-title">
     <div class="modal-card checkout-modal-card">
-      
+
       <div class="modal-header">
         <div>
           <h2 id="checkout-modal-title" class="modal-title">Secure Mock Checkout</h2>
-          <span style="font-size:0.8rem; color:var(--color-text-muted);">Academic simulation • No real transaction</span>
+          <span style="font-size:0.8rem; color:var(--color-text-muted);">Academic simulation • No real
+            transaction</span>
         </div>
-        <button type="button" id="checkout-close-btn" class="modal-close-btn" aria-label="Close checkout modal">✕</button>
+        <button type="button" id="checkout-close-btn" class="modal-close-btn"
+          aria-label="Close checkout modal">✕</button>
       </div>
 
       <div class="modal-body">
-        
+
         <!-- Multi-Step Progress Indicators -->
         <div class="checkout-stepper" aria-label="Checkout Progress">
           <div id="step-indicator-1" class="step-indicator active">
@@ -640,20 +899,22 @@
         </div>
 
         <form id="checkout-form" novalidate>
-          
+
           <!-- Step 1: Customer & Delivery Details -->
           <div id="checkout-step-1">
             <h3 class="step-heading">Delivery Address</h3>
             <div class="form-grid">
               <div class="form-group col-full">
                 <label for="checkout-fullname" class="form-label">Full Name *</label>
-                <input type="text" id="checkout-fullname" class="form-input" placeholder="e.g. Sarah Jenkins" required />
+                <input type="text" id="checkout-fullname" class="form-input" placeholder="e.g. Sarah Jenkins"
+                  required />
                 <span id="error-fullname" class="field-error"></span>
               </div>
 
               <div class="form-group">
                 <label for="checkout-email" class="form-label">Email Address *</label>
-                <input type="email" id="checkout-email" class="form-input" placeholder="e.g. sarah@example.com" required />
+                <input type="email" id="checkout-email" class="form-input" placeholder="e.g. sarah@example.com"
+                  required />
                 <span id="error-email" class="field-error"></span>
               </div>
 
@@ -665,7 +926,8 @@
 
               <div class="form-group col-full">
                 <label for="checkout-address" class="form-label">Street Address *</label>
-                <input type="text" id="checkout-address" class="form-input" placeholder="e.g. 42 Highfield Terrace" required />
+                <input type="text" id="checkout-address" class="form-input" placeholder="e.g. 42 Highfield Terrace"
+                  required />
                 <span id="error-address" class="field-error"></span>
               </div>
 
@@ -686,7 +948,7 @@
           <!-- Step 2: Mock Payment Details -->
           <div id="checkout-step-2" style="display:none;">
             <h3 class="step-heading">Mock Payment Details</h3>
-            
+
             <!-- Virtual Card Preview -->
             <div class="payment-card-preview" aria-hidden="true">
               <div class="card-chip"></div>
@@ -700,7 +962,8 @@
             <div class="form-grid">
               <div class="form-group col-full">
                 <label for="checkout-cardnumber" class="form-label">Card Number (Mock Simulation) *</label>
-                <input type="text" id="checkout-cardnumber" class="form-input" placeholder="4532 0000 0000 8892" maxlength="19" required />
+                <input type="text" id="checkout-cardnumber" class="form-input" placeholder="4532 0000 0000 8892"
+                  maxlength="19" required />
                 <span id="error-cardnumber" class="field-error"></span>
               </div>
 
@@ -712,19 +975,22 @@
 
               <div class="form-group">
                 <label for="checkout-cardexpiry" class="form-label">Expiry Date *</label>
-                <input type="text" id="checkout-cardexpiry" class="form-input" placeholder="MM/YY" maxlength="5" required />
+                <input type="text" id="checkout-cardexpiry" class="form-input" placeholder="MM/YY" maxlength="5"
+                  required />
                 <span id="error-cardexpiry" class="field-error"></span>
               </div>
 
               <div class="form-group">
                 <label for="checkout-cardcvv" class="form-label">CVV Security Code *</label>
-                <input type="password" id="checkout-cardcvv" class="form-input" placeholder="123" maxlength="4" required />
+                <input type="password" id="checkout-cardcvv" class="form-input" placeholder="123" maxlength="4"
+                  required />
                 <span id="error-cardcvv" class="field-error"></span>
               </div>
             </div>
-            
+
             <p class="mock-security-note">
-              🔒 <strong>Academic simulation note:</strong> This is an educational mock application. No genuine financial transaction occurs and no card data leaves your browser.
+              🔒 <strong>Academic simulation note:</strong> This is an educational mock application. No genuine
+              financial transaction occurs and no card data leaves your browser.
             </p>
           </div>
 
@@ -749,7 +1015,8 @@
         <button type="button" id="checkout-next-btn" class="btn btn-editorial-primary">
           Continue to Payment →
         </button>
-        <button type="submit" form="checkout-form" id="checkout-submit-btn" class="btn btn-editorial-primary" style="display:none;">
+        <button type="submit" form="checkout-form" id="checkout-submit-btn" class="btn btn-editorial-primary"
+          style="display:none;">
           🔒 Confirm &amp; Pay Mock Order
         </button>
       </div>
@@ -760,12 +1027,14 @@
   <!-- ==========================================================================
        Order History Modal
        ========================================================================== -->
-  <div id="orders-overlay" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="orders-modal-title">
+  <div id="orders-overlay" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true"
+    aria-labelledby="orders-modal-title">
     <div class="modal-card" style="max-width: 680px;">
       <div class="modal-header">
         <div>
           <h2 id="orders-modal-title" class="modal-title">Order History &amp; Receipts</h2>
-          <span style="font-size:0.8rem; color:var(--color-text-muted);">Stored persistently in browser LocalStorage</span>
+          <span style="font-size:0.8rem; color:var(--color-text-muted);">Stored persistently in browser
+            LocalStorage</span>
         </div>
         <button type="button" id="orders-close-btn" class="modal-close-btn" aria-label="Close order history">✕</button>
       </div>
@@ -781,7 +1050,7 @@
   <!-- SECTION H: REFINED STRUCTURED FOOTER -->
   <footer class="site-footer" role="contentinfo">
     <div class="container">
-      
+
       <div class="footer-top-row">
         <div class="footer-brand-col">
           <div class="brand-logo" style="margin-bottom:0.75rem;">
@@ -792,7 +1061,8 @@
             </div>
           </div>
           <p class="footer-desc">
-            ShopEase is an accessible editorial e-commerce experience curated with 10 signature products across Food, Clothing, and Technology.
+            ShopEase is an accessible editorial e-commerce experience curated with 10 signature products across Food,
+            Clothing, and Technology.
           </p>
           <div class="footer-badge-strip">
             <span class="footer-badge">Universal Design</span>
@@ -804,10 +1074,14 @@
         <div class="footer-col">
           <h4 class="footer-heading">Departments</h4>
           <ul class="footer-links">
-            <li><button type="button" class="footer-link-btn" onclick="window.shopeaseFilterCategory('Food')">Food &amp; Gourmet (3)</button></li>
-            <li><button type="button" class="footer-link-btn" onclick="window.shopeaseFilterCategory('Clothing')">Clothing &amp; Apparel (3)</button></li>
-            <li><button type="button" class="footer-link-btn" onclick="window.shopeaseFilterCategory('Electronics')">Electronics &amp; Tech (4)</button></li>
-            <li><button type="button" class="footer-link-btn" onclick="window.shopeaseFilterCategory('all')">All 10 Essentials</button></li>
+            <li><button type="button" class="footer-link-btn" onclick="window.shopeaseFilterCategory('Food')">Food &amp;
+                Gourmet (3)</button></li>
+            <li><button type="button" class="footer-link-btn"
+                onclick="window.shopeaseFilterCategory('Clothing')">Clothing &amp; Apparel (3)</button></li>
+            <li><button type="button" class="footer-link-btn"
+                onclick="window.shopeaseFilterCategory('Electronics')">Electronics &amp; Tech (4)</button></li>
+            <li><button type="button" class="footer-link-btn" onclick="window.shopeaseFilterCategory('all')">All 10
+                Essentials</button></li>
           </ul>
         </div>
 
@@ -817,7 +1091,8 @@
             <li><a href="customer-dashboard.html">👤 Customer Dashboard</a></li>
             <li><a href="admin-dashboard.html">🛡️ Admin Console</a></li>
             <li><a href="login.html">Sign In / Account</a></li>
-            <li><button type="button" class="footer-link-btn" onclick="document.getElementById('orders-toggle-btn')?.click()">Past Orders &amp; Receipts</button></li>
+            <li><button type="button" class="footer-link-btn"
+                onclick="document.getElementById('orders-toggle-btn')?.click()">Past Orders &amp; Receipts</button></li>
           </ul>
         </div>
 
@@ -827,15 +1102,18 @@
           <ul class="footer-voucher-list">
             <li>
               <code>SAVE10</code> — 10% off entire basket
-              <button type="button" class="voucher-apply-btn" onclick="window.shopeaseApplyVoucher('SAVE10')">Apply</button>
+              <button type="button" class="voucher-apply-btn"
+                onclick="window.shopeaseApplyVoucher('SAVE10')">Apply</button>
             </li>
             <li>
               <code>WELCOME20</code> — 20% first order discount
-              <button type="button" class="voucher-apply-btn" onclick="window.shopeaseApplyVoucher('WELCOME20')">Apply</button>
+              <button type="button" class="voucher-apply-btn"
+                onclick="window.shopeaseApplyVoucher('WELCOME20')">Apply</button>
             </li>
             <li>
               <code>FREESHIP</code> — Free express delivery
-              <button type="button" class="voucher-apply-btn" onclick="window.shopeaseApplyVoucher('FREESHIP')">Apply</button>
+              <button type="button" class="voucher-apply-btn"
+                onclick="window.shopeaseApplyVoucher('FREESHIP')">Apply</button>
             </li>
           </ul>
         </div>
@@ -843,7 +1121,8 @@
 
       <div class="footer-bottom-row">
         <div>
-          © 2026 ShopEase Retail Technologies Inc. All rights reserved. Built for Human Computer Interaction University Assignment.
+          © 2026 ShopEase Retail Technologies Inc. All rights reserved. Built for Human Computer Interaction University
+          Assignment.
         </div>
         <div class="footer-legal-links">
           <span>Privacy Notice</span> • <span>Terms of Service</span> • <span>Universal Accessibility Statement</span>
@@ -856,4 +1135,5 @@
   <!-- Application Scripts -->
   <script type="module" src="app.js"></script>
 </body>
+
 </html>

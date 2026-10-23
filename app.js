@@ -272,7 +272,7 @@ function getFilteredAndSortedProducts() {
   // Search filter
   if (state.searchQuery.trim() !== '') {
     const q = state.searchQuery.toLowerCase().trim();
-    products = products.filter(p => 
+    products = products.filter(p =>
       p.name.toLowerCase().includes(q) ||
       p.description.toLowerCase().includes(q) ||
       p.category.toLowerCase().includes(q) ||
@@ -1714,18 +1714,170 @@ function initProductSpotlight() {
 }
 
 /* ==========================================================================
-   Cinematic Video / Media Strip Controller
+   Promotions, Brands & Discounts Swapping Deck Controller
    ========================================================================== */
 function initCinematicMediaStrip() {
   const strip = document.getElementById('cinematic-strip');
   const btn = document.getElementById('video-motion-btn');
   if (!strip || !btn) return;
 
+  const deck = document.getElementById('promo-swap-deck');
+  const cards = Array.from(document.querySelectorAll('.promo-card'));
+  const dots = Array.from(document.querySelectorAll('.promo-dot'));
+  const prevBtn = document.getElementById('promo-prev-btn');
+  const nextBtn = document.getElementById('promo-next-btn');
+
+  let currentCardIndex = 0;
   let isPaused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let autoSwapTimer = null;
+  let isHovered = false;
+
+  function updateDeckClasses() {
+    if (!cards.length) return;
+    const total = cards.length;
+
+    cards.forEach((card, i) => {
+      let diff = (i - currentCardIndex + total) % total;
+      if (diff > total / 2) diff -= total;
+
+      card.classList.remove('card-active', 'card-next', 'card-prev', 'card-far-right', 'card-far-left');
+
+      if (diff === 0) {
+        card.classList.add('card-active');
+        card.setAttribute('aria-hidden', 'false');
+      } else if (diff === 1) {
+        card.classList.add('card-next');
+        card.setAttribute('aria-hidden', 'true');
+      } else if (diff === -1) {
+        card.classList.add('card-prev');
+        card.setAttribute('aria-hidden', 'true');
+      } else if (diff > 1) {
+        card.classList.add('card-far-right');
+        card.setAttribute('aria-hidden', 'true');
+      } else {
+        card.classList.add('card-far-left');
+        card.setAttribute('aria-hidden', 'true');
+      }
+    });
+
+    dots.forEach((dot, idx) => {
+      const isActive = idx === currentCardIndex;
+      dot.classList.toggle('active', isActive);
+      dot.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+  }
+
+  function goToCard(idx) {
+    if (!cards.length) return;
+    currentCardIndex = (idx + cards.length) % cards.length;
+    updateDeckClasses();
+    const activeTitle = cards[currentCardIndex]?.querySelector('.promo-card-title')?.textContent || `Promotion ${currentCardIndex + 1}`;
+    announce(`Showing promotion: ${activeTitle}`);
+  }
+
+  function startAutoSwap() {
+    stopAutoSwap();
+    if (isPaused || isHovered) return;
+    autoSwapTimer = setInterval(() => {
+      goToCard(currentCardIndex + 1);
+    }, 4200);
+  }
+
+  function stopAutoSwap() {
+    if (autoSwapTimer) {
+      clearInterval(autoSwapTimer);
+      autoSwapTimer = null;
+    }
+  }
+
+  function resetAutoSwap() {
+    stopAutoSwap();
+    startAutoSwap();
+  }
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      goToCard(currentCardIndex - 1);
+      resetAutoSwap();
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      goToCard(currentCardIndex + 1);
+      resetAutoSwap();
+    });
+  }
+
+  dots.forEach((dot, idx) => {
+    dot.addEventListener('click', () => {
+      goToCard(idx);
+      resetAutoSwap();
+    });
+  });
+
+  cards.forEach((card) => {
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.promo-code-btn')) {
+        return;
+      }
+      if (card.classList.contains('card-next')) {
+        goToCard(currentCardIndex + 1);
+        resetAutoSwap();
+      } else if (card.classList.contains('card-prev')) {
+        goToCard(currentCardIndex - 1);
+        resetAutoSwap();
+      }
+    });
+  });
+
+  if (deck) {
+    deck.addEventListener('mouseenter', () => {
+      isHovered = true;
+      stopAutoSwap();
+    });
+    deck.addEventListener('mouseleave', () => {
+      isHovered = false;
+      startAutoSwap();
+    });
+    deck.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        goToCard(currentCardIndex + 1);
+        resetAutoSwap();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        goToCard(currentCardIndex - 1);
+        resetAutoSwap();
+      }
+    });
+  }
+
+  // Live Countdown Timer Engine
+  const timeElements = document.querySelectorAll('.timer-digits');
+  if (timeElements.length) {
+    setInterval(() => {
+      timeElements.forEach((el) => {
+        let remaining = parseInt(el.getAttribute('data-countdown') || '14400', 10);
+        remaining = Math.max(0, remaining - 1);
+        el.setAttribute('data-countdown', String(remaining));
+        const hours = String(Math.floor(remaining / 3600)).padStart(2, '0');
+        const mins = String(Math.floor((remaining % 3600) / 60)).padStart(2, '0');
+        const secs = String(remaining % 60).padStart(2, '0');
+        el.textContent = `${hours}:${mins}:${secs}`;
+      });
+    }, 1000);
+  }
+
+  // Reduced motion initial check
   if (isPaused) {
     strip.classList.add('is-paused');
     btn.setAttribute('aria-pressed', 'true');
     btn.innerHTML = '<span>▶ Resume Visual Motion</span>';
+  } else {
+    startAutoSwap();
   }
 
   btn.addEventListener('click', () => {
@@ -1733,9 +1885,16 @@ function initCinematicMediaStrip() {
     strip.classList.toggle('is-paused', isPaused);
     btn.setAttribute('aria-pressed', isPaused ? 'true' : 'false');
     btn.innerHTML = isPaused ? '<span>▶ Resume Visual Motion</span>' : '<span>⏸ Pause Visual Motion</span>';
-    announce(isPaused ? 'Cinematic media motion paused.' : 'Cinematic media motion resumed.');
+    if (isPaused) {
+      stopAutoSwap();
+    } else {
+      startAutoSwap();
+    }
+    announce(isPaused ? 'Visual motion paused.' : 'Visual motion resumed.');
     showToast(isPaused ? 'Visual motion paused' : 'Visual motion resumed', 'info');
   });
+
+  updateDeckClasses();
 }
 
 /* ==========================================================================
