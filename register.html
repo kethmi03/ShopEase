@@ -159,7 +159,7 @@
           </div>
 
           <!-- Contact Phone -->
-          <div class="form-group">
+          <div class="form-group col-full">
             <label for="reg-phone" class="form-label">
               <span>Contact Phone</span>
             </label>
@@ -173,55 +173,25 @@
             />
           </div>
 
-          <!-- Postal Code -->
-          <div class="form-group">
-            <label for="reg-postcode" class="form-label">
-              <span>Postal Code</span>
-            </label>
-            <input 
-              type="text" 
-              id="reg-postcode" 
-              name="postcode" 
-              class="form-input" 
-              placeholder="e.g. BS1 5AH" 
-              autocomplete="postal-code" 
-            />
-          </div>
-
-          <!-- Street Address -->
-          <div class="form-group">
+          <!-- Address -->
+          <div class="form-group col-full">
             <label for="reg-address" class="form-label">
-              <span>Street Address</span>
+              <span>Address</span>
             </label>
             <input 
               type="text" 
               id="reg-address" 
               name="address" 
               class="form-input" 
-              placeholder="e.g. 15 Victoria Crescent" 
+              placeholder="e.g. 15 Victoria Crescent, Colombo" 
               autocomplete="street-address" 
-            />
-          </div>
-
-          <!-- City / Town -->
-          <div class="form-group">
-            <label for="reg-city" class="form-label">
-              <span>City / Town</span>
-            </label>
-            <input 
-              type="text" 
-              id="reg-city" 
-              name="city" 
-              class="form-input" 
-              placeholder="e.g. Bristol" 
-              autocomplete="address-level2" 
             />
           </div>
 
           <!-- Password Field -->
           <div class="form-group col-full">
             <label for="reg-password" class="form-label">
-              <span>Password (Minimum 6 characters) <span aria-hidden="true">*</span></span>
+              <span>Password <span aria-hidden="true">*</span></span>
             </label>
             <div class="password-input-group">
               <input 
@@ -229,7 +199,7 @@
                 id="reg-password" 
                 name="password" 
                 class="form-input" 
-                placeholder="Choose a secure password" 
+                placeholder="Enter password" 
                 autocomplete="new-password" 
                 required 
                 aria-required="true"
@@ -244,17 +214,6 @@
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
               </button>
-            </div>
-            
-            <!-- Live Password Strength Meter -->
-            <div class="password-strength-container" aria-live="polite">
-              <div class="password-strength-bar">
-                <div id="password-strength-fill" class="password-strength-fill"></div>
-              </div>
-              <div class="password-strength-label">
-                <span>Strength:</span>
-                <span id="password-strength-text">Minimum 6 characters</span>
-              </div>
             </div>
             <span id="error-reg-password" class="field-error" role="alert"></span>
           </div>

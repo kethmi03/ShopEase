@@ -1,22 +1,44 @@
 /**
  * ShopEase Customer Dashboard Controller
- * Handles customer session verification, KPI statistics,
- * order history rendering, offers vouchers, address management, and navigation.
+ * Implements all 5 customer core modules:
+ * 1. Home / Dashboard (Welcome message, KPI stats, featured products, search, 3-category navigation)
+ * 2. Product Listing & Details (All 10 products, image, price, stock, category, Add to Cart, disabled out-of-stock, View Details modal)
+ * 3. Shopping Basket / Cart (Added products, +/- stepper, remove, subtotal & total, checkout button)
+ * 4. Checkout & Mock Payment (Order summary, customer details, mock payment methods, confirm/pay now, success confirmation with SE-XXXXXX ID)
+ * 5. My Orders (Order history from LocalStorage, date, total, ordered items, payment status, order status, printable invoice)
  */
 
 import { Storage } from './storage.js';
 import { Auth } from './auth.js';
 import { Cart } from './cart.js';
-import { CURRENCY } from './products.js';
+import { Checkout } from './checkout.js';
+import { CURRENCY, INITIAL_PRODUCTS } from './products.js';
 
-// Application state for dashboard
+// Application state for Customer Dashboard
 const state = {
   currentUser: null,
-  activeModal: null // 'cart' | 'address-edit'
+  activeCategory: 'ALL',
+  searchQuery: '',
+  sortBy: 'featured',
+  inStockOnly: false,
+  selectedProductDetails: null
+};
+
+// Universal Design Theme Management
+const THEMES = ['light', 'dark', 'high-contrast'];
+const THEME_ICONS = {
+  'light': '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>',
+  'dark': '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>',
+  'high-contrast': '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"></path></svg>'
+};
+const THEME_NAMES = {
+  'light': 'Light',
+  'dark': 'Dark',
+  'high-contrast': 'High Contrast'
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Authentication Guard: Retrieve active user or restore registered customer
+  // 1. Authentication Guard: Retrieve active user or restore verified customer
   let user = Auth.getCurrentUser();
   if (!user) {
     const users = Storage.getUsers();
@@ -37,38 +59,55 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2. Initialize Accessibility Controls
   initAccessibilityControls();
 
-  // 3. Render Dashboard Sections with graceful guards
-  if (state.currentUser.role === 'Admin') {
+  // 3. Show Admin Console link if user has Admin privileges
+  const emailLower = (state.currentUser.email || '').toLowerCase();
+  const isAdmin = state.currentUser.role === 'Admin' || emailLower === 'admin@gmail.com' || emailLower === 'admin@shopease.com' || emailLower.includes('admin');
+  if (isAdmin) {
     const adminBtn = document.getElementById('dash-admin-btn');
     if (adminBtn) adminBtn.style.display = 'inline-flex';
   }
 
-  try { renderDashboardHeader(); } catch (e) { console.warn('Header render error:', e); }
-  try { renderKPIs(); } catch (e) { console.warn('KPI render error:', e); }
-  try { renderOrdersSection(); } catch (e) { console.warn('Orders render error:', e); }
-  try { renderWishlistSection(); } catch (e) { console.warn('Wishlist render error:', e); }
-  try { renderOffersSection(); } catch (e) { console.warn('Offers render error:', e); }
-  try { renderBasketPreview(); } catch (e) { console.warn('Basket render error:', e); }
-  try { renderProfileSection(); } catch (e) { console.warn('Profile render error:', e); }
+  // 4. Initialize Event Listeners & Filter Handlers
+  initEventHandlers();
 
-  // 4. Initialize Navigation and Event Listeners
-  initDashboardEvents();
-  updateCartBadge();
+  // 5. Render All Dashboard Modules
+  renderAllModules();
+
+  // 6. Cross-tab and Storage Synchronization
+  window.addEventListener('storage', (e) => {
+    if (e.key && e.key.startsWith('shopease_')) {
+      renderAllModules();
+    }
+  });
+  window.addEventListener('shopease:inventory-updated', renderAllModules);
+  window.addEventListener('shopease:orders-updated', () => {
+    renderOrdersSection();
+    renderKPIs();
+  });
+  window.addEventListener('shopease:cart-updated', () => {
+    renderBasketPreview();
+    updateCartBadge();
+    renderDrawerCart();
+  });
 });
 
 /**
- * Universal Design Preferences (Theme & Font Scaling)
-const THEMES = ['light', 'dark', 'high-contrast'];
-const THEME_ICONS = {
-  'light': '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>',
-  'dark': '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>',
-  'high-contrast': '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"></path></svg>'
-};
-const THEME_NAMES = {
-  'light': 'Light',
-  'dark': 'Dark',
-  'high-contrast': 'High Contrast'
-};
+ * Universal Accessibility & Theme Controller
+ */
+function initAccessibilityControls() {
+  const settings = Storage.getSettings();
+  applyTheme(settings.theme || 'light');
+  document.documentElement.setAttribute('data-font-size', settings.fontSize || 'normal');
+
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  themeToggleBtn?.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const nextIdx = (THEMES.indexOf(currentTheme) + 1) % THEMES.length;
+    const nextTheme = THEMES[nextIdx];
+    applyTheme(nextTheme);
+    announce(`Theme switched to ${THEME_NAMES[nextTheme]} mode.`);
+  });
+}
 
 function applyTheme(theme) {
   const targetTheme = THEMES.includes(theme) ? theme : 'light';
@@ -87,30 +126,96 @@ function applyTheme(theme) {
 }
 
 /**
- * Universal Design Preferences (Theme Management - Icon Only)
+ * Master Render for all dashboard components
  */
-function initAccessibilityControls() {
-  const settings = Storage.getSettings();
-  applyTheme(settings.theme || 'light');
-  document.documentElement.setAttribute('data-font-size', settings.fontSize || 'normal');
+function renderAllModules() {
+  try { renderDashboardHeader(); } catch (e) { console.warn('Header error:', e); }
+  try { renderKPIs(); } catch (e) { console.warn('KPI error:', e); }
+  try { renderFeaturedProducts(); } catch (e) { console.warn('Featured error:', e); }
+  try { renderCategoryBadges(); } catch (e) { console.warn('Cat badges error:', e); }
+  try { renderAllProducts(); } catch (e) { console.warn('Products error:', e); }
+  try { renderBasketPreview(); } catch (e) { console.warn('Basket error:', e); }
+  try { renderDrawerCart(); } catch (e) { console.warn('Drawer error:', e); }
+  try { renderOrdersSection(); } catch (e) { console.warn('Orders error:', e); }
+  try { renderOffersSection(); } catch (e) { console.warn('Offers error:', e); }
+  try { renderWishlistSection(); } catch (e) { console.warn('Wishlist error:', e); }
+  try { renderProfileSection(); } catch (e) { console.warn('Profile error:', e); }
+  updateCartBadge();
+}
 
-  const themeToggleBtn = document.getElementById('theme-toggle-btn');
-  themeToggleBtn?.addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    const nextIdx = (THEMES.indexOf(currentTheme) + 1) % THEMES.length;
-    const nextTheme = THEMES[nextIdx];
-    applyTheme(nextTheme);
-    announce(`Theme switched to ${THEME_NAMES[nextTheme]} mode.`);
+/**
+ * Initialize Event Listeners
+ */
+function initEventHandlers() {
+  // Logout button
+  document.getElementById('dash-logout-btn')?.addEventListener('click', () => {
+    Auth.logout();
+    window.location.href = 'login.html';
+  });
+
+  // Cart Button in Header
+  document.getElementById('dash-cart-btn')?.addEventListener('click', () => {
+    window.shopeaseOpenDashboardCart();
+  });
+
+  // Cart Drawer Close Button
+  document.getElementById('dash-cart-close-btn')?.addEventListener('click', () => {
+    window.shopeaseCloseDashboardCart();
+  });
+  document.getElementById('dash-cart-overlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'dash-cart-overlay') {
+      window.shopeaseCloseDashboardCart();
+    }
+  });
+
+  // Search Input for Products
+  const searchInput = document.getElementById('dash-search-input');
+  const searchClear = document.getElementById('dash-search-clear');
+  searchInput?.addEventListener('input', (e) => {
+    state.searchQuery = e.target.value.toLowerCase().trim();
+    if (searchClear) searchClear.style.display = state.searchQuery ? 'block' : 'none';
+    renderAllProducts();
+  });
+  searchClear?.addEventListener('click', () => {
+    if (searchInput) searchInput.value = '';
+    state.searchQuery = '';
+    searchClear.style.display = 'none';
+    renderAllProducts();
+  });
+
+  // Category filter pills
+  const categoryPills = document.querySelectorAll('#dash-category-pills .category-pill-btn');
+  categoryPills.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cat = btn.getAttribute('data-category');
+      categoryPills.forEach(b => b.classList.toggle('active', b === btn));
+      state.activeCategory = cat;
+      renderAllProducts();
+    });
+  });
+
+  // In-stock only toggle
+  document.getElementById('dash-in-stock-toggle')?.addEventListener('change', (e) => {
+    state.inStockOnly = e.target.checked;
+    renderAllProducts();
+  });
+
+  // Sort dropdown
+  document.getElementById('dash-sort-select')?.addEventListener('change', (e) => {
+    state.sortBy = e.target.value;
+    renderAllProducts();
   });
 }
 
 /**
- * Renders Welcome Hero Header
+ * ============================================================================
+ * MODULE 1: HOME / DASHBOARD (Welcome message, KPIs, Featured Products)
+ * ============================================================================
  */
 function renderDashboardHeader() {
   const user = state.currentUser;
   const welcomeSlot = document.getElementById('dash-welcome-slot');
-  if (!welcomeSlot) return;
+  if (!welcomeSlot || !user) return;
 
   const fullName = user.fullName || user.email?.split('@')[0] || 'Member';
   const initials = fullName
@@ -121,7 +226,8 @@ function renderDashboardHeader() {
     .substring(0, 2)
     .toUpperCase() || 'U';
 
-  const isAdmin = user.role === 'Admin';
+  const emailLower = (user.email || '').toLowerCase();
+  const isAdmin = user.role === 'Admin' || emailLower === 'admin@gmail.com';
 
   welcomeSlot.innerHTML = `
     ${isAdmin ? `
@@ -144,84 +250,91 @@ function renderDashboardHeader() {
         <div class="dashboard-avatar-large" aria-hidden="true">${initials}</div>
         <div>
           <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
-            <h1 class="dashboard-hero-title">Welcome back, ${escapeHtml(user.fullName)}!</h1>
+            <h1 class="dashboard-hero-title">Welcome back, ${escapeHtml(fullName)}!</h1>
             <span style="font-size:0.75rem; font-weight:800; padding:0.2rem 0.6rem; border-radius:var(--radius-full); background:var(--color-brand-primary); color:#ffffff; text-transform:uppercase;">
               ${escapeHtml(user.role || 'Verified Member')}
             </span>
           </div>
-          <div class="dashboard-hero-meta">
-            <span>📧 ${escapeHtml(user.email)}</span>
-            <span>📞 ${escapeHtml(user.phone || '07700 900123')}</span>
-            <span>📍 ${escapeHtml(user.city || 'London')}</span>
+          <p class="dashboard-hero-subtitle">
+            ${escapeHtml(user.email)} • Handcrafted Commerce Member Since ${new Date(user.createdAt || Date.now()).getFullYear()}
+          </p>
+          <div style="font-size:0.825rem; color:var(--color-text-secondary); margin-top:0.35rem; display:flex; gap:1.25rem; flex-wrap:wrap;">
+            <span>📍 Delivery: <strong>${escapeHtml(user.address || 'Colombo, Sri Lanka')}</strong></span>
+            <span>📞 Contact: <strong>${escapeHtml(user.phone || '+94 77 123 4567')}</strong></span>
           </div>
         </div>
       </div>
 
       <div class="dashboard-hero-actions">
-        ${isAdmin ? `
-          <a href="admin-dashboard.html" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:0.4rem; background:linear-gradient(135deg, #1e40af, #3b82f6); color:#fff; text-decoration:none;">
-            <span>🛡️</span>
-            <span>Admin Console</span>
-          </a>
-        ` : ''}
-        <a href="index.html#catalog-section" class="btn btn-secondary" style="display:inline-flex; align-items:center; gap:0.4rem; text-decoration:none;">
-          <span>🛍️</span>
-          <span>Explore Products</span>
+        <a href="#dash-products-section" class="btn btn-primary" style="padding:0.5rem 1rem; font-size:0.875rem;">
+          Explore All 10 Products →
         </a>
-        <button type="button" class="btn btn-secondary" id="dash-hero-edit-profile-btn" style="display:inline-flex; align-items:center; gap:0.4rem;">
-          <span>✏️</span>
-          <span>Edit Address</span>
+        <button type="button" class="btn btn-secondary" style="padding:0.5rem 1rem; font-size:0.875rem;" onclick="window.customerOpenCheckout()">
+          Mock Checkout (Cart)
         </button>
       </div>
     </div>
   `;
-
-  document.getElementById('dash-hero-edit-profile-btn')?.addEventListener('click', openAddressEditModal);
 }
 
-/**
- * Renders Quick KPI Summary Cards
- */
 function renderKPIs() {
   const kpiContainer = document.getElementById('dash-kpi-container');
   if (!kpiContainer) return;
 
   const orders = Storage.getOrders();
-  const summary = Cart.getSummary();
-  const totalSpent = orders.reduce((sum, o) => sum + (o.financials?.grandTotal || 0), 0);
-  const loyaltyPoints = Math.floor(totalSpent * 10) + 100;
+  const userOrders = orders.filter(o => {
+    return o.customer?.email === state.currentUser?.email ||
+           o.customer?.fullName === state.currentUser?.fullName ||
+           !o.customer?.email;
+  });
+
+  const cartSummary = Cart.getSummary();
+  const totalSpent = userOrders.reduce((sum, o) => sum + (o.financials?.grandTotal || 0), 0);
+  const wishlist = Storage.getWishlist();
 
   kpiContainer.innerHTML = `
     <div class="dashboard-kpi-grid">
       <div class="dashboard-kpi-card">
-        <div class="dashboard-kpi-icon" aria-hidden="true" style="color:var(--color-brand-primary);">📦</div>
-        <div>
-          <div class="dashboard-kpi-val">${orders.length}</div>
-          <div class="dashboard-kpi-label">Completed Orders</div>
+        <div class="kpi-icon-wrap" style="background:var(--color-info-bg); color:var(--color-info);">
+          <span>🛍️</span>
+        </div>
+        <div class="kpi-body">
+          <div class="kpi-number">${cartSummary.itemCount}</div>
+          <div class="kpi-label">Units in Active Basket</div>
+          <div style="font-size:0.75rem; color:var(--color-text-muted); margin-top:0.25rem;">Subtotal: Rs. ${cartSummary.subtotal.toFixed(2)}</div>
         </div>
       </div>
 
       <div class="dashboard-kpi-card">
-        <div class="dashboard-kpi-icon" aria-hidden="true" style="color:var(--color-success);">💳</div>
-        <div>
-          <div class="dashboard-kpi-val">${CURRENCY.format(totalSpent)}</div>
-          <div class="dashboard-kpi-label">Total Amount Spent</div>
+        <div class="kpi-icon-wrap" style="background:var(--color-success-bg); color:var(--color-success);">
+          <span>📦</span>
+        </div>
+        <div class="kpi-body">
+          <div class="kpi-number">${userOrders.length}</div>
+          <div class="kpi-label">Completed Orders</div>
+          <div style="font-size:0.75rem; color:var(--color-text-muted); margin-top:0.25rem;">Total spent: Rs. ${totalSpent.toFixed(2)}</div>
         </div>
       </div>
 
       <div class="dashboard-kpi-card">
-        <div class="dashboard-kpi-icon" aria-hidden="true" style="color:#d97706;">⭐</div>
-        <div>
-          <div class="dashboard-kpi-val" style="color:var(--color-brand-primary);">${loyaltyPoints} pts</div>
-          <div class="dashboard-kpi-label">Loyalty Rewards Balance</div>
+        <div class="kpi-icon-wrap" style="background:var(--color-warning-bg); color:var(--color-warning);">
+          <span>💖</span>
+        </div>
+        <div class="kpi-body">
+          <div class="kpi-number">${wishlist.length}</div>
+          <div class="kpi-label">Saved Wishlist Objects</div>
+          <div style="font-size:0.75rem; color:var(--color-text-muted); margin-top:0.25rem;">Ready for instant basket add</div>
         </div>
       </div>
 
       <div class="dashboard-kpi-card">
-        <div class="dashboard-kpi-icon" aria-hidden="true" style="color:var(--color-info);">🛍️</div>
-        <div>
-          <div class="dashboard-kpi-val">${summary.totalItems}</div>
-          <div class="dashboard-kpi-label">Items in Basket (${CURRENCY.format(summary.grandTotal)})</div>
+        <div class="kpi-icon-wrap" style="background:rgba(216,92,54,0.12); color:var(--color-brand-primary);">
+          <span>🏷️</span>
+        </div>
+        <div class="kpi-body">
+          <div class="kpi-number">3</div>
+          <div class="kpi-label">Promotional Vouchers</div>
+          <div style="font-size:0.75rem; color:var(--color-text-muted); margin-top:0.25rem;">WELCOME10, EASE20, VIP50</div>
         </div>
       </div>
     </div>
@@ -229,25 +342,918 @@ function renderKPIs() {
 }
 
 /**
- * Renders Orders History
+ * Featured Products Spotlight (Featured products)
+ */
+function renderFeaturedProducts() {
+  const container = document.getElementById('dash-featured-container');
+  if (!container) return;
+
+  const products = Storage.getProducts();
+  // Pick 3 standout products across the 3 categories
+  const featured = [
+    products.find(p => p.category === 'Food') || products[0],
+    products.find(p => p.category === 'Clothing') || products[1],
+    products.find(p => p.category === 'Electronics') || products[2]
+  ].filter(Boolean);
+
+  container.innerHTML = `
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.25rem;">
+      ${featured.map(product => {
+        const isOutOfStock = product.stock <= 0;
+        return `
+          <div class="product-card" style="border:1px solid var(--color-border); border-radius:var(--radius-lg); overflow:hidden; background:var(--color-surface);">
+            <div class="card-media-wrapper" style="position:relative; aspect-ratio:16/10; overflow:hidden;">
+              <img src="${product.image}" alt="${escapeHtml(product.name)}" style="width:100%; height:100%; object-fit:cover;" />
+              <div class="card-badges" style="position:absolute; top:0.75rem; left:0.75rem; display:flex; gap:0.4rem;">
+                <span class="badge badge-category" style="background:rgba(0,0,0,0.65); color:#fff; font-size:0.72rem; padding:0.2rem 0.5rem; border-radius:var(--radius-full);">${product.category}</span>
+                <span style="background:var(--color-brand-primary); color:#fff; font-size:0.72rem; font-weight:700; padding:0.2rem 0.5rem; border-radius:var(--radius-full);">Featured</span>
+              </div>
+            </div>
+            <div class="card-body" style="padding:1rem;">
+              <h4 style="font-size:1rem; font-weight:700; margin-bottom:0.35rem; color:var(--color-text-primary);">${escapeHtml(product.name)}</h4>
+              <p style="font-size:0.8rem; color:var(--color-text-secondary); line-height:1.4; margin-bottom:0.75rem; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+                ${escapeHtml(product.description)}
+              </p>
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
+                <span style="font-size:1.1rem; font-weight:800; color:var(--color-brand-primary);">Rs. ${product.price.toFixed(2)}</span>
+                <span style="font-size:0.75rem; color:var(--color-text-muted);">Stock: ${product.stock} units</span>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+                <button 
+                  type="button" 
+                  class="btn btn-primary" 
+                  style="font-size:0.8rem; padding:0.4rem 0.6rem;" 
+                  onclick="window.customerAddToCart('${product.id}')"
+                  ${isOutOfStock ? 'disabled aria-disabled="true"' : ''}
+                >
+                  ${isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                </button>
+                <button 
+                  type="button" 
+                  class="btn btn-secondary" 
+                  style="font-size:0.8rem; padding:0.4rem 0.6rem;" 
+                  onclick="window.customerOpenProductDetails('${product.id}')"
+                >
+                  View Details
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+/**
+ * ============================================================================
+ * MODULE 2: CATEGORIES 3 NAVIGATION
+ * ============================================================================
+ */
+function renderCategoryBadges() {
+  const products = Storage.getProducts();
+  const foodCount = products.filter(p => p.category === 'Food').length;
+  const clothCount = products.filter(p => p.category === 'Clothing').length;
+  const elecCount = products.filter(p => p.category === 'Electronics').length;
+
+  const bFood = document.getElementById('cat-badge-food');
+  const bCloth = document.getElementById('cat-badge-clothing');
+  const bElec = document.getElementById('cat-badge-electronics');
+
+  if (bFood) bFood.textContent = `${foodCount} Curated Products`;
+  if (bCloth) bCloth.textContent = `${clothCount} Curated Products`;
+  if (bElec) bElec.textContent = `${elecCount} Curated Products`;
+}
+
+// Global category click filter
+window.customerFilterCategory = function(category) {
+  state.activeCategory = category;
+
+  // Update pills active state
+  document.querySelectorAll('#dash-category-pills .category-pill-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-category') === category);
+  });
+
+  renderAllProducts();
+
+  // Smooth scroll down to products section
+  const section = document.getElementById('dash-products-section');
+  if (section) {
+    section.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  showToast(`Filtered catalogue for: ${category}`, 'info');
+};
+
+/**
+ * ============================================================================
+ * MODULE 3: PRODUCT LISTING & DETAILS (ALL 10 PRODUCTS)
+ * ============================================================================
+ */
+function renderAllProducts() {
+  const grid = document.getElementById('dash-product-grid');
+  const countLabel = document.getElementById('dash-product-count');
+  if (!grid) return;
+
+  let products = Storage.getProducts();
+
+  // 1. Filter by category
+  if (state.activeCategory !== 'ALL') {
+    products = products.filter(p => p.category.toLowerCase() === state.activeCategory.toLowerCase());
+  }
+
+  // 2. Filter by search query
+  if (state.searchQuery) {
+    products = products.filter(p => {
+      const q = state.searchQuery;
+      return (
+        p.name.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q)
+      );
+    });
+  }
+
+  // 3. Filter by in-stock toggle
+  if (state.inStockOnly) {
+    products = products.filter(p => p.stock > 0);
+  }
+
+  // 4. Sort
+  products.sort((a, b) => {
+    switch (state.sortBy) {
+      case 'price-asc': return a.price - b.price;
+      case 'price-desc': return b.price - a.price;
+      case 'stock': return b.stock - a.stock;
+      case 'name': return a.name.localeCompare(b.name);
+      default: return 0; // featured order preserved
+    }
+  });
+
+  if (countLabel) {
+    countLabel.textContent = `${products.length} product${products.length === 1 ? '' : 's'} displayed`;
+  }
+
+  if (products.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align:center; padding:3rem 1.5rem; background:var(--color-surface); border:1px dashed var(--color-border); border-radius:var(--radius-lg);">
+        <div style="font-size:2.5rem; margin-bottom:0.75rem;">🔍</div>
+        <h3 style="font-family:var(--font-serif); font-size:1.25rem; margin-bottom:0.5rem;">No matching products found</h3>
+        <p style="font-size:0.875rem; color:var(--color-text-secondary); margin-bottom:1.25rem;">Try modifying your search or clearing the active department filter.</p>
+        <button type="button" class="btn btn-secondary" onclick="window.customerResetFilters()">Reset All Filters</button>
+      </div>
+    `;
+    return;
+  }
+
+  const wishlist = Storage.getWishlist();
+
+  grid.innerHTML = products.map(product => {
+    const isOutOfStock = product.stock <= 0;
+    const isLowStock = product.stock > 0 && product.stock <= 3;
+    const isWishlisted = wishlist.includes(product.id);
+
+    const stockBadge = isOutOfStock
+      ? `<span class="badge badge-stock-out" style="background:var(--color-danger); color:#fff; font-size:0.72rem; padding:0.2rem 0.5rem; border-radius:var(--radius-full);">Out of Stock</span>`
+      : isLowStock
+        ? `<span class="badge badge-stock-low" style="background:var(--color-warning); color:#fff; font-size:0.72rem; padding:0.2rem 0.5rem; border-radius:var(--radius-full);">Low Stock (${product.stock})</span>`
+        : `<span class="badge badge-stock-in" style="background:var(--color-success); color:#fff; font-size:0.72rem; padding:0.2rem 0.5rem; border-radius:var(--radius-full);">In Stock (${product.stock})</span>`;
+
+    return `
+      <article class="product-card" id="card-${product.id}">
+        <div class="card-media-wrapper">
+          <img 
+            src="${product.image}" 
+            alt="${escapeHtml(product.name)}" 
+            class="product-image" 
+            loading="lazy"
+            onerror="this.src='https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=800&q=80'"
+          />
+          <div class="card-badges">
+            <span class="badge badge-category">${product.category}</span>
+            ${stockBadge}
+          </div>
+          <button 
+            type="button" 
+            class="wishlist-btn ${isWishlisted ? 'active' : ''}" 
+            onclick="window.customerToggleWishlist('${product.id}')"
+            aria-label="${isWishlisted ? 'Remove from wishlist' : 'Save to wishlist'} for ${escapeHtml(product.name)}"
+            title="${isWishlisted ? 'Remove from wishlist' : 'Save to wishlist'}"
+          >
+            ♥
+          </button>
+        </div>
+
+        <div class="card-body">
+          <div class="card-rating" aria-label="Rating: ${product.rating || 5} out of 5 stars">
+            <span>★★★★★</span>
+            <strong>${(product.rating || 5).toFixed(1)}</strong>
+            <span class="review-count">(${product.reviewsCount || 12})</span>
+          </div>
+
+          <h3 class="product-title" id="prod-title-${product.id}">${escapeHtml(product.name)}</h3>
+          <p class="product-desc">${escapeHtml(product.description)}</p>
+
+          <div class="card-footer">
+            <div class="price-row">
+              <span class="product-price">Rs. ${product.price.toFixed(2)}</span>
+              <span class="product-unit">${product.unit || 'per unit'}</span>
+            </div>
+
+            <div class="card-actions">
+              <!-- Out-of-stock products have DISABLED button (TC-05 & specification) -->
+              <button 
+                type="button" 
+                class="btn btn-primary add-to-cart-btn" 
+                onclick="window.customerAddToCart('${product.id}')"
+                ${isOutOfStock ? 'disabled aria-disabled="true"' : ''}
+              >
+                <span>${isOutOfStock ? 'Out of Stock' : 'Add to Cart'}</span>
+              </button>
+
+              <!-- View Details modal trigger -->
+              <button 
+                type="button" 
+                class="btn btn-secondary quick-view-btn" 
+                onclick="window.customerOpenProductDetails('${product.id}')"
+                aria-label="View specifications of ${escapeHtml(product.name)}"
+              >
+                View Details
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
+
+// Reset filters handler
+window.customerResetFilters = function() {
+  state.activeCategory = 'ALL';
+  state.searchQuery = '';
+  state.sortBy = 'featured';
+  state.inStockOnly = false;
+
+  const searchInput = document.getElementById('dash-search-input');
+  if (searchInput) searchInput.value = '';
+
+  const inStockCheck = document.getElementById('dash-in-stock-toggle');
+  if (inStockCheck) inStockCheck.checked = false;
+
+  const sortSelect = document.getElementById('dash-sort-select');
+  if (sortSelect) sortSelect.value = 'featured';
+
+  document.querySelectorAll('#dash-category-pills .category-pill-btn').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('data-category') === 'ALL');
+  });
+
+  renderAllProducts();
+  showToast('Filters reset to default.', 'info');
+};
+
+// Add to Cart handler
+window.customerAddToCart = function(productId, qty = 1) {
+  const result = Cart.addItem(productId, qty);
+  if (result.success) {
+    showToast(result.message, 'success');
+    triggerCartBadgePulse();
+    renderBasketPreview();
+    renderDrawerCart();
+    renderKPIs();
+  } else {
+    showToast(result.message, 'warning');
+  }
+};
+
+// Wishlist toggle
+window.customerToggleWishlist = function(productId) {
+  const added = Storage.toggleWishlist(productId);
+  renderAllProducts();
+  renderWishlistSection();
+  renderKPIs();
+  showToast(added ? 'Saved to your Wishlist!' : 'Removed from Wishlist.', 'info');
+};
+
+/**
+ * Product Details Modal (Quick View)
+ */
+window.customerOpenProductDetails = function(productId) {
+  const product = Storage.getProductById(productId);
+  if (!product) return;
+
+  state.selectedProductDetails = product;
+  const modal = document.getElementById('customer-product-details-modal');
+  const body = document.getElementById('prod-details-body');
+  if (!modal || !body) return;
+
+  const isOutOfStock = product.stock <= 0;
+  const isLowStock = product.stock > 0 && product.stock <= 3;
+
+  body.innerHTML = `
+    <div class="quick-view-grid">
+      <div style="position:relative;">
+        <img src="${product.image}" alt="${escapeHtml(product.name)}" class="quick-view-img" />
+        <span class="badge badge-category" style="position:absolute; top:1rem; left:1rem; background:rgba(0,0,0,0.7); color:#fff; border-radius:var(--radius-full); padding:0.25rem 0.65rem; font-size:0.75rem;">
+          ${product.category}
+        </span>
+      </div>
+
+      <div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;">
+          <span style="font-family:var(--font-mono); font-size:0.75rem; text-transform:uppercase; color:var(--color-text-muted);">${product.id}</span>
+          ${isOutOfStock 
+            ? `<span style="background:var(--color-danger); color:#fff; font-size:0.75rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:var(--radius-full);">Out of Stock</span>` 
+            : isLowStock 
+              ? `<span style="background:var(--color-warning); color:#fff; font-size:0.75rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:var(--radius-full);">Only ${product.stock} left</span>`
+              : `<span style="background:var(--color-success); color:#fff; font-size:0.75rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:var(--radius-full);">${product.stock} in stock</span>`
+          }
+        </div>
+
+        <h2 style="font-family:var(--font-serif); font-size:1.6rem; font-weight:700; line-height:1.2; margin-bottom:0.75rem;">
+          ${escapeHtml(product.name)}
+        </h2>
+
+        <p style="font-size:0.9rem; line-height:1.55; color:var(--color-text-secondary); margin-bottom:1.25rem;">
+          ${escapeHtml(product.description)}
+        </p>
+
+        <div style="background:var(--color-surface-subtle); padding:1rem; border-radius:var(--radius-md); border:1px solid var(--color-border); margin-bottom:1.5rem;">
+          <div style="display:flex; align-items:baseline; gap:0.5rem; margin-bottom:0.5rem;">
+            <span style="font-size:1.6rem; font-weight:800; color:var(--color-brand-primary);">Rs. ${product.price.toFixed(2)}</span>
+            <span style="font-size:0.85rem; color:var(--color-text-muted);">${product.unit || 'per unit'}</span>
+          </div>
+          <div style="font-size:0.8rem; color:var(--color-text-secondary);">
+            Department: <strong>${product.category}</strong> • Verified Authenticity & Quality Guaranteed
+          </div>
+        </div>
+
+        <div style="display:flex; gap:0.75rem;">
+          <button 
+            type="button" 
+            class="btn btn-primary" 
+            style="flex:1; height:46px; font-size:0.95rem;" 
+            onclick="window.customerAddToCart('${product.id}'); window.customerCloseProductDetails();"
+            ${isOutOfStock ? 'disabled aria-disabled="true"' : ''}
+          >
+            ${isOutOfStock ? 'Currently Out of Stock' : 'Add to Shopping Basket'}
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-secondary" 
+            style="height:46px; padding:0 1.25rem;" 
+            onclick="window.customerCloseProductDetails()"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  modal.style.display = 'flex';
+  modal.classList.add('open');
+};
+
+window.customerCloseProductDetails = function() {
+  const modal = document.getElementById('customer-product-details-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('open');
+  }
+};
+
+/**
+ * ============================================================================
+ * MODULE 4: SHOPPING BASKET / CART (In-page and Drawer)
+ * - Added products display
+ * - Quantity +/- stepper
+ * - Remove product option
+ * - Subtotal and total price
+ * - Checkout button
+ * ============================================================================
+ */
+function renderBasketPreview() {
+  const container = document.getElementById('dash-basket-container');
+  if (!container) return;
+
+  const cart = Cart.getSummary();
+
+  if (cart.items.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state" style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:2.5rem 1.5rem;">
+        <div class="empty-state-icon">🛍️</div>
+        <h3>Your Shopping Basket is currently empty</h3>
+        <p>Browse our 10 curated essentials across Food, Clothing, and Electronics to add objects to your order.</p>
+        <a href="#dash-products-section" class="btn btn-primary">
+          Explore Products Collection →
+        </a>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = `
+    <div style="display:grid; grid-template-columns:1.8fr 1.2fr; gap:1.5rem; background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:1.5rem;">
+      <!-- Basket Items List -->
+      <div style="display:flex; flex-direction:column; gap:1rem;">
+        <div style="font-size:0.85rem; font-weight:700; text-transform:uppercase; color:var(--color-text-muted); border-bottom:1px solid var(--color-border); padding-bottom:0.5rem;">
+          Basket Items (${cart.itemCount} total units)
+        </div>
+
+        ${cart.items.map(item => `
+          <div class="cart-item-row" style="padding:0.75rem 0;">
+            <img src="${item.image}" alt="${escapeHtml(item.name)}" class="cart-item-img" />
+            <div class="cart-item-info">
+              <div class="cart-item-title">${escapeHtml(item.name)}</div>
+              <div class="cart-item-price">Rs. ${item.price.toFixed(2)} each • ${item.category}</div>
+              
+              <div class="cart-item-controls">
+                <!-- Quantity +/- Stepper -->
+                <div class="cart-stepper">
+                  <button 
+                    type="button" 
+                    class="cart-stepper-btn" 
+                    onclick="window.customerUpdateCartQty('${item.productId}', ${item.quantity - 1})"
+                    aria-label="Decrease quantity"
+                  >-</button>
+                  <span class="cart-stepper-qty">${item.quantity}</span>
+                  <button 
+                    type="button" 
+                    class="cart-stepper-btn" 
+                    onclick="window.customerUpdateCartQty('${item.productId}', ${item.quantity + 1})"
+                    aria-label="Increase quantity"
+                  >+</button>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:0.75rem;">
+                  <strong class="cart-item-total">Rs. ${item.totalPrice.toFixed(2)}</strong>
+                  <!-- Remove button -->
+                  <button 
+                    type="button" 
+                    class="cart-item-remove-btn" 
+                    onclick="window.customerRemoveCartItem('${item.productId}')"
+                    title="Remove product"
+                    aria-label="Remove ${escapeHtml(item.name)} from basket"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Financial Order Summary -->
+      <div style="background:var(--color-surface-subtle); padding:1.25rem; border-radius:var(--radius-md); border:1px solid var(--color-border); display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <div style="font-size:1rem; font-weight:700; margin-bottom:1rem; color:var(--color-text-primary);">
+            Order Financials
+          </div>
+
+          <!-- Promo Voucher Code Input -->
+          <form class="promo-form" onsubmit="window.customerApplyPromo(event)">
+            <input 
+              type="text" 
+              id="dash-promo-input" 
+              class="promo-input" 
+              placeholder="Voucher (e.g. WELCOME10)" 
+              value="${cart.activePromoCode || ''}"
+            />
+            <button type="submit" class="btn btn-secondary promo-btn">Apply</button>
+          </form>
+
+          ${cart.activePromoCode ? `
+            <div class="active-promo-tag">
+              <span>🏷️ Code: <strong>${cart.activePromoCode}</strong> applied</span>
+              <button type="button" onclick="window.customerRemovePromo()" style="background:none; border:none; color:var(--color-danger); cursor:pointer; font-weight:bold;">✕</button>
+            </div>
+          ` : ''}
+
+          <div class="financial-breakdown">
+            <div class="financial-row">
+              <span>Items Subtotal:</span>
+              <strong>Rs. ${cart.subtotal.toFixed(2)}</strong>
+            </div>
+
+            ${cart.discount > 0 ? `
+              <div class="financial-row" style="color:var(--color-success);">
+                <span>Promotional Discount:</span>
+                <strong>-Rs. ${cart.discount.toFixed(2)}</strong>
+              </div>
+            ` : ''}
+
+            <div class="financial-row">
+              <span>Standard Delivery:</span>
+              <span>${cart.deliveryFee === 0 ? 'FREE' : `Rs. ${cart.deliveryFee.toFixed(2)}`}</span>
+            </div>
+
+            <div class="financial-row total-row">
+              <span>Total Price:</span>
+              <span style="color:var(--color-brand-primary);">Rs. ${cart.grandTotal.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Checkout Button -->
+        <button 
+          type="button" 
+          class="btn btn-primary cart-checkout-btn" 
+          onclick="window.customerOpenCheckout()"
+          style="margin-top:1.25rem;"
+        >
+          Proceed to Checkout (${cart.itemCount} Units) →
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// Drawer Basket Renderer
+function renderDrawerCart() {
+  const drawerItems = document.getElementById('dash-drawer-items');
+  const subtotalElem = document.getElementById('dash-drawer-subtotal');
+  const totalElem = document.getElementById('dash-drawer-grandtotal');
+  if (!drawerItems) return;
+
+  const cart = Cart.getSummary();
+
+  if (subtotalElem) subtotalElem.textContent = `Rs. ${cart.subtotal.toFixed(2)}`;
+  if (totalElem) totalElem.textContent = `Rs. ${cart.grandTotal.toFixed(2)}`;
+
+  if (cart.items.length === 0) {
+    drawerItems.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">🛍️</div>
+        <h3>Your basket is empty</h3>
+        <p>Add some handcrafted essentials from the catalogue.</p>
+      </div>
+    `;
+    return;
+  }
+
+  drawerItems.innerHTML = cart.items.map(item => `
+    <div class="cart-item-row">
+      <img src="${item.image}" alt="${escapeHtml(item.name)}" class="cart-item-img" />
+      <div class="cart-item-info">
+        <div class="cart-item-title">${escapeHtml(item.name)}</div>
+        <div class="cart-item-price">Rs. ${item.price.toFixed(2)}</div>
+        <div class="cart-item-controls">
+          <div class="cart-stepper">
+            <button type="button" class="cart-stepper-btn" onclick="window.customerUpdateCartQty('${item.productId}', ${item.quantity - 1})">-</button>
+            <span class="cart-stepper-qty">${item.quantity}</span>
+            <button type="button" class="cart-stepper-btn" onclick="window.customerUpdateCartQty('${item.productId}', ${item.quantity + 1})">+</button>
+          </div>
+          <strong class="cart-item-total">Rs. ${item.totalPrice.toFixed(2)}</strong>
+          <button type="button" class="cart-item-remove-btn" onclick="window.customerRemoveCartItem('${item.productId}')">🗑️</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Cart Item Quantity Stepper & Removal
+window.customerUpdateCartQty = function(productId, qty) {
+  Cart.updateQuantity(productId, qty);
+  renderBasketPreview();
+  renderDrawerCart();
+  updateCartBadge();
+  renderKPIs();
+};
+
+window.customerRemoveCartItem = function(productId) {
+  Cart.removeItem(productId);
+  renderBasketPreview();
+  renderDrawerCart();
+  updateCartBadge();
+  renderKPIs();
+  showToast('Product removed from basket.', 'info');
+};
+
+// Promo code application
+window.customerApplyPromo = function(event) {
+  event.preventDefault();
+  const input = document.getElementById('dash-promo-input');
+  if (!input) return;
+  const res = Cart.applyPromoCode(input.value);
+  showToast(res.message, res.success ? 'success' : 'warning');
+  renderBasketPreview();
+  renderDrawerCart();
+};
+
+window.customerRemovePromo = function() {
+  Cart.removePromoCode();
+  showToast('Promotional voucher removed.', 'info');
+  renderBasketPreview();
+  renderDrawerCart();
+};
+
+window.shopeaseOpenDashboardCart = function() {
+  const overlay = document.getElementById('dash-cart-overlay');
+  if (overlay) {
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+  }
+};
+
+window.shopeaseCloseDashboardCart = function() {
+  const overlay = document.getElementById('dash-cart-overlay');
+  if (overlay) {
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+  }
+};
+
+function updateCartBadge() {
+  const cart = Cart.getSummary();
+  const badge = document.getElementById('dash-cart-badge');
+  if (badge) {
+    badge.textContent = cart.itemCount;
+  }
+}
+
+function triggerCartBadgePulse() {
+  const badge = document.getElementById('dash-cart-badge');
+  if (badge) {
+    badge.classList.remove('pulse');
+    void badge.offsetWidth;
+    badge.classList.add('pulse');
+  }
+}
+
+/**
+ * ============================================================================
+ * MODULE 5: CHECKOUT & MOCK PAYMENT
+ * - Order summary
+ * - Customer name and contact details
+ * - Mock payment method selection
+ * - Confirm Order / Pay Now button
+ * - Payment success or failure message
+ * - Order confirmation number
+ * ============================================================================
+ */
+window.customerOpenCheckout = function() {
+  const cart = Cart.getSummary();
+  if (cart.items.length === 0) {
+    alert('Your shopping basket is empty. Please add items to checkout.');
+    return;
+  }
+
+  const modal = document.getElementById('customer-checkout-modal');
+  const body = document.getElementById('checkout-modal-body');
+  if (!modal || !body) return;
+
+  const user = state.currentUser || {};
+
+  body.innerHTML = `
+    <form id="customer-checkout-form" onsubmit="window.customerSubmitPayment(event)">
+      <!-- 1. Order Summary -->
+      <div style="background:var(--color-surface-subtle); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:1rem; margin-bottom:1.25rem;">
+        <div style="font-size:0.85rem; font-weight:700; text-transform:uppercase; color:var(--color-text-muted); margin-bottom:0.6rem;">
+          1. Order Items Summary (${cart.itemCount} items)
+        </div>
+        <div style="display:flex; flex-direction:column; gap:0.4rem; max-height:140px; overflow-y:auto; margin-bottom:0.75rem; padding-right:0.25rem;">
+          ${cart.items.map(item => `
+            <div style="display:flex; justify-content:space-between; font-size:0.825rem;">
+              <span>${item.quantity}x ${escapeHtml(item.name)}</span>
+              <strong>Rs. ${item.totalPrice.toFixed(2)}</strong>
+            </div>
+          `).join('')}
+        </div>
+        <div style="border-top:1px dashed var(--color-border); padding-top:0.5rem; display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; color:var(--color-brand-primary);">
+          <span>Grand Total to Pay:</span>
+          <span>Rs. ${cart.grandTotal.toFixed(2)}</span>
+        </div>
+      </div>
+
+      <!-- 2. Customer Contact & Delivery Details -->
+      <div style="margin-bottom:1.25rem;">
+        <div style="font-size:0.85rem; font-weight:700; text-transform:uppercase; color:var(--color-text-muted); margin-bottom:0.6rem;">
+          2. Customer &amp; Delivery Details
+        </div>
+        <div class="form-group" style="margin-bottom:0.75rem;">
+          <label class="form-label" for="chk-name">Full Name *</label>
+          <input type="text" id="chk-name" class="form-input" required value="${escapeHtml(user.fullName || 'Sarah Jenkins')}" />
+        </div>
+        <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label" for="chk-email">Email Address *</label>
+            <input type="email" id="chk-email" class="form-input" required value="${escapeHtml(user.email || 'sarah@example.com')}" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="chk-phone">Contact Phone *</label>
+            <input type="tel" id="chk-phone" class="form-input" required value="${escapeHtml(user.phone || '+94 77 123 4567')}" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="chk-address">Delivery Address *</label>
+          <input type="text" id="chk-address" class="form-input" required value="${escapeHtml(user.address || '42 Highfield Terrace, Colombo 03')}" />
+        </div>
+      </div>
+
+      <!-- 3. Mock Payment Method Selection -->
+      <div style="margin-bottom:1.5rem;">
+        <div style="font-size:0.85rem; font-weight:700; text-transform:uppercase; color:var(--color-text-muted); margin-bottom:0.6rem;">
+          3. Mock Payment Method Selection (No Real Money Required)
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:0.6rem; margin-bottom:1rem;">
+          <label style="display:flex; align-items:center; gap:0.5rem; padding:0.6rem 0.85rem; border:1px solid var(--color-border); border-radius:var(--radius-sm); cursor:pointer; background:var(--color-surface);">
+            <input type="radio" name="chk-pay-method" value="Demo Card" checked onchange="window.customerTogglePaymentInputs('card')" />
+            <span style="font-size:0.85rem; font-weight:600;">💳 Demo Card</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:0.5rem; padding:0.6rem 0.85rem; border:1px solid var(--color-border); border-radius:var(--radius-sm); cursor:pointer; background:var(--color-surface);">
+            <input type="radio" name="chk-pay-method" value="Cash on Delivery" onchange="window.customerTogglePaymentInputs('cod')" />
+            <span style="font-size:0.85rem; font-weight:600;">💵 Cash on Delivery</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:0.5rem; padding:0.6rem 0.85rem; border:1px solid var(--color-border); border-radius:var(--radius-sm); cursor:pointer; background:var(--color-surface);">
+            <input type="radio" name="chk-pay-method" value="1-Click Instant Demo" onchange="window.customerTogglePaymentInputs('instant')" />
+            <span style="font-size:0.85rem; font-weight:600;">⚡ 1-Click Instant Demo</span>
+          </label>
+        </div>
+
+        <!-- Mock Card Fields -->
+        <div id="chk-card-fields" style="background:var(--color-surface-subtle); padding:0.85rem; border-radius:var(--radius-sm); border:1px solid var(--color-border);">
+          <div class="form-group" style="margin-bottom:0.6rem;">
+            <label class="form-label" style="font-size:0.75rem;">Mock Card Number (Pre-filled Demo)</label>
+            <input type="text" id="chk-card-num" class="form-input" style="font-family:var(--font-mono); font-size:0.85rem;" value="4532 •••• •••• 8892" />
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem;">
+            <div>
+              <label class="form-label" style="font-size:0.75rem;">Expiry (MM/YY)</label>
+              <input type="text" id="chk-card-exp" class="form-input" style="font-family:var(--font-mono); font-size:0.85rem;" value="08/28" />
+            </div>
+            <div>
+              <label class="form-label" style="font-size:0.75rem;">Security CVV</label>
+              <input type="text" id="chk-card-cvv" class="form-input" style="font-family:var(--font-mono); font-size:0.85rem;" value="394" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
+        <button type="button" class="btn btn-secondary" onclick="window.customerCloseCheckout()">Cancel</button>
+        <button type="submit" id="chk-submit-btn" class="btn btn-primary" style="padding:0.6rem 1.5rem; font-weight:700;">
+          Confirm Order &amp; Pay Now (Rs. ${cart.grandTotal.toFixed(2)}) →
+        </button>
+      </div>
+    </form>
+  `;
+
+  modal.style.display = 'flex';
+  modal.classList.add('open');
+};
+
+window.customerTogglePaymentInputs = function(type) {
+  const cardFields = document.getElementById('chk-card-fields');
+  if (cardFields) {
+    cardFields.style.display = type === 'card' ? 'block' : 'none';
+  }
+};
+
+window.customerCloseCheckout = function() {
+  const modal = document.getElementById('customer-checkout-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('open');
+  }
+};
+
+window.customerSubmitPayment = async function(event) {
+  event.preventDefault();
+  const submitBtn = document.getElementById('chk-submit-btn');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span>⏳ Processing Mock Payment...</span>';
+  }
+
+  const name = document.getElementById('chk-name')?.value;
+  const email = document.getElementById('chk-email')?.value;
+  const phone = document.getElementById('chk-phone')?.value;
+  const address = document.getElementById('chk-address')?.value;
+  const methodRadio = document.querySelector('input[name="chk-pay-method"]:checked');
+  const paymentMethod = methodRadio ? methodRadio.value : 'Demo Card';
+
+  setTimeout(async () => {
+    const orderData = {
+      fullName: name,
+      email: email,
+      phone: phone,
+      address: address,
+      city: 'Colombo',
+      postcode: '00300',
+      paymentMethod: paymentMethod,
+      cardNumber: '4532 •••• •••• 8892',
+      cardHolder: name
+    };
+
+    const result = await Checkout.processMockOrder(orderData);
+
+    if (result.success && result.order) {
+      // Show Confirmation Screen
+      const body = document.getElementById('checkout-modal-body');
+      if (body) {
+        body.innerHTML = `
+          <div style="text-align:center; padding:1.5rem 1rem;">
+            <div style="width:64px; height:64px; border-radius:var(--radius-full); background:var(--color-success-bg); color:var(--color-success); font-size:2rem; display:inline-flex; align-items:center; justify-content:center; margin-bottom:1rem;">
+              ✓
+            </div>
+            <h3 style="font-family:var(--font-serif); font-size:1.6rem; margin-bottom:0.35rem; color:var(--color-text-primary);">
+              Payment Successful!
+            </h3>
+            <p style="font-size:0.9rem; color:var(--color-text-secondary); margin-bottom:1.5rem;">
+              Your mock order has been verified and confirmed in the local store ledger.
+            </p>
+
+            <div style="background:var(--color-surface-subtle); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:1.25rem; text-align:left; margin-bottom:1.5rem;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.875rem;">
+                <span style="color:var(--color-text-muted);">Order Confirmation No:</span>
+                <strong style="font-family:var(--font-mono); color:var(--color-brand-primary); font-size:1rem;">${result.order.orderId}</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.875rem;">
+                <span style="color:var(--color-text-muted);">Date &amp; Time:</span>
+                <span>${result.order.formattedDate}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.875rem;">
+                <span style="color:var(--color-text-muted);">Payment Method:</span>
+                <span>${result.order.payment.method} (Demo Verified)</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.875rem;">
+                <span style="color:var(--color-text-muted);">Recipient &amp; Delivery:</span>
+                <span>${escapeHtml(result.order.customer.fullName)} (${escapeHtml(result.order.customer.address)})</span>
+              </div>
+              <div style="border-top:1px dashed var(--color-border); padding-top:0.5rem; display:flex; justify-content:space-between; font-size:1rem; font-weight:800; color:var(--color-brand-primary);">
+                <span>Total Amount Paid:</span>
+                <span>Rs. ${result.order.financials.grandTotal.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+              <button type="button" class="btn btn-secondary" onclick="window.customerCloseCheckout(); window.customerViewInvoice('${result.order.orderId}');">
+                🖨️ View &amp; Print Invoice
+              </button>
+              <button type="button" class="btn btn-primary" onclick="window.customerCloseCheckout(); document.getElementById('dash-orders-section')?.scrollIntoView({behavior:'smooth'});">
+                View in My Orders →
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      // Re-render components
+      renderBasketPreview();
+      renderDrawerCart();
+      updateCartBadge();
+      renderOrdersSection();
+      renderAllProducts();
+      renderKPIs();
+      showToast(`Order #${result.order.orderId} placed successfully!`, 'success');
+    } else {
+      alert(`Checkout failed: ${result.message}`);
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Confirm Order &amp; Pay Now →';
+      }
+    }
+  }, 600);
+};
+
+/**
+ * ============================================================================
+ * MODULE 6: MY ORDERS (Saved in LocalStorage)
+ * - Previous orders
+ * - Order date and total
+ * - Ordered products
+ * - Payment status
+ * - Order status
+ * - Printable Invoice modal
+ * ============================================================================
  */
 function renderOrdersSection() {
   const container = document.getElementById('dash-orders-container');
   if (!container) return;
 
   const orders = Storage.getOrders();
+  const user = state.currentUser;
 
-  if (orders.length === 0) {
+  // Filter orders matching current customer, or show all if demo
+  const userOrders = orders.filter(o => {
+    return !user?.email || 
+           o.customer?.email === user.email || 
+           o.customer?.fullName === user.fullName ||
+           user.role === 'Admin';
+  });
+
+  if (userOrders.length === 0) {
     container.innerHTML = `
-      <div class="empty-state" style="padding:3rem 1.5rem; text-align:center;">
-        <div style="font-size:3rem; margin-bottom:1rem;" aria-hidden="true">📦</div>
-        <h3 style="font-size:1.3rem; margin-bottom:0.5rem;">No orders placed yet</h3>
-        <p style="color:var(--color-text-secondary); max-width:420px; margin:0 auto 1.5rem;">
-          Explore our handpicked catalog of 10 curated products and place your first order today!
-        </p>
-        <a href="index.html#catalog-section" class="btn btn-primary" style="padding:0.75rem 1.5rem;">
-          🛍️ Browse 10 Products
-        </a>
+      <div class="empty-state" style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:2.5rem 1.5rem;">
+        <div class="empty-state-icon">📦</div>
+        <h3>No Past Orders Found</h3>
+        <p>You haven't placed any orders yet. Try our quick demo simulation or checkout with your shopping cart.</p>
+        <button type="button" class="btn btn-primary" onclick="window.shopeaseSimulateCustomerOrder()">
+          ⚡ Place Instant Demo Order
+        </button>
       </div>
     `;
     return;
@@ -255,139 +1261,270 @@ function renderOrdersSection() {
 
   container.innerHTML = `
     <div style="display:flex; flex-direction:column; gap:1.25rem;">
-      ${orders.map(order => {
+      ${userOrders.map(order => {
+        const items = order.items || [];
         const status = order.status || 'Confirmed';
-        const isDelivered = /delivered/i.test(status);
-        const isShipped = /shipped|dispatched/i.test(status) || isDelivered;
-        const isProcessing = /processing/i.test(status) || isShipped;
+        const isCompleted = status.toLowerCase().includes('completed') || status.toLowerCase().includes('delivered');
 
         return `
-        <article class="dashboard-order-card" aria-label="Order receipt ${order.orderId}">
-          <div class="dashboard-order-header">
-            <div>
-              <strong style="color:var(--color-brand-primary); font-size:1.1rem; font-family:var(--font-mono);">${order.orderId}</strong>
-              <span style="display:inline-block; margin-left:0.5rem; font-size:0.75rem; padding:0.25rem 0.65rem; background:${isDelivered ? 'var(--color-success-bg)' : isShipped ? 'var(--color-info-bg)' : 'var(--color-warning-bg)'}; color:${isDelivered ? 'var(--color-success)' : isShipped ? 'var(--color-info)' : 'var(--color-warning)'}; border-radius:var(--radius-full); font-weight:bold;">
-                ● ${escapeHtml(status)}
-              </span>
-            </div>
-            <div style="font-size:0.85rem; color:var(--color-text-muted);">
-              📅 ${order.formattedDate}
-            </div>
-          </div>
-
-          <!-- Order Status Timeline Tracker -->
-          <div style="margin: 0.75rem 0 1rem; padding: 0.75rem; background: var(--color-surface-subtle); border-radius: var(--radius-sm); border: 1px solid var(--color-border);">
-            <div style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--color-text-muted); margin-bottom:0.5rem;">
-              Shipment Progress Tracker
-            </div>
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.25rem; text-align: center; font-size: 0.75rem;">
-              <div style="display:flex; flex-direction:column; align-items:center; gap:0.2rem; color: var(--color-success); font-weight:600;">
-                <div style="width:20px; height:20px; border-radius:50%; background:var(--color-success); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px;">✓</div>
-                <span>Confirmed</span>
+          <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:1.25rem; box-shadow:var(--shadow-xs);">
+            <!-- Header bar of order -->
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.75rem; border-bottom:1px solid var(--color-border); padding-bottom:0.75rem; margin-bottom:1rem;">
+              <div>
+                <span style="font-family:var(--font-mono); font-weight:800; color:var(--color-brand-primary); font-size:1rem;">${order.orderId}</span>
+                <span style="font-size:0.8rem; color:var(--color-text-muted); margin-left:0.5rem;">• Placed on ${order.formattedDate || new Date(order.createdAt).toLocaleDateString()}</span>
               </div>
-              <div style="display:flex; flex-direction:column; align-items:center; gap:0.2rem; color: ${isProcessing ? 'var(--color-success)' : 'var(--color-text-muted)'}; font-weight:${isProcessing ? '600' : 'normal'};">
-                <div style="width:20px; height:20px; border-radius:50%; background:${isProcessing ? 'var(--color-success)' : 'var(--color-border)'}; color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px;">${isProcessing ? '✓' : '2'}</div>
-                <span>Processing</span>
-              </div>
-              <div style="display:flex; flex-direction:column; align-items:center; gap:0.2rem; color: ${isShipped ? 'var(--color-success)' : 'var(--color-text-muted)'}; font-weight:${isShipped ? '600' : 'normal'};">
-                <div style="width:20px; height:20px; border-radius:50%; background:${isShipped ? 'var(--color-success)' : 'var(--color-border)'}; color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px;">${isShipped ? '✓' : '3'}</div>
-                <span>Dispatched</span>
-              </div>
-              <div style="display:flex; flex-direction:column; align-items:center; gap:0.2rem; color: ${isDelivered ? 'var(--color-success)' : 'var(--color-text-muted)'}; font-weight:${isDelivered ? '600' : 'normal'};">
-                <div style="width:20px; height:20px; border-radius:50%; background:${isDelivered ? 'var(--color-success)' : 'var(--color-border)'}; color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px;">${isDelivered ? '✓' : '4'}</div>
-                <span>Delivered</span>
+              <div style="display:flex; align-items:center; gap:0.6rem;">
+                <span style="font-size:0.75rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:var(--radius-full); background:${isCompleted ? 'var(--color-success-bg)' : 'var(--color-info-bg)'}; color:${isCompleted ? 'var(--color-success)' : 'var(--color-info)'}; border:1px solid ${isCompleted ? 'var(--color-success-border)' : 'var(--color-info-border)'};">
+                  ● ${escapeHtml(status)}
+                </span>
+                <span style="font-size:0.75rem; padding:0.25rem 0.65rem; border-radius:var(--radius-full); background:var(--color-surface-subtle); border:1px solid var(--color-border); color:var(--color-text-secondary);">
+                  💳 ${order.payment?.method || 'Demo Card (Paid)'}
+                </span>
               </div>
             </div>
-          </div>
 
-          <div style="font-size:0.875rem; color:var(--color-text-secondary); margin-bottom:0.75rem;">
-            📍 <strong>Delivered to:</strong> ${escapeHtml(order.customer?.fullName || 'Customer')} • ${escapeHtml([order.customer?.address, order.customer?.city, order.customer?.postcode].filter(Boolean).join(', ') || 'Saved Delivery Address')}
-          </div>
+            <!-- Ordered Products List -->
+            <div style="display:flex; flex-direction:column; gap:0.6rem; margin-bottom:1rem;">
+              ${items.map(item => `
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; font-size:0.875rem;">
+                  <div style="display:flex; align-items:center; gap:0.75rem;">
+                    ${item.image ? `<img src="${item.image}" alt="" style="width:36px; height:36px; object-fit:cover; border-radius:var(--radius-xs); border:1px solid var(--color-border);" />` : ''}
+                    <div>
+                      <span style="font-weight:600; color:var(--color-text-primary);">${escapeHtml(item.name)}</span>
+                      <span style="color:var(--color-text-muted); font-size:0.8rem; margin-left:0.35rem;">(${item.quantity}x @ Rs. ${(item.price || 0).toFixed(2)})</span>
+                    </div>
+                  </div>
+                  <strong style="color:var(--color-text-primary);">Rs. ${(item.totalPrice || item.price * item.quantity).toFixed(2)}</strong>
+                </div>
+              `).join('')}
+            </div>
 
-          <ul class="dashboard-order-items">
-            ${(order.items || []).map(item => `
-              <li style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem; padding:0.35rem 0; border-bottom:1px dashed var(--color-border);">
-                <span>${item.quantity || 1} × <strong>${escapeHtml(item.name || 'Product')}</strong></span>
-                <span style="font-weight:700;">${CURRENCY.format(item.totalPrice || item.price || 0)}</span>
-              </li>
-            `).join('')}
-          </ul>
-
-          <div class="dashboard-order-footer">
-            <span style="font-size:0.85rem; color:var(--color-text-muted);">
-              💳 Mock Authorized ••••• ${order.payment?.last4 || '8892'}
-            </span>
-            <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
-              <span style="font-size:1.15rem; font-weight:800; color:var(--color-text-primary); margin-right:0.25rem;">
-                Total: ${CURRENCY.format(order.financials?.grandTotal || 0)}
-              </span>
-              <button type="button" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;" onclick="window.print()">
-                🖨️ Receipt
-              </button>
-              <button type="button" class="btn btn-primary" style="font-size:0.8rem; padding:0.35rem 0.75rem;" onclick="window.shopeaseReorder('${order.orderId}')">
-                🔁 Reorder
-              </button>
+            <!-- Order Footer with Total and Invoice Action -->
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.75rem; border-top:1px dashed var(--color-border); padding-top:0.75rem;">
+              <div style="font-size:0.85rem; color:var(--color-text-secondary);">
+                Recipient: <strong>${escapeHtml(order.customer?.fullName || user?.fullName || 'Customer')}</strong>
+              </div>
+              <div style="display:flex; align-items:center; gap:1rem;">
+                <span style="font-size:1.1rem; font-weight:800; color:var(--color-brand-primary);">
+                  Total: Rs. ${(order.financials?.grandTotal || 0).toFixed(2)}
+                </span>
+                <button type="button" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;" onclick="window.customerViewInvoice('${order.orderId}')">
+                  View Receipt 📄
+                </button>
+              </div>
             </div>
           </div>
-        </article>
-      `;
+        `;
       }).join('')}
     </div>
   `;
 }
 
+// Invoice Modal Viewer
+window.customerViewInvoice = function(orderId) {
+  const order = Storage.getOrderById(orderId);
+  if (!order) {
+    alert('Order record not found.');
+    return;
+  }
+
+  const modal = document.getElementById('customer-invoice-modal');
+  const body = document.getElementById('customer-invoice-body');
+  if (!modal || !body) return;
+
+  const items = order.items || [];
+  const fin = order.financials || {};
+
+  body.innerHTML = `
+    <div style="padding:0.5rem 0;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem; border-bottom:1px solid var(--color-border); padding-bottom:1rem;">
+        <div>
+          <span style="font-size:1.3rem; font-weight:800; color:var(--color-brand-primary); font-family:var(--font-heading);">ShopEase Studio</span>
+          <div style="font-size:0.8rem; color:var(--color-text-muted);">Curated Retail Technologies • Client-Side Ledger</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:var(--font-mono); font-weight:800; font-size:1.1rem; color:var(--color-text-primary);">${order.orderId}</div>
+          <div style="font-size:0.8rem; color:var(--color-text-muted);">${order.formattedDate}</div>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem; font-size:0.85rem; background:var(--color-surface-subtle); padding:1rem; border-radius:var(--radius-sm);">
+        <div>
+          <strong style="display:block; margin-bottom:0.25rem;">Billed / Delivered To:</strong>
+          <div>${escapeHtml(order.customer?.fullName)}</div>
+          <div style="color:var(--color-text-muted);">${escapeHtml(order.customer?.email)}</div>
+          <div style="color:var(--color-text-muted);">${escapeHtml(order.customer?.address)}</div>
+        </div>
+        <div>
+          <strong style="display:block; margin-bottom:0.25rem;">Payment &amp; Status:</strong>
+          <div>Method: ${order.payment?.method || 'Demo Card (Mock)'}</div>
+          <div>Status: <span style="font-weight:700; color:var(--color-success);">${order.status}</span></div>
+        </div>
+      </div>
+
+      <!-- Table of items -->
+      <table style="width:100%; border-collapse:collapse; margin-bottom:1.5rem; font-size:0.85rem;">
+        <thead>
+          <tr style="border-bottom:1px solid var(--color-border); text-align:left; color:var(--color-text-muted);">
+            <th style="padding:0.5rem 0;">Item Description</th>
+            <th style="padding:0.5rem 0; text-align:center;">Qty</th>
+            <th style="padding:0.5rem 0; text-align:right;">Unit Price</th>
+            <th style="padding:0.5rem 0; text-align:right;">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${items.map(it => `
+            <tr style="border-bottom:1px dashed var(--color-border);">
+              <td style="padding:0.5rem 0; font-weight:600;">${escapeHtml(it.name)}</td>
+              <td style="padding:0.5rem 0; text-align:center;">${it.quantity}</td>
+              <td style="padding:0.5rem 0; text-align:right;">Rs. ${(it.price || 0).toFixed(2)}</td>
+              <td style="padding:0.5rem 0; text-align:right; font-weight:700;">Rs. ${(it.totalPrice || it.price * it.quantity).toFixed(2)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+
+      <!-- Summary breakdown -->
+      <div style="display:flex; flex-direction:column; gap:0.4rem; font-size:0.875rem; text-align:right;">
+        <div style="display:flex; justify-content:space-between;">
+          <span style="color:var(--color-text-muted);">Subtotal:</span>
+          <strong>Rs. ${(fin.subtotal || 0).toFixed(2)}</strong>
+        </div>
+        ${fin.discount ? `
+          <div style="display:flex; justify-content:space-between; color:var(--color-success);">
+            <span>Discount (${fin.promoCode || 'PROMO'}):</span>
+            <strong>-Rs. ${fin.discount.toFixed(2)}</strong>
+          </div>
+        ` : ''}
+        <div style="display:flex; justify-content:space-between;">
+          <span style="color:var(--color-text-muted);">Standard Delivery:</span>
+          <span>${fin.deliveryFee === 0 ? 'FREE' : `Rs. ${(fin.deliveryFee || 0).toFixed(2)}`}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:1.15rem; font-weight:800; border-top:1px solid var(--color-border); padding-top:0.6rem; color:var(--color-brand-primary);">
+          <span>Grand Total:</span>
+          <span>Rs. ${(fin.grandTotal || 0).toFixed(2)}</span>
+        </div>
+      </div>
+    </div>
+  `;
+
+  modal.style.display = 'flex';
+  modal.classList.add('open');
+};
+
+window.customerCloseInvoice = function() {
+  const modal = document.getElementById('customer-invoice-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('open');
+  }
+};
+
+// Simulation of test customer order
+window.shopeaseSimulateCustomerOrder = function() {
+  const products = Storage.getProducts().filter(p => p.stock > 0);
+  if (products.length === 0) {
+    showToast('Cannot simulate order: No in-stock products available.', 'warning');
+    return;
+  }
+
+  // Add 1 in-stock item to cart temporarily and checkout
+  const product = products[0];
+  Cart.addItem(product.id, 1);
+  const cartSummary = Cart.getSummary();
+
+  const user = state.currentUser || {};
+  const orderRecord = {
+    orderId: 'SE-' + Math.floor(100000 + Math.random() * 900000),
+    createdAt: new Date().toISOString(),
+    formattedDate: new Intl.DateTimeFormat('en-GB', {
+      dateStyle: 'full',
+      timeStyle: 'short'
+    }).format(new Date()),
+    customer: {
+      fullName: user.fullName || 'Sarah Jenkins',
+      email: user.email || 'sarah@example.com',
+      phone: user.phone || '+94 77 123 4567',
+      address: user.address || '42 Highfield Terrace, Colombo 03'
+    },
+    payment: {
+      method: 'Demo Card (Instant Verified)',
+      last4: '8892',
+      cardHolder: user.fullName || 'Sarah Jenkins'
+    },
+    items: cartSummary.items.map(it => ({
+      productId: it.productId,
+      name: it.name,
+      category: it.category,
+      price: it.price,
+      quantity: it.quantity,
+      totalPrice: it.totalPrice,
+      image: it.image
+    })),
+    financials: {
+      subtotal: cartSummary.subtotal,
+      deliveryFee: 0,
+      discount: cartSummary.discount,
+      promoCode: cartSummary.activePromoCode,
+      grandTotal: cartSummary.grandTotal
+    },
+    status: 'Confirmed - Preparing for Mock Dispatch'
+  };
+
+  Storage.deductStock(product.id, 1);
+  Storage.saveOrder(orderRecord);
+  Cart.clear();
+
+  renderAllModules();
+  showToast(`Simulated Order #${orderRecord.orderId} created successfully!`, 'success');
+};
+
 /**
- * Renders Active Offers & Vouchers
+ * ============================================================================
+ * MODULE 7: PROMOTIONAL OFFERS (MY OFFERS)
+ * ============================================================================
  */
 function renderOffersSection() {
   const container = document.getElementById('dash-offers-container');
   if (!container) return;
 
-  const offers = [
+  const vouchers = [
     {
-      code: 'SAVE10',
-      title: '10% Off Entire Basket',
-      desc: 'No minimum order required. Apply anytime for 10% instant discount.',
-      badge: '🔥 Popular'
+      code: 'WELCOME10',
+      discount: '10% OFF',
+      description: 'Welcome reward on all handcrafted essentials. No minimum cart value.',
+      expiry: 'Valid until 31 Dec 2026'
     },
     {
-      code: 'WELCOME20',
-      title: '20% Welcome Member Offer',
-      desc: 'Exclusive first-order discount across all 3 curated departments.',
-      badge: '✨ Member Perk'
+      code: 'EASE20',
+      discount: '20% OFF',
+      description: 'Mid-season curated promotion on orders over Rs. 100.00.',
+      expiry: 'Limited Edition'
     },
     {
-      code: 'FREESHIP',
-      title: 'Free Express Delivery',
-      desc: 'Waives the standard Rs. 3.99 delivery fee completely on any order.',
-      badge: '🚚 Free Shipping'
+      code: 'VIP50',
+      discount: 'Rs. 50 OFF',
+      description: 'Exclusive voucher for verified members on multi-item orders.',
+      expiry: 'Active'
     }
   ];
 
   container.innerHTML = `
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.25rem;">
-      ${offers.map(offer => `
-        <div class="voucher-ticket" style="background:var(--color-surface); border:1px solid var(--color-border); padding:1.25rem; border-radius:var(--radius-md);">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">
-            <div style="font-size:1.05rem; font-weight:800; color:var(--color-text-primary);">${offer.title}</div>
-            <span style="font-size:0.75rem; background:var(--color-brand-primary); color:#ffffff; padding:0.15rem 0.5rem; border-radius:var(--radius-full); font-weight:700;">
-              ${offer.badge}
-            </span>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:1rem;">
+      ${vouchers.map(v => `
+        <div style="background:var(--color-surface); border:1px dashed var(--color-border-strong); border-radius:var(--radius-md); padding:1.25rem; display:flex; flex-direction:column; justify-content:space-between;">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+              <span style="font-size:1.15rem; font-weight:800; color:var(--color-brand-primary);">${v.discount}</span>
+              <span style="font-size:0.75rem; color:var(--color-text-muted);">${v.expiry}</span>
+            </div>
+            <p style="font-size:0.85rem; color:var(--color-text-secondary); line-height:1.4; margin-bottom:1rem;">${v.description}</p>
           </div>
-          <p style="font-size:0.85rem; color:var(--color-text-secondary); margin-bottom:1rem; line-height:1.4;">
-            ${offer.desc}
-          </p>
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-family:var(--font-mono); font-size:0.95rem; font-weight:800; color:var(--color-brand-primary); background:var(--color-surface-subtle); padding:0.25rem 0.6rem; border-radius:4px; border:1px solid var(--color-border);">
-              ${offer.code}
-            </span>
-            <button 
-              type="button" 
-              class="btn btn-primary" 
-              style="font-size:0.85rem; padding:0.4rem 0.85rem;"
-              onclick="window.shopeaseApplyDashboardOffer('${offer.code}')"
-            >
-              Apply to Basket →
+          <div style="display:flex; align-items:center; justify-content:space-between; background:var(--color-surface-subtle); padding:0.4rem 0.75rem; border-radius:var(--radius-sm); border:1px solid var(--color-border);">
+            <code style="font-family:var(--font-mono); font-weight:800; font-size:0.95rem; color:var(--color-text-primary);">${v.code}</code>
+            <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.6rem;" onclick="window.customerCopyCode('${v.code}')">
+              Copy &amp; Apply
             </button>
           </div>
         </div>
@@ -396,405 +1533,145 @@ function renderOffersSection() {
   `;
 }
 
+window.customerCopyCode = function(code) {
+  Cart.applyPromoCode(code);
+  renderBasketPreview();
+  renderDrawerCart();
+  showToast(`Voucher code "${code}" applied to cart!`, 'success');
+  document.getElementById('dash-basket-section')?.scrollIntoView({ behavior: 'smooth' });
+};
+
 /**
- * Renders Current Basket Preview
+ * ============================================================================
+ * MODULE 8: SAVED WISHLIST
+ * ============================================================================
  */
-function renderBasketPreview() {
-  const container = document.getElementById('dash-basket-container');
+function renderWishlistSection() {
+  const container = document.getElementById('dash-wishlist-container');
+  const countBadge = document.getElementById('dash-wishlist-count');
   if (!container) return;
 
-  const summary = Cart.getSummary();
+  const wishlist = Storage.getWishlist();
+  if (countBadge) countBadge.textContent = `${wishlist.length} item${wishlist.length === 1 ? '' : 's'} saved`;
 
-  if (summary.items.length === 0) {
+  if (wishlist.length === 0) {
     container.innerHTML = `
-      <div style="padding:1.5rem; text-align:center; background:var(--color-surface-subtle); border-radius:var(--radius-md); border:1px solid var(--color-border);">
-        <p style="color:var(--color-text-secondary); margin-bottom:0.75rem;">Your shopping basket is currently empty.</p>
-        <a href="index.html#catalog-section" class="btn btn-primary" style="font-size:0.85rem; padding:0.4rem 1rem;">
-          🛒 Start Shopping
-        </a>
+      <div style="text-align:center; padding:2rem 1rem; background:var(--color-surface); border:1px dashed var(--color-border); border-radius:var(--radius-md);">
+        <p style="color:var(--color-text-muted); font-size:0.875rem; margin-bottom:0.75rem;">Your wishlist is currently empty. Click the heart icon on any product to save it here.</p>
+        <a href="#dash-products-section" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">Browse Products</a>
       </div>
     `;
     return;
   }
 
+  const allProducts = Storage.getProducts();
+  const wishItems = wishlist.map(id => allProducts.find(p => p.id === id)).filter(Boolean);
+
   container.innerHTML = `
-    <div style="background:var(--color-surface-subtle); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:1.25rem;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-        <strong>${summary.totalItems} Items currently in your basket</strong>
-        <span style="font-size:1.15rem; font-weight:800; color:var(--color-brand-primary);">
-          Total: ${CURRENCY.format(summary.grandTotal)}
-        </span>
-      </div>
-
-      <ul style="list-style:none; display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1.25rem;">
-        ${summary.items.map(item => `
-          <li style="display:flex; justify-content:space-between; font-size:0.875rem;">
-            <span>${item.quantity} × ${escapeHtml(item.name)}</span>
-            <strong>${CURRENCY.format(item.totalPrice)}</strong>
-          </li>
-        `).join('')}
-      </ul>
-
-      <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
-        <button type="button" class="btn btn-primary" style="flex:1;" onclick="window.shopeaseOpenDashboardCart()">
-          🛍️ View Basket Drawer & Checkout
-        </button>
-        <a href="index.html#catalog-section" class="btn btn-secondary">
-          + Add More Products
-        </a>
-      </div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1rem;">
+      ${wishItems.map(item => `
+        <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:1rem; display:flex; align-items:center; gap:0.75rem;">
+          <img src="${item.image}" alt="" style="width:54px; height:54px; object-fit:cover; border-radius:var(--radius-sm); border:1px solid var(--color-border);" />
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:700; font-size:0.875rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(item.name)}</div>
+            <div style="color:var(--color-brand-primary); font-weight:800; font-size:0.85rem;">Rs. ${item.price.toFixed(2)}</div>
+            <div style="display:flex; gap:0.4rem; margin-top:0.4rem;">
+              <button type="button" class="btn btn-primary" style="font-size:0.72rem; padding:0.2rem 0.5rem;" onclick="window.customerAddToCart('${item.id}')" ${item.stock <= 0 ? 'disabled' : ''}>
+                ${item.stock <= 0 ? 'Sold Out' : '+ Cart'}
+              </button>
+              <button type="button" class="btn btn-secondary" style="font-size:0.72rem; padding:0.2rem 0.5rem;" onclick="window.customerToggleWishlist('${item.id}')">
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('')}
     </div>
   `;
 }
 
 /**
- * Renders Profile & Address Details
+ * ============================================================================
+ * MODULE 9: PROFILE AND ADDRESS MANAGEMENT
+ * ============================================================================
  */
 function renderProfileSection() {
   const container = document.getElementById('dash-profile-container');
   if (!container) return;
 
-  const user = state.currentUser;
+  const user = state.currentUser || {};
 
   container.innerHTML = `
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem;">
-      <div style="background:var(--color-surface-subtle); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:1.25rem;">
-        <h4 style="font-size:0.95rem; margin-bottom:0.75rem; color:var(--color-brand-primary);">👤 Personal Information</h4>
-        <p style="font-size:0.9rem; line-height:1.6; color:var(--color-text-secondary);">
-          <strong>Full Name:</strong> ${escapeHtml(user.fullName || 'Valued Member')}<br>
-          <strong>Email:</strong> ${escapeHtml(user.email || 'customer@example.com')}<br>
-          <strong>Account Role:</strong> ${escapeHtml(user.role || 'Customer')}<br>
-          <strong>Joined:</strong> ${escapeHtml((user.joinedDate || '2026-01-15').split('T')[0])}
-        </p>
+    <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:1.5rem; display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+      <div>
+        <h4 style="font-size:1rem; font-weight:700; margin-bottom:0.75rem;">Account Information</h4>
+        <div style="display:flex; flex-direction:column; gap:0.4rem; font-size:0.875rem;">
+          <div><span style="color:var(--color-text-muted);">Name:</span> <strong>${escapeHtml(user.fullName || 'Member')}</strong></div>
+          <div><span style="color:var(--color-text-muted);">Email:</span> <strong>${escapeHtml(user.email || 'user@example.com')}</strong></div>
+          <div><span style="color:var(--color-text-muted);">Role:</span> <strong>${escapeHtml(user.role || 'Customer')}</strong></div>
+          <div><span style="color:var(--color-text-muted);">Phone:</span> <strong>${escapeHtml(user.phone || '+94 77 123 4567')}</strong></div>
+        </div>
       </div>
 
-      <div style="background:var(--color-surface-subtle); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:1.25rem;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-          <h4 style="font-size:0.95rem; color:var(--color-brand-primary); margin:0;">🚚 Default Delivery Address</h4>
-          <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:0.2rem 0.5rem;" id="dash-btn-edit-addr">
-            Edit
-          </button>
+      <div>
+        <h4 style="font-size:1rem; font-weight:700; margin-bottom:0.75rem;">Default Delivery Address</h4>
+        <div style="font-size:0.875rem; color:var(--color-text-secondary); line-height:1.5; margin-bottom:1rem;">
+          ${escapeHtml(user.address || '42 Highfield Terrace, Colombo 03, Sri Lanka')}
         </div>
-        <p style="font-size:0.9rem; line-height:1.6; color:var(--color-text-secondary);">
-          <strong>Street Address:</strong> ${escapeHtml(user.address || '42 Highfield Terrace')}<br>
-          <strong>City / Town:</strong> ${escapeHtml(user.city || 'Manchester')}<br>
-          <strong>Postal Code:</strong> ${escapeHtml(user.postcode || 'M14 6XX')}<br>
-          <strong>Contact Phone:</strong> ${escapeHtml(user.phone || '07700 900123')}
-        </p>
+        <button type="button" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;" onclick="window.customerEditProfilePrompt()">
+          ✏️ Edit Details
+        </button>
       </div>
     </div>
   `;
-
-  document.getElementById('dash-btn-edit-addr')?.addEventListener('click', openAddressEditModal);
 }
 
+window.customerEditProfilePrompt = function() {
+  const newName = prompt('Enter your updated Full Name:', state.currentUser.fullName || '');
+  if (!newName) return;
+  const newPhone = prompt('Enter your Contact Phone:', state.currentUser.phone || '');
+  const newAddress = prompt('Enter your Delivery Address:', state.currentUser.address || '');
+
+  state.currentUser.fullName = newName;
+  if (newPhone) state.currentUser.phone = newPhone;
+  if (newAddress) state.currentUser.address = newAddress;
+
+  Storage.setCurrentUser(state.currentUser);
+  // Also update in users collection
+  const users = Storage.getUsers();
+  const idx = users.findIndex(u => u.email === state.currentUser.email);
+  if (idx !== -1) {
+    users[idx] = { ...users[idx], ...state.currentUser };
+    Storage.saveUsers(users);
+  }
+
+  renderAllModules();
+  showToast('Account profile updated successfully.', 'success');
+};
+
 /**
- * Event Listeners & Navigation Bar handlers
+ * Switch Demo Account Shortcut
  */
-function initDashboardEvents() {
-  // Navigation Bar Buttons
-  document.getElementById('dash-offers-btn')?.addEventListener('click', () => {
-    document.getElementById('dash-offers-section')?.scrollIntoView({ behavior: 'smooth' });
-  });
-
-  document.getElementById('dash-orders-btn')?.addEventListener('click', () => {
-    document.getElementById('dash-orders-section')?.scrollIntoView({ behavior: 'smooth' });
-  });
-
-  document.getElementById('dash-cart-btn')?.addEventListener('click', () => {
-    openDrawer();
-  });
-
-  document.getElementById('dash-logout-btn')?.addEventListener('click', () => {
-    Auth.logout();
-    window.location.href = 'index.html';
-  });
-
-  // Drawer Close
-  document.getElementById('dash-cart-close-btn')?.addEventListener('click', closeDrawer);
-  document.getElementById('dash-cart-overlay')?.addEventListener('click', (e) => {
-    if (e.target === document.getElementById('dash-cart-overlay')) closeDrawer();
-  });
-
-  // Global escape
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeDrawer();
-      closeAddressModal();
-    }
-  });
-
-  // Listen for storage updates
-  window.addEventListener('shopease:cart-updated', () => {
-    updateCartBadge();
-    renderKPIs();
-    renderBasketPreview();
-    renderDrawerItems();
-  });
-
-  window.addEventListener('shopease:orders-updated', () => {
-    renderKPIs();
-    renderOrdersSection();
-  });
-
-  window.addEventListener('shopease:inventory-updated', () => {
-    renderWishlistSection();
-  });
-
-  // Cross-tab synchronization
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'shopease_orders_v1') {
-      renderKPIs();
-      renderOrdersSection();
-    } else if (e.key === 'shopease_inventory_v1') {
-      renderWishlistSection();
-    } else if (e.key === 'shopease_cart_v1') {
-      updateCartBadge();
-      renderKPIs();
-      renderBasketPreview();
-      renderDrawerItems();
-    }
-  });
-
-  window.addEventListener('shopease:auth-changed', () => {
+window.shopeaseSwitchAccount = function(email) {
+  const users = Storage.getUsers();
+  const target = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  if (target) {
+    Auth.login(target.email, target.password || 'password123');
     state.currentUser = Auth.getCurrentUser();
-    if (!state.currentUser) {
-      window.location.href = 'index.html';
+    if (email === 'admin@gmail.com') {
+      window.location.href = 'admin-dashboard.html';
       return;
     }
-    renderDashboardHeader();
-    renderProfileSection();
-  });
-}
-
-function updateCartBadge() {
-  const summary = Cart.getSummary();
-  const badge = document.getElementById('dash-cart-badge');
-  if (badge) {
-    badge.textContent = summary.totalItems;
-  }
-}
-
-function openDrawer() {
-  const overlay = document.getElementById('dash-cart-overlay');
-  if (overlay) {
-    overlay.classList.add('open');
-    overlay.setAttribute('aria-hidden', 'false');
-    renderDrawerItems();
-  }
-}
-
-function closeDrawer() {
-  const overlay = document.getElementById('dash-cart-overlay');
-  if (overlay) {
-    overlay.classList.remove('open');
-    overlay.setAttribute('aria-hidden', 'true');
-  }
-}
-
-function renderDrawerItems() {
-  const container = document.getElementById('dash-drawer-items');
-  const subtotalEl = document.getElementById('dash-drawer-subtotal');
-  const grandTotalEl = document.getElementById('dash-drawer-grandtotal');
-  if (!container) return;
-
-  const summary = Cart.getSummary();
-
-  if (subtotalEl) subtotalEl.textContent = CURRENCY.format(summary.subtotal);
-  if (grandTotalEl) grandTotalEl.textContent = CURRENCY.format(summary.grandTotal);
-
-  if (summary.items.length === 0) {
-    container.innerHTML = `
-      <div style="padding:2.5rem 1rem; text-align:center;">
-        <p style="color:var(--color-text-secondary);">Your basket is empty.</p>
-        <a href="index.html#catalog-section" class="btn btn-primary" style="margin-top:0.75rem;">
-          Start Shopping
-        </a>
-      </div>
-    `;
-    return;
-  }
-
-  container.innerHTML = `
-    <ul style="list-style:none; display:flex; flex-direction:column; gap:0.75rem;">
-      ${summary.items.map(item => `
-        <li style="display:flex; justify-content:space-between; align-items:center; padding-bottom:0.5rem; border-bottom:1px solid var(--color-border);">
-          <div>
-            <div style="font-weight:700; font-size:0.9rem;">${escapeHtml(item.name)}</div>
-            <div style="font-size:0.8rem; color:var(--color-text-muted);">
-              ${item.quantity} × ${CURRENCY.format(item.price)}
-            </div>
-          </div>
-          <div style="font-weight:800; font-size:0.95rem;">
-            ${CURRENCY.format(item.totalPrice)}
-          </div>
-        </li>
-      `).join('')}
-    </ul>
-  `;
-}
-
-/**
- * Edit Address Modal
- */
-function openAddressEditModal() {
-  const modal = document.getElementById('dash-address-modal');
-  if (!modal) return;
-
-  const user = state.currentUser;
-  document.getElementById('edit-fullname').value = user.fullName || '';
-  document.getElementById('edit-phone').value = user.phone || '';
-  document.getElementById('edit-address').value = user.address || '';
-  document.getElementById('edit-city').value = user.city || '';
-  document.getElementById('edit-postcode').value = user.postcode || '';
-
-  modal.style.display = 'flex';
-  modal.setAttribute('aria-hidden', 'false');
-}
-
-function closeAddressModal() {
-  const modal = document.getElementById('dash-address-modal');
-  if (modal) {
-    modal.style.display = 'none';
-    modal.setAttribute('aria-hidden', 'true');
-  }
-}
-
-// Global dashboard helpers
-window.shopeaseApplyDashboardOffer = (code) => {
-  const res = Cart.setPromo(code);
-  if (res.success) {
-    showToast(`Voucher "${code}" applied to your basket!`, 'success');
-    renderKPIs();
-    renderBasketPreview();
-    openDrawer();
+    renderAllModules();
+    showToast(`Switched active profile to ${target.fullName} (${target.email})`, 'success');
   } else {
-    showToast(res.message, 'warning');
+    showToast(`Account ${email} not found in database.`, 'warning');
   }
-};
-
-window.shopeaseOpenDashboardCart = () => {
-  openDrawer();
-};
-
-window.shopeaseSaveAddress = (e) => {
-  e.preventDefault();
-  const fullName = document.getElementById('edit-fullname').value.trim();
-  const phone = document.getElementById('edit-phone').value.trim();
-  const address = document.getElementById('edit-address').value.trim();
-  const city = document.getElementById('edit-city').value.trim();
-  const postcode = document.getElementById('edit-postcode').value.trim();
-
-  if (!fullName || !address) {
-    showToast('Name and Address are required.', 'warning');
-    return;
-  }
-
-  Storage.updateUser({ fullName, phone, address, city, postcode });
-  state.currentUser = Auth.getCurrentUser();
-  closeAddressModal();
-  renderDashboardHeader();
-  renderProfileSection();
-  showToast('Delivery address updated successfully.', 'success');
-};
-
-window.shopeaseCloseAddressModal = () => {
-  closeAddressModal();
 };
 
 /**
- * Renders Saved Wishlist Section
+ * Toast & Screen Reader Announcements
  */
-function renderWishlistSection() {
-  const container = document.getElementById('dash-wishlist-container');
-  const countSpan = document.getElementById('dash-wishlist-count');
-  if (!container) return;
-
-  const wishlistIds = Storage.getWishlist();
-  const allProducts = Storage.getProducts();
-  const wishlistItems = allProducts.filter(p => wishlistIds.includes(p.id));
-
-  if (countSpan) {
-    countSpan.textContent = `${wishlistItems.length} item${wishlistItems.length === 1 ? '' : 's'} saved`;
-  }
-
-  if (wishlistItems.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state" style="padding:2.5rem 1.5rem; text-align:center; background:var(--color-surface); border:1px dashed var(--color-border); border-radius:var(--radius-md);">
-        <div style="font-size:2.5rem; margin-bottom:0.75rem;" aria-hidden="true">🤍</div>
-        <h3 style="font-size:1.2rem; margin-bottom:0.4rem;">Your Wishlist is Empty</h3>
-        <p style="color:var(--color-text-secondary); max-width:400px; margin:0 auto 1.25rem; font-size:0.9rem;">
-          Save products you love by clicking the heart button on any item in our store.
-        </p>
-        <a href="index.html#catalog-section" class="btn btn-secondary" style="padding:0.5rem 1.2rem; text-decoration:none;">
-          🛍️ Browse Products
-        </a>
-      </div>
-    `;
-    return;
-  }
-
-  container.innerHTML = `
-    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:1rem;">
-      ${wishlistItems.map(item => `
-        <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:1rem; display:flex; flex-direction:column; justify-content:space-between; gap:0.75rem;">
-          <div style="display:flex; gap:0.75rem; align-items:center;">
-            <img src="${item.image}" alt="${escapeHtml(item.name)}" style="width:56px; height:56px; object-fit:cover; border-radius:var(--radius-sm); border:1px solid var(--color-border);" />
-            <div>
-              <span style="font-size:0.7rem; text-transform:uppercase; font-weight:700; color:var(--color-brand-primary);">${item.category}</span>
-              <div style="font-weight:700; font-size:0.9rem; line-height:1.2; margin-top:0.15rem; color:var(--color-text-primary);">${escapeHtml(item.name)}</div>
-              <div style="font-weight:800; font-size:1rem; color:var(--color-text-primary); margin-top:0.25rem;">${CURRENCY.format(item.price)}</div>
-            </div>
-          </div>
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; padding-top:0.5rem; border-top:1px solid var(--color-border);">
-            <button type="button" class="btn btn-primary" style="font-size:0.8rem; padding:0.35rem 0.75rem; flex:1;" onclick="window.shopeaseAddWishlistToCart('${item.id}')">
-              🛒 Add to Basket
-            </button>
-            <button type="button" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.6rem; color:var(--color-danger);" onclick="window.shopeaseRemoveWishlist('${item.id}')" title="Remove from wishlist">
-              ✕
-            </button>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-  `;
-}
-
-// Global Wishlist and Profile Switch Handlers
-window.shopeaseAddWishlistToCart = (productId) => {
-  const res = Cart.addItem(productId, 1);
-  if (res.success) {
-    showToast(`Added to basket! (${res.item.name})`, 'success');
-    updateCartBadge();
-    renderBasketPreview();
-    renderKPIs();
-  } else {
-    showToast(res.message, 'warning');
-  }
-};
-
-window.shopeaseRemoveWishlist = (productId) => {
-  Storage.toggleWishlist(productId);
-  showToast('Removed from wishlist', 'info');
-  renderWishlistSection();
-};
-
-window.shopeaseSwitchAccount = (email) => {
-  const users = Storage.getUsers();
-  const u = users.find(x => x.email.toLowerCase() === email.toLowerCase());
-  if (u) {
-    Auth.login(u.email, u.password || 'password123');
-    showToast(`Switched active profile to ${u.fullName} (${u.role})`, 'success');
-    setTimeout(() => {
-      if (u.role === 'Admin') {
-        window.location.href = 'admin-dashboard.html';
-      } else {
-        window.location.reload();
-      }
-    }, 250);
-  }
-};
-
 function showToast(message, type = 'info') {
   const container = document.getElementById('toast-container');
   if (!container) return;
@@ -819,10 +1696,12 @@ function showToast(message, type = 'info') {
 }
 
 function announce(message) {
-  const el = document.getElementById('live-announcer');
-  if (el) {
-    el.textContent = '';
-    setTimeout(() => { el.textContent = message; }, 50);
+  const announcer = document.getElementById('live-announcer');
+  if (announcer) {
+    announcer.textContent = '';
+    setTimeout(() => {
+      announcer.textContent = message;
+    }, 50);
   }
 }
 
@@ -835,108 +1714,3 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
-
-window.shopeaseSimulateCustomerOrder = () => {
-  const products = Storage.getProducts();
-  if (products.length === 0) return;
-
-  const user = state.currentUser || {
-    fullName: 'Alex Morgan',
-    email: 'alex@example.com',
-    phone: '07700 900123',
-    address: '42 Highfield Terrace',
-    city: 'Manchester',
-    postcode: 'M14 6XX'
-  };
-
-  const randomProd1 = products[Math.floor(Math.random() * products.length)];
-  const randomProd2 = products[(Math.floor(Math.random() * products.length) + 1) % products.length];
-
-  const orderId = 'SE-' + Math.floor(100000 + Math.random() * 900000);
-  const qty1 = 1;
-  const qty2 = 1;
-  const subtotal = randomProd1.price * qty1 + (randomProd2.id !== randomProd1.id ? randomProd2.price * qty2 : 0);
-  const deliveryFee = subtotal > 50 ? 0 : 3.99;
-  const grandTotal = subtotal + deliveryFee;
-
-  const items = [
-    {
-      productId: randomProd1.id,
-      name: randomProd1.name,
-      category: randomProd1.category,
-      price: randomProd1.price,
-      quantity: qty1,
-      totalPrice: randomProd1.price * qty1,
-      image: randomProd1.image
-    }
-  ];
-
-  if (randomProd2.id !== randomProd1.id) {
-    items.push({
-      productId: randomProd2.id,
-      name: randomProd2.name,
-      category: randomProd2.category,
-      price: randomProd2.price,
-      quantity: qty2,
-      totalPrice: randomProd2.price * qty2,
-      image: randomProd2.image
-    });
-  }
-
-  const mockOrder = {
-    orderId,
-    createdAt: new Date().toISOString(),
-    formattedDate: new Intl.DateTimeFormat('en-GB', { dateStyle: 'full', timeStyle: 'short' }).format(new Date()),
-    customer: {
-      fullName: user.fullName || 'Customer Member',
-      email: user.email || 'customer@example.com',
-      phone: user.phone || '07700 900123',
-      address: user.address || '42 Highfield Terrace',
-      city: user.city || 'Manchester',
-      postcode: user.postcode || 'M14 6XX'
-    },
-    payment: {
-      method: 'Credit Card (Mock Auth)',
-      last4: '4192',
-      cardHolder: user.fullName || 'Customer Member'
-    },
-    items,
-    financials: {
-      subtotal,
-      deliveryFee,
-      discount: 0,
-      promoCode: null,
-      tax: subtotal * 0.20,
-      grandTotal
-    },
-    status: 'Confirmed'
-  };
-
-  Storage.saveOrder(mockOrder);
-  showToast(`Demo order #${orderId} generated (${CURRENCY.format(grandTotal)})!`, 'success');
-  renderKPIs();
-  renderOrdersSection();
-};
-
-window.shopeaseReorder = (orderId) => {
-  const orders = Storage.getOrders();
-  const order = orders.find(o => o.orderId === orderId);
-  if (!order || !order.items) return;
-
-  let addedCount = 0;
-  order.items.forEach(item => {
-    const res = Cart.addItem(item.productId, item.quantity || 1);
-    if (res.success) addedCount++;
-  });
-
-  if (addedCount > 0) {
-    showToast(`Added ${addedCount} items from #${orderId} to your basket!`, 'success');
-    updateCartBadge();
-    renderKPIs();
-    renderBasketPreview();
-    openDrawer();
-  } else {
-    showToast('Items could not be added (check available stock).', 'warning');
-  }
-};
-
