@@ -1031,87 +1031,479 @@ body {
 }
 
 /* ==========================================================================
-   SECTION C: CINEMATIC LOOPED VIDEO / MEDIA STRIP
+   SECTION C: PROMOTIONS, BRANDS & DISCOUNTS SWAPPING CARD PANEL
+   (Slim Panel Size • Warm Ivory Background Matching 2nd Image)
    ========================================================================== */
 .cinematic-strip {
   position: relative;
-  background-color: #191919;
-  background-image: url('https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=1800&q=80');
-  background-size: cover;
-  background-position: center;
-  padding: 6.5rem 0;
+  background-color: var(--color-bg); /* Warm Ivory matching user's 2nd image #F7F5EF */
+  padding: 3rem 0;
   margin: 3.5rem 0;
-  color: #FFFFFF;
-  text-align: center;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
   overflow: hidden;
   transition: filter var(--transition-normal);
 }
 
 .cinematic-strip.is-paused {
-  background-attachment: initial;
+  filter: none;
 }
 
 .cinematic-backdrop-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(20, 20, 19, 0.75) 0%, rgba(20, 20, 19, 0.88) 100%);
+  background: radial-gradient(ellipse at 80% 50%, rgba(216, 92, 54, 0.04) 0%, transparent 60%);
+  pointer-events: none;
 }
 
-.cinematic-content-wrap {
+.promo-strip-container {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 2.75rem;
+  align-items: center;
   position: relative;
   z-index: 2;
-  max-width: 780px;
 }
 
-.cinematic-tag {
+/* Left Column: Sidebar & Controls */
+.promo-strip-sidebar {
+  text-align: left;
+}
+
+.promo-kicker-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.promo-kicker-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-brand-primary);
+  box-shadow: 0 0 8px rgba(216, 92, 54, 0.5);
+  animation: promoPulse 2s infinite ease-in-out;
+}
+
+@keyframes promoPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.5; }
+}
+
+.promo-kicker-text {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  font-weight: 700;
   color: var(--color-brand-primary);
-  margin-bottom: 1rem;
-  display: block;
+  margin: 0;
+  display: inline;
 }
 
-.cinematic-headline {
+.promo-strip-title {
   font-family: var(--font-serif);
-  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-size: clamp(1.75rem, 2.6vw, 2.35rem);
   font-weight: 700;
   line-height: 1.15;
-  margin-bottom: 1rem;
-  color: #FFFFFF;
+  color: var(--color-text-primary);
+  margin: 0 0 0.45rem 0;
+  letter-spacing: -0.02em;
 }
 
-.cinematic-subtitle {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.85);
-  margin-bottom: 2rem;
+.promo-strip-subtitle {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  margin: 0 0 1.35rem 0;
+  max-width: 440px;
 }
 
-.cinematic-actions {
+/* Controls */
+.promo-strip-controls {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 1rem;
+  gap: 1.15rem;
   flex-wrap: wrap;
 }
 
-.btn-motion-toggle {
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #FFFFFF;
-  padding: 0.75rem 1.4rem;
+.promo-deck-arrows {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.promo-arrow-btn {
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-full);
-  font-size: 0.85rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 700;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-xs);
+}
+
+.promo-arrow-btn:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-brand-primary);
+  color: var(--color-brand-primary);
+  transform: scale(1.05);
+}
+
+.promo-deck-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.promo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.promo-dot.active {
+  width: 22px;
+  background: var(--color-brand-primary);
+}
+
+.promo-actions-row {
+  margin: 0;
+}
+
+.btn-motion-toggle,
+.promo-motion-btn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-xs);
+}
+
+.btn-motion-toggle:hover,
+.promo-motion-btn:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+  border-color: var(--color-text-primary);
+}
+
+/* Right Column: Swapping Card Deck Stage */
+.promo-strip-stage {
+  position: relative;
+  perspective: 1000px;
+}
+
+.promo-swap-deck {
+  position: relative;
+  width: 100%;
+  height: 230px;
+}
+
+/* Individual Modern Deal Card */
+.promo-card {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  box-shadow: 0 10px 25px rgba(25, 25, 25, 0.06), 0 2px 6px rgba(25, 25, 25, 0.04);
+  overflow: hidden;
+  text-align: left;
+  transition: transform 0.55s cubic-bezier(0.2, 0.9, 0.28, 1), 
+              opacity 0.45s ease, 
+              box-shadow 0.35s ease;
+  user-select: none;
+}
+
+.promo-card.card-active {
+  transform: translate3d(0, 0, 0) scale(1);
+  opacity: 1;
+  z-index: 5;
+  pointer-events: auto;
+  box-shadow: 0 14px 30px rgba(25, 25, 25, 0.08), 0 4px 10px rgba(25, 25, 25, 0.04);
+}
+
+.promo-card.card-next {
+  transform: translate3d(14px, 10px, -20px) rotate(1.6deg) scale(0.96);
+  opacity: 0.65;
+  z-index: 3;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.promo-card.card-prev {
+  transform: translate3d(-14px, 10px, -20px) rotate(-1.6deg) scale(0.96);
+  opacity: 0.65;
+  z-index: 3;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.promo-card.card-far-right,
+.promo-card.card-far-left {
+  transform: translate3d(0, 20px, -40px) scale(0.9);
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.promo-card.card-next:hover,
+.promo-card.card-prev:hover {
+  opacity: 0.85;
+}
+
+/* Card Visual Image & Countdown */
+.promo-card-visual {
+  position: relative;
+  height: 100%;
+  background: #F0EDE4;
+  overflow: hidden;
+}
+
+.promo-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.promo-card:hover .promo-card-img {
+  transform: scale(1.05);
+}
+
+.promo-timer-pill {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(25, 25, 25, 0.88);
+  backdrop-filter: blur(6px);
+  color: #FFFFFF;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.timer-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #FF5722;
+  box-shadow: 0 0 5px #FF5722;
+}
+
+/* Card Content Details */
+.promo-card-content {
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.promo-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.promo-brand-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+}
+
+.promo-discount-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.badge-orange { background: #FBECE6; color: #D85C36; border: 1px solid #F5C7B5; }
+.badge-green { background: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9; }
+.badge-purple { background: #F3E8FF; color: #7E22CE; border: 1px solid #E9D5FF; }
+.badge-amber { background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; }
+.badge-rose { background: #FFE4E6; color: #BE123C; border: 1px solid #FECDD3; }
+
+.promo-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0.25rem 0 0.15rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.promo-card-desc {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  line-height: 1.35;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.promo-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0;
+  border-top: 1px dashed var(--color-border);
+  margin-top: 0.35rem;
+}
+
+.promo-price-block {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+}
+
+.promo-price-deal {
+  font-family: var(--font-mono);
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.promo-price-old {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+.promo-code-btn {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  transition: all 0.2s ease;
+}
+
+.promo-code-btn:hover {
+  background: var(--color-brand-primary);
+  color: #FFFFFF;
+  border-color: var(--color-brand-primary);
+}
+
+.promo-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.btn-outline-compact {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.76rem;
   font-weight: 600;
   cursor: pointer;
+  text-align: center;
   transition: all var(--transition-fast);
 }
 
-.btn-motion-toggle:hover {
-  background: rgba(255, 255, 255, 0.22);
-  border-color: #FFFFFF;
+.btn-outline-compact:hover {
+  border-color: var(--color-text-primary);
+  background: var(--color-surface-hover);
+}
+
+.btn-primary-compact {
+  background: var(--color-text-primary);
+  border: 1px solid var(--color-text-primary);
+  color: #FFFFFF;
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+
+.btn-primary-compact:hover {
+  background: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .promo-strip-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .promo-strip-sidebar {
+    text-align: center;
+  }
+  .promo-strip-subtitle {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .promo-strip-controls {
+    justify-content: center;
+  }
+  .promo-swap-deck {
+    max-width: 540px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 580px) {
+  .promo-swap-deck {
+    height: 330px;
+    max-width: 100%;
+  }
+  .promo-card {
+    grid-template-columns: 1fr;
+    grid-template-rows: 120px 1fr;
+  }
+  .promo-card-title,
+  .promo-card-desc {
+    white-space: normal;
+  }
 }
 
 /* ==========================================================================
