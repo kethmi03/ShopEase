@@ -100,6 +100,11 @@
                 <span>My Orders</span>
               </a>
 
+              <!-- Profile Button -->
+              <a href="profile.html" class="nav-btn nav-btn-ghost" aria-label="Go to My Profile" title="My Profile & Account Details">
+                <span>👤 Profile</span>
+              </a>
+
               <!-- Logout Button -->
               <button 
                 type="button" 
@@ -119,36 +124,7 @@
 
   <!-- Main Customer Dashboard Content -->
   <main id="main-content" class="dashboard-container">
-    <div class="container">
-      
-      <!-- 0. Fast Demo Profile Switcher -->
-      <div class="profile-fast-switcher" id="profile-fast-switcher" style="margin-bottom:1.25rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; padding:0.6rem 1rem; border-radius:var(--radius-md); background:var(--color-surface-subtle); border:1px dashed var(--color-border-strong);">
-        <div style="font-size:0.8rem; font-weight:600; color:var(--color-text-secondary); display:flex; align-items:center; gap:0.4rem;">
-          <span>⚡ Fast Switch Demo Profile:</span>
-        </div>
-        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-          <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.6rem;" onclick="window.shopeaseSwitchAccount('alex@example.com')">
-            👤 Alex (Customer)
-          </button>
-          <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.6rem;" onclick="window.shopeaseSwitchAccount('sarah@example.com')">
-            ⭐ Sarah (VIP Member)
-          </button>
-          <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.6rem; border-color:var(--color-brand-primary);" onclick="window.shopeaseSwitchAccount('admin@gmail.com')">
-            🛡️ Admin (admin@gmail.com)
-          </button>
-        </div>
-      </div>
-
-      <!-- Quick Section Jump Links -->
-      <nav class="dashboard-quick-nav" aria-label="Dashboard Jump Links" style="margin:1rem 0 1.5rem 0; display:flex; gap:0.5rem; flex-wrap:wrap;">
-        <a href="#dash-home-section" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">🏠 Home</a>
-        <a href="#dash-categories-section" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">🏷️ 3 Categories</a>
-        <a href="#dash-products-section" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">📦 All 10 Products</a>
-        <a href="#dash-basket-section" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">🛍️ Shopping Cart</a>
-        <a href="#dash-orders-section" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">🧾 My Orders</a>
-        <a href="#dash-offers-section" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">🎁 Vouchers</a>
-        <a href="#dash-profile-section" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">👤 Profile</a>
-      </nav>
+    <div class="container" style="padding-top: 1rem;">
 
       <!-- ======================================================================
            1. HOME / DASHBOARD SECTION
@@ -432,20 +408,6 @@
           <span id="dash-wishlist-count" style="font-size:0.85rem; color:var(--color-text-muted);">0 items saved</span>
         </div>
         <div id="dash-wishlist-container" style="margin-top:1rem;"></div>
-      </section>
-
-      <!-- ======================================================================
-           8. CUSTOMER PROFILE & DELIVERY ADDRESS
-           ====================================================================== -->
-      <section id="dash-profile-section" class="dashboard-section" aria-label="Profile and Delivery Address" style="margin-top:2.5rem;">
-        <div class="dashboard-section-title">
-          <div>
-            <span style="font-size:0.75rem; font-family:var(--font-mono); text-transform:uppercase; color:var(--color-brand-primary); font-weight:700; letter-spacing:0.05em; display:block;">AUTHENTICATED PROFILE</span>
-            <span style="font-size:1.35rem; font-family:var(--font-serif); font-weight:700;">Account &amp; Delivery Details</span>
-          </div>
-          <span style="font-size:0.85rem; color:var(--color-text-muted);">Persisted in Local Storage</span>
-        </div>
-        <div id="dash-profile-container" style="margin-top:1rem;"></div>
       </section>
 
     </div>

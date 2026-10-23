@@ -233,6 +233,13 @@ export const Storage = {
     return order;
   },
 
+  getOrderById(orderId) {
+    if (!orderId) return null;
+    const orders = this.getOrders();
+    const cleanId = String(orderId).trim().toLowerCase();
+    return orders.find(o => String(o.orderId || '').trim().toLowerCase() === cleanId) || null;
+  },
+
   /**
    * Wishlist operations
    */
@@ -343,7 +350,7 @@ export const Storage = {
     this.setCurrentUser(updated);
 
     const users = this.getUsers();
-    const idx = users.findIndex(u => u.id === updated.id);
+    const idx = users.findIndex(u => (u.id && u.id === updated.id) || (u.email && u.email.toLowerCase() === (updated.email || '').toLowerCase()));
     if (idx !== -1) {
       users[idx] = { ...users[idx], ...updatedData };
       this.saveUsers(users);
