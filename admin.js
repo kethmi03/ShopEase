@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   } else if (!isAdmin) {
     alert('Access Restricted: The Admin Console is only accessible to Administrator accounts. Redirecting to Customer Dashboard...');
-    window.location.href = 'dashboard.html';
+    window.location.href = 'customer-dashboard.html';
     return;
   } else {
     state.currentUser = user;
@@ -943,7 +943,7 @@ window.adminSwitchUser = (email) => {
       if (u.role === 'Admin') {
         window.location.reload();
       } else {
-        window.location.href = 'dashboard.html';
+        window.location.href = 'customer-dashboard.html';
       }
     }, 250);
   }

@@ -471,7 +471,7 @@ function showAlreadyLoggedInBanner(user) {
   if (!container) return;
 
   const isAdmin = user.role === 'Admin';
-  const targetHref = isAdmin ? 'admin.html' : 'dashboard.html';
+  const targetHref = isAdmin ? 'admin-dashboard.html' : 'customer-dashboard.html';
   const targetLabel = isAdmin ? '🛡️ Go to Admin Dashboard' : '👤 Go to Customer Dashboard';
 
   container.innerHTML = `
@@ -534,9 +534,9 @@ function redirectAfterAuth() {
   const isAdmin = user && (user.role === 'Admin' || emailLower === 'admin@gmail.com' || emailLower === 'admin@shopease.com' || emailLower.includes('admin'));
 
   if (isAdmin) {
-    window.location.href = 'admin.html';
+    window.location.href = 'admin-dashboard.html';
   } else {
-    window.location.href = 'dashboard.html';
+    window.location.href = 'customer-dashboard.html';
   }
 }
 

@@ -133,7 +133,7 @@ function renderDashboardHeader() {
             <div style="font-size:0.825rem; color:var(--color-text-secondary);">You have administrative rights to manage store inventory, orders, customer accounts, and promotions.</div>
           </div>
         </div>
-        <a href="admin.html" class="btn btn-primary" style="font-size:0.85rem; padding:0.45rem 1rem; font-weight:700; text-decoration:none;">
+        <a href="admin-dashboard.html" class="btn btn-primary" style="font-size:0.85rem; padding:0.45rem 1rem; font-weight:700; text-decoration:none;">
           Launch Admin Console →
         </a>
       </div>
@@ -159,7 +159,7 @@ function renderDashboardHeader() {
 
       <div class="dashboard-hero-actions">
         ${isAdmin ? `
-          <a href="admin.html" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:0.4rem; background:linear-gradient(135deg, #1e40af, #3b82f6); color:#fff; text-decoration:none;">
+          <a href="admin-dashboard.html" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:0.4rem; background:linear-gradient(135deg, #1e40af, #3b82f6); color:#fff; text-decoration:none;">
             <span>🛡️</span>
             <span>Admin Console</span>
           </a>
@@ -787,7 +787,7 @@ window.shopeaseSwitchAccount = (email) => {
     showToast(`Switched active profile to ${u.fullName} (${u.role})`, 'success');
     setTimeout(() => {
       if (u.role === 'Admin') {
-        window.location.href = 'admin.html';
+        window.location.href = 'admin-dashboard.html';
       } else {
         window.location.reload();
       }

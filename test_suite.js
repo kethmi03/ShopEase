@@ -278,7 +278,7 @@ async function runTestSuite() {
 
   // TC-20: No broken links, missing local assets, or relevant console errors remain
   // Validate all local html references in files
-  const htmlFiles = ['index.html', 'login.html', 'register.html', 'dashboard.html', 'admin.html'];
+  const htmlFiles = ['index.html', 'login.html', 'register.html', 'customer-dashboard.html', 'admin-dashboard.html', 'dashboard.html', 'admin.html'];
   let brokenLinksFound = 0;
   for (const f of htmlFiles) {
     const content = fs.readFileSync(f, 'utf-8');
