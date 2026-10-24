@@ -8,6 +8,7 @@ import { INITIAL_PRODUCTS } from './products.js';
 
 const STORAGE_KEYS = {
   INVENTORY: 'shopease_inventory_v1',
+  CATALOG_VERSION: 'shopease_catalog_version',
   CART: 'shopease_cart_v1',
   ORDERS: 'shopease_orders_v1',
   WISHLIST: 'shopease_wishlist_v1',
@@ -140,6 +141,14 @@ export const Storage = {
     if (!inventory || !Array.isArray(inventory) || inventory.length < INITIAL_PRODUCTS.length) {
       inventory = JSON.parse(JSON.stringify(INITIAL_PRODUCTS));
       setItem(STORAGE_KEYS.INVENTORY, inventory);
+      setItem(STORAGE_KEYS.CATALOG_VERSION, 2);
+    } else if (getItem(STORAGE_KEYS.CATALOG_VERSION, 0) !== 2) {
+      inventory = inventory.map(product => {
+        const initialProduct = INITIAL_PRODUCTS.find(initial => initial.id === product.id);
+        return initialProduct ? { ...product, price: initialProduct.price } : product;
+      });
+      setItem(STORAGE_KEYS.INVENTORY, inventory);
+      setItem(STORAGE_KEYS.CATALOG_VERSION, 2);
     }
     return inventory;
   },
