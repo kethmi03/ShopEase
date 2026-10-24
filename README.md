@@ -11,16 +11,16 @@ Each of the 10 products features distinct pricing, customer ratings, detailed de
 
 | # | Product Name | Category | Unit Price | Initial Stock | Highlights |
 |---|--------------|----------|------------|---------------|------------|
-| 1 | **Artisan Organic Sourdough Loaf** | Food | **Rs. 4.95** | 25 | 36h cold-fermentation, 100% stoneground flour |
-| 2 | **Single-Estate Ethiopian Yirgacheffe Coffee** | Food | **Rs. 14.50** | 40 | 500g whole bean, floral & bergamot notes |
-| 3 | **Luxury Swiss Dark Chocolate Truffle Box** | Food | **Rs. 22.00** | 18 | 24 handcrafted Grand Cru 72% dark truffles |
-| 4 | **Everyday Tailored Stretch Chino Trousers** | Clothing | **Rs. 49.99** | 20 | 98% cotton, 2% elastane, wrinkle-resistant |
-| 5 | **Vintage Washed Denim Trucker Jacket** | Clothing | **Rs. 68.00** | 15 | 13.5oz organic rigid denim, brass shanks |
-| 6 | **Pure Italian Merino Wool Knit Jumper** | Clothing | **Rs. 85.50** | 12 | 19.5-micron extrafine yarn, thermo-regulating |
-| 7 | **ErgoPro Wireless Mechanical Keyboard** | Electronics | **Rs. 119.50** | 16 | Hot-swap tactile switches, tri-mode wireless |
-| 8 | **SmartPulse GPS & Health Tracker Watch** | Electronics | **Rs. 159.00** | 14 | AMOLED display, ECG + SpO2, 5ATM swimproof |
-| 9 | **AcousticPro Hybrid ANC Wireless Headphones** | Electronics | **Rs. 199.99** | 10 | 38dB active noise cancellation, 50h battery |
-| 10 | **UltraSlim 4K OLED 15.6" Portable Monitor** | Electronics | **Rs. 279.00** | 8 | True-Black 3840x2160 panel, dual USB-C |
+| 1 | **Artisan Organic Sourdough Loaf** | Food | **Rs. 650.00** | 25 | 36h cold-fermentation, 100% stoneground flour |
+| 2 | **Single-Estate Ethiopian Yirgacheffe Coffee** | Food | **Rs. 2900.00** | 40 | 500g whole bean, floral & bergamot notes |
+| 3 | **Luxury Swiss Dark Chocolate Truffle Box** | Food | **Rs. 3300.00** | 18 | 24 handcrafted Grand Cru 72% dark truffles |
+| 4 | **Everyday Tailored Stretch Chino Trousers** | Clothing | **Rs. 4500.00** | 20 | 98% cotton, 2% elastane, wrinkle-resistant |
+| 5 | **Vintage Washed Denim Trucker Jacket** | Clothing | **Rs. 6800.00** | 15 | 13.5oz organic rigid denim, brass shanks |
+| 6 | **Pure Italian Merino Wool Knit Jumper** | Clothing | **Rs. 8550.00** | 12 | 19.5-micron extrafine yarn, thermo-regulating |
+| 7 | **ErgoPro Wireless Mechanical Keyboard** | Electronics | **Rs. 11950.00** | 16 | Hot-swap tactile switches, tri-mode wireless |
+| 8 | **SmartPulse GPS & Health Tracker Watch** | Electronics | **Rs. 15900.00** | 14 | AMOLED display, ECG + SpO2, 5ATM swimproof |
+| 9 | **AcousticPro Hybrid ANC Wireless Headphones** | Electronics | **Rs. 19900.00** | 10 | 38dB active noise cancellation, 50h battery |
+| 10 | **UltraSlim 4K OLED 15.6" Portable Monitor** | Electronics | **Rs. 27900.00** | 8 | True-Black 3840x2160 panel, dual USB-C |
 
 ---
 
@@ -80,7 +80,7 @@ All persistent data is saved under namespaced keys in the browser's `window.loca
    - Quick View dialog displays detailed bulleted specs, full description, and quantity selector.
 
 2. **Slide-Over Basket Drawer**:
-   - Dynamic subtotal, free shipping progress meter (Spend Rs. 50.00 for FREE express delivery; standard Rs. 3.99 otherwise).
+   - Dynamic subtotal, free shipping progress meter (Spend Rs. 500.00 for FREE express delivery; standard Rs. 350.00 otherwise).
    - Stepper controls (`−` / `+`) and item removal button.
    - Promo discount code engine:
      - `SAVE10` (10% off entire basket)
