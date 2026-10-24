@@ -12,8 +12,8 @@ export const PROMO_CODES = {
   'FREESHIP': { type: 'shipping', value: 0, description: 'Free Express Shipping' }
 };
 
-export const DELIVERY_THRESHOLD = 50.00;
-export const STANDARD_DELIVERY_FEE = 3.99;
+export const DELIVERY_THRESHOLD = 350.00;
+export const STANDARD_DELIVERY_FEE = 500.00;
 
 let activePromoCode = null;
 

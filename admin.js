@@ -984,7 +984,7 @@ window.adminDeleteProduct = function (productId) {
       id: productId,
       name: `Available Product Slot (${product.category})`,
       category: product.category,
-      price: 19.99,
+      price: 1900.00,
       stock: 15,
       image: 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=800&q=80',
       description: 'Slot ready for new product assignment.',
