@@ -300,7 +300,7 @@ function renderKPIs() {
         </div>
         <div class="kpi-body">
           <div class="kpi-number">${cartSummary.itemCount}</div>
-          <div class="kpi-label">Units in Active Basket</div>
+          <div class="kpi-label">Items in Cart</div>
           <div style="font-size:0.75rem; color:var(--color-text-muted); margin-top:0.25rem;">Subtotal: Rs. ${cartSummary.subtotal.toFixed(2)}</div>
         </div>
       </div>
@@ -322,8 +322,8 @@ function renderKPIs() {
         </div>
         <div class="kpi-body">
           <div class="kpi-number">${wishlist.length}</div>
-          <div class="kpi-label">Saved Wishlist Objects</div>
-          <div style="font-size:0.75rem; color:var(--color-text-muted); margin-top:0.25rem;">Ready for instant basket add</div>
+          <div class="kpi-label">Saved in Wishlist</div>
+          <div style="font-size:0.75rem; color:var(--color-text-muted); margin-top:0.25rem;">Ready to add to cart</div>
         </div>
       </div>
 
@@ -696,7 +696,7 @@ window.customerOpenProductDetails = function(productId) {
             onclick="window.customerAddToCart('${product.id}'); window.customerCloseProductDetails();"
             ${isOutOfStock ? 'disabled aria-disabled="true"' : ''}
           >
-            ${isOutOfStock ? 'Currently Out of Stock' : 'Add to Shopping Basket'}
+            ${isOutOfStock ? 'Currently Out of Stock' : 'Add to Cart'}
           </button>
           <button 
             type="button" 
@@ -743,8 +743,8 @@ function renderBasketPreview() {
     container.innerHTML = `
       <div class="empty-state" style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:2.5rem 1.5rem;">
         <div class="empty-state-icon">🛍️</div>
-        <h3>Your Shopping Basket is currently empty</h3>
-        <p>Browse our 10 curated essentials across Food, Clothing, and Electronics to add objects to your order.</p>
+        <h3>Your Cart is currently empty</h3>
+        <p>Browse our products across Food, Clothing, and Electronics to add items to your cart.</p>
         <a href="#dash-products-section" class="btn btn-primary">
           Explore Products Collection →
         </a>
@@ -758,7 +758,7 @@ function renderBasketPreview() {
       <!-- Basket Items List -->
       <div style="display:flex; flex-direction:column; gap:1rem;">
         <div style="font-size:0.85rem; font-weight:700; text-transform:uppercase; color:var(--color-text-muted); border-bottom:1px solid var(--color-border); padding-bottom:0.5rem;">
-          Basket Items (${cart.itemCount} total units)
+          Cart Items (${cart.itemCount} items)
         </div>
 
         ${cart.items.map(item => `
@@ -794,7 +794,7 @@ function renderBasketPreview() {
                     class="cart-item-remove-btn" 
                     onclick="window.customerRemoveCartItem('${item.productId}')"
                     title="Remove product"
-                    aria-label="Remove ${escapeHtml(item.name)} from basket"
+                    aria-label="Remove ${escapeHtml(item.name)} from cart"
                   >
                     🗑️
                   </button>
@@ -886,8 +886,8 @@ function renderDrawerCart() {
     drawerItems.innerHTML = `
       <div class="empty-state">
         <div class="empty-state-icon">🛍️</div>
-        <h3>Your basket is empty</h3>
-        <p>Add some handcrafted essentials from the catalogue.</p>
+        <h3>Your cart is empty</h3>
+        <p>Add some items from our catalog to get started.</p>
       </div>
     `;
     return;
@@ -928,7 +928,7 @@ window.customerRemoveCartItem = function(productId) {
   renderDrawerCart();
   updateCartBadge();
   renderKPIs();
-  showToast('Product removed from basket.', 'info');
+  showToast('Product removed from cart.', 'info');
 };
 
 // Promo code application
@@ -996,7 +996,7 @@ function triggerCartBadgePulse() {
 window.customerOpenCheckout = function() {
   const cart = Cart.getSummary();
   if (cart.items.length === 0) {
-    alert('Your shopping basket is empty. Please add items to checkout.');
+    alert('Your shopping cart is empty. Please add items to checkout.');
     return;
   }
 

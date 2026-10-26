@@ -393,7 +393,7 @@ function renderProductCatalog() {
                 data-add-id="${product.id}"
                 ${isOutOfStock ? 'disabled aria-disabled="true"' : ''}
               >
-                <span>${isOutOfStock ? 'Out of Stock' : 'Add to Basket'}</span>
+                <span>${isOutOfStock ? 'Out of Stock' : 'Add to Cart'}</span>
               </button>
               <button 
                 type="button" 
@@ -524,8 +524,8 @@ function updateCartUI() {
     DOM.cartItemsContainer.innerHTML = `
       <div class="empty-state" style="padding: 2.5rem 1rem;">
         <div class="empty-state-icon">🛒</div>
-        <h3>Your basket is empty</h3>
-        <p>Explore our catalog of 10 curated products and add some favorites!</p>
+        <h3>Your cart is empty</h3>
+        <p>Explore our products and add your favorites to your cart!</p>
         <button type="button" class="btn btn-primary" id="btn-cart-browse">
           Start Shopping
         </button>
@@ -571,7 +571,7 @@ function updateCartUI() {
                 type="button" 
                 class="cart-item-remove-btn" 
                 data-remove-id="${item.productId}"
-                aria-label="Remove ${item.name} from basket"
+                aria-label="Remove ${item.name} from cart"
                 title="Remove item"
               >
                 🗑️
@@ -583,7 +583,7 @@ function updateCartUI() {
     </ul>
     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.75rem;">
       <button type="button" id="btn-clear-entire-cart" class="btn btn-secondary btn-danger-outline" style="font-size:0.8rem; padding:0.4rem 0.75rem;">
-        Clear Basket
+        Clear Cart
       </button>
       <span style="font-size:0.8rem; color:var(--color-text-muted);">
         Includes 20% estimated VAT (Rs. ${summary.estimatedTax.toFixed(2)})
@@ -1368,7 +1368,7 @@ window.shopeaseFilterCategory = (category) => {
 window.shopeaseApplyVoucher = (code) => {
   const res = Cart.setPromo(code);
   if (res.success) {
-    showToast(`Voucher "${code}" applied to your basket!`, 'success');
+    showToast(`Voucher "${code}" applied to your cart!`, 'success');
     announce(`Promotional code ${code} applied.`);
     updateCartUI();
     openCart();
@@ -1698,6 +1698,8 @@ function renderProductSpotlight() {
 }
 
 function initProductSpotlight() {
+  const container = document.getElementById('spotlight-container');
+  if (!container) return;
   renderProductSpotlight();
 
   document.getElementById('spotlight-prev-btn')?.addEventListener('click', () => {
@@ -1719,7 +1721,7 @@ function initProductSpotlight() {
 function initCinematicMediaStrip() {
   const strip = document.getElementById('cinematic-strip');
   const btn = document.getElementById('video-motion-btn');
-  if (!strip || !btn) return;
+  if (!strip) return;
 
   const deck = document.getElementById('promo-swap-deck');
   const cards = Array.from(document.querySelectorAll('.promo-card'));
@@ -1872,27 +1874,35 @@ function initCinematicMediaStrip() {
   }
 
   // Reduced motion initial check
-  if (isPaused) {
-    strip.classList.add('is-paused');
-    btn.setAttribute('aria-pressed', 'true');
-    btn.innerHTML = '<span>▶ Resume Visual Motion</span>';
-  } else {
-    startAutoSwap();
-  }
-
-  btn.addEventListener('click', () => {
-    isPaused = !isPaused;
-    strip.classList.toggle('is-paused', isPaused);
-    btn.setAttribute('aria-pressed', isPaused ? 'true' : 'false');
-    btn.innerHTML = isPaused ? '<span>▶ Resume Visual Motion</span>' : '<span>⏸ Pause Visual Motion</span>';
+  if (btn) {
     if (isPaused) {
-      stopAutoSwap();
+      strip.classList.add('is-paused');
+      btn.setAttribute('aria-pressed', 'true');
+      btn.innerHTML = '<span>▶ Resume Visual Motion</span>';
     } else {
       startAutoSwap();
     }
-    announce(isPaused ? 'Visual motion paused.' : 'Visual motion resumed.');
-    showToast(isPaused ? 'Visual motion paused' : 'Visual motion resumed', 'info');
-  });
+
+    btn.addEventListener('click', () => {
+      isPaused = !isPaused;
+      strip.classList.toggle('is-paused', isPaused);
+      btn.setAttribute('aria-pressed', isPaused ? 'true' : 'false');
+      btn.innerHTML = isPaused ? '<span>▶ Resume Visual Motion</span>' : '<span>⏸ Pause Visual Motion</span>';
+      if (isPaused) {
+        stopAutoSwap();
+      } else {
+        startAutoSwap();
+      }
+      announce(isPaused ? 'Visual motion paused.' : 'Visual motion resumed.');
+      showToast(isPaused ? 'Visual motion paused' : 'Visual motion resumed', 'info');
+    });
+  } else {
+    if (isPaused) {
+      strip.classList.add('is-paused');
+    } else {
+      startAutoSwap();
+    }
+  }
 
   updateDeckClasses();
 }

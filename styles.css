@@ -767,9 +767,15 @@ body {
 
 .hero-split-grid {
   display: grid;
-  grid-template-columns: 1fr 1.15fr;
+  grid-template-columns: 1.25fr 0.85fr;
   align-items: center;
-  gap: 3.5rem;
+  gap: 3rem;
+}
+
+.hero-media-col {
+  max-width: 440px;
+  width: 100%;
+  justify-self: end;
 }
 
 .hero-badge-pill {
@@ -844,6 +850,7 @@ body {
   gap: 1.25rem;
   padding-top: 1.5rem;
   border-top: 1px solid var(--color-border);
+  max-width: 240px;
 }
 
 .hero-counter-wrap {
@@ -929,8 +936,9 @@ body {
   overflow: hidden;
   background: var(--color-surface-subtle);
   border: 1px solid var(--color-border);
-  aspect-ratio: 4 / 3.4;
-  box-shadow: var(--shadow-xl);
+  aspect-ratio: 4 / 3.2;
+  max-height: 400px;
+  box-shadow: var(--shadow-lg);
 }
 
 .hero-image-stage {
@@ -954,20 +962,20 @@ body {
 /* Floating Editorial Product Card */
 .hero-floating-card {
   position: absolute;
-  bottom: 1.5rem;
-  left: 1.5rem;
-  right: 1.5rem;
-  background: rgba(255, 255, 255, 0.92);
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(216, 212, 204, 0.8);
-  border-radius: var(--radius-lg);
-  padding: 1.25rem 1.5rem;
-  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.15rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 [data-theme="dark"] .hero-floating-card {
-  background: rgba(30, 30, 28, 0.92);
+  background: rgba(30, 30, 28, 0.94);
   border-color: var(--color-border);
 }
 
@@ -975,12 +983,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.25rem;
 }
 
 .hero-card-tag {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--color-brand-primary);
@@ -988,16 +996,16 @@ body {
 }
 
 .hero-card-live-dot {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--color-success);
 }
 
 .hero-card-title {
-  font-size: 1.15rem;
+  font-size: 0.98rem;
   font-weight: 700;
   color: var(--color-text-primary);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
   line-height: 1.25;
 }
 
@@ -1008,7 +1016,7 @@ body {
 }
 
 .hero-card-price {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 800;
   color: var(--color-text-primary);
 }
@@ -1016,9 +1024,9 @@ body {
 .hero-card-quick-btn {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  padding: 0.4rem 0.85rem;
+  padding: 0.32rem 0.75rem;
   border-radius: var(--radius-full);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--color-text-primary);
   cursor: pointer;
@@ -3222,6 +3230,12 @@ body {
   .hero-split-grid {
     grid-template-columns: 1fr;
     gap: 2.5rem;
+  }
+
+  .hero-media-col {
+    max-width: 440px;
+    margin: 0 auto;
+    justify-self: center;
   }
 
   .hero-editorial-summary {

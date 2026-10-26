@@ -89,7 +89,7 @@ export const Checkout = {
   async processMockOrder(orderData) {
     const cartSummary = Cart.getSummary();
     if (cartSummary.items.length === 0) {
-      return { success: false, message: 'Your basket is empty. Cannot process order.' };
+      return { success: false, message: 'Your cart is empty. Cannot process order.' };
     }
 
     // Verify stock availability
