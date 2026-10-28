@@ -230,11 +230,7 @@ function renderOrderSummary() {
               badgeBg = 'rgba(16,185,129,0.12)';
               badgeColor = '#059669';
               badgeText = '✅ Completed';
-            } else if (s.includes('process') || s.includes('pend')) {
-              badgeBg = 'rgba(245,158,11,0.15)';
-              badgeColor = '#d97706';
-              badgeText = '⏳ Pending';
-            }
+            
 
             return `
               <tr style="border-bottom:1px solid var(--color-border);">

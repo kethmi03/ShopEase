@@ -290,7 +290,7 @@ function renderKPIs() {
   const totalSpent = userOrders.reduce((sum, o) => sum + (o.financials?.grandTotal || 0), 0);
   const wishlist = Storage.getWishlist();
 
-  const pendingOrders = userOrders.filter(o => (o.status || '').toLowerCase().includes('pending')).length;
+  const confirmedOrders = userOrders.filter(o => !((o.status || '').toLowerCase().includes('complete') || (o.status || '').toLowerCase().includes('deliver'))).length;
   const completedOrders = userOrders.filter(o => {
     const s = (o.status || '').toLowerCase();
     return s.includes('complete') || s.includes('delivered');
@@ -317,7 +317,7 @@ function renderKPIs() {
           <div class="kpi-number">${userOrders.length}</div>
           <div class="kpi-label">Orders Placed</div>
           <div style="font-size:0.75rem; color:var(--color-text-muted); margin-top:0.25rem;">
-            ${pendingOrders > 0 ? `<strong style="color:var(--color-warning);">${pendingOrders} Pending</strong> • ` : ''}Total: Rs. ${totalSpent.toFixed(2)}
+            ${confirmedOrders > 0 ? `<strong style="color:var(--color-info);">${confirmedOrders} Confirmed</strong> • ` : ''}Total: Rs. ${totalSpent.toFixed(2)}
           </div>
         </div>
       </div>
@@ -1251,14 +1251,7 @@ function getCustomerOrderStatusBadge(statusRaw = '') {
       border: 'var(--color-success-border)'
     };
   }
-  if (s.includes('pend') || s.includes('process')) {
-    return {
-      text: '⏳ Pending',
-      bg: 'var(--color-warning-bg)',
-      color: 'var(--color-warning)',
-      border: 'var(--color-warning-border)'
-    };
-  }
+  
   return {
     text: '● Confirmed',
     bg: 'var(--color-info-bg)',
@@ -1509,7 +1502,7 @@ window.shopeaseSimulateCustomerOrder = function() {
       promoCode: cartSummary.activePromoCode,
       grandTotal: cartSummary.grandTotal
     },
-    status: 'Pending'
+    status: 'Confirmed'
   };
 
   Storage.deductStock(product.id, 1);

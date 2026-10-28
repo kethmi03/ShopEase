@@ -1107,14 +1107,7 @@ function getOrderStatusBadge(statusRaw = '') {
       border: 'var(--color-success-border)'
     };
   }
-  if (s.includes('pend') || s.includes('process')) {
-    return {
-      text: '⏳ Pending',
-      bg: 'var(--color-warning-bg)',
-      color: 'var(--color-warning)',
-      border: 'var(--color-warning-border)'
-    };
-  }
+  
   return {
     text: '● Confirmed',
     bg: 'var(--color-info-bg)',

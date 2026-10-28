@@ -246,7 +246,7 @@ function renderOverviewKPIs() {
   const products = Storage.getProducts();
 
   const totalSales = orders.reduce((sum, o) => sum + (o.financials?.grandTotal || 0), 0);
-  const pendingOrders = orders.filter(o => (o.status || '').toLowerCase().includes('pending')).length;
+  const confirmedOrders = orders.filter(o => !((o.status || '').toLowerCase().includes('complete') || (o.status || '').toLowerCase().includes('deliver'))).length;
   const completedOrders = orders.filter(o => {
     const s = (o.status || '').toLowerCase();
     return s.includes('complete') || s.includes('delivered') || s.includes('confirmed');
@@ -264,7 +264,7 @@ function renderOverviewKPIs() {
   if (catEl) catEl.textContent = '3';
   if (ordEl) ordEl.textContent = `${orders.length}`;
   if (salesEl) salesEl.textContent = CURRENCY.format(totalSales);
-  if (splitEl) splitEl.textContent = `${pendingOrders} Pending / ${completedOrders} Done`;
+  if (splitEl) splitEl.textContent = `${confirmedOrders} Confirmed / ${completedOrders} Done`;
   if (stockEl) stockEl.textContent = `${lowStockCount}`;
 }
 
@@ -308,7 +308,6 @@ function renderOverviewRecentOrders() {
           onchange="window.adminUpdateOrderStatus('${order.orderId}', this.value)"
         >
           <option value="Confirmed" ${activeStatus === 'Confirmed' ? 'selected' : ''}>● Confirmed</option>
-          <option value="Pending" ${activeStatus === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
           <option value="Completed" ${activeStatus === 'Completed' ? 'selected' : ''}>✅ Completed</option>
         </select>
       </td>
@@ -594,7 +593,7 @@ function renderOrdersTable() {
     );
   }
   if (status !== 'ALL') {
-    orders = orders.filter(o => (o.status || '').toLowerCase().includes(status.toLowerCase()));
+    orders = orders.filter(o => resolveOrderStatus(o.status) === status);
   }
 
   if (countEl) countEl.textContent = `${orders.length} Order${orders.length === 1 ? '' : 's'}`;
@@ -642,7 +641,7 @@ function renderOrdersTable() {
           </span>
         </td>
         <td>
-          <!-- Live Status Dropdown with 3 options: Confirmed, Pending, Completed -->
+          <!-- Live Status Dropdown with 2 options: Confirmed, Completed -->
           <select 
             class="admin-status-select ${getStatusSelectClass(order.status)}" 
             aria-label="Order ${order.orderId} status"
@@ -650,7 +649,6 @@ function renderOrdersTable() {
             onchange="window.adminUpdateOrderStatus('${order.orderId}', this.value)"
           >
             <option value="Confirmed" ${resolveOrderStatus(order.status) === 'Confirmed' ? 'selected' : ''}>● Confirmed</option>
-            <option value="Pending" ${resolveOrderStatus(order.status) === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
             <option value="Completed" ${resolveOrderStatus(order.status) === 'Completed' ? 'selected' : ''}>✅ Completed</option>
           </select>
         </td>
@@ -769,7 +767,7 @@ function renderReportsSection() {
     const s = (o.status || '').toLowerCase();
     return s.includes('complete') || s.includes('delivered') || s.includes('confirmed');
   }).length;
-  const pendingCount = orders.filter(o => (o.status || '').toLowerCase().includes('pending')).length;
+  const confirmedCount = orders.filter(o => !((o.status || '').toLowerCase().includes('complete') || (o.status || '').toLowerCase().includes('deliver'))).length;
 
   // Update KPI counters
   const rSales = document.getElementById('rep-total-sales');
@@ -780,7 +778,7 @@ function renderReportsSection() {
   if (rSales) rSales.textContent = CURRENCY.format(totalSales);
   if (rOrders) rOrders.textContent = `${totalOrders}`;
   if (rAvg) rAvg.textContent = CURRENCY.format(avgOrder);
-  if (rPay) rPay.textContent = `${completedCount} Paid / ${pendingCount} Pending`;
+  if (rPay) rPay.textContent = `${completedCount} Paid / ${confirmedCount} Confirmed`;
 
   // Compute Most Popular Products
   const productSalesMap = {};
@@ -1281,7 +1279,7 @@ window.adminSimulateOrder = function () {
       discount: 0,
       grandTotal: p.price
     },
-    status: 'Pending'
+    status: 'Confirmed'
   };
 
   Storage.deductStock(p.id, 1);
@@ -1550,14 +1548,12 @@ window.adminViewUserModal = function (identifier) {
 function resolveOrderStatus(status = '') {
   const s = String(status || '').toLowerCase();
   if (s.includes('complete') || s.includes('deliver')) return 'Completed';
-  if (s.includes('pend') || s.includes('process')) return 'Pending';
   return 'Confirmed';
 }
 
 function getStatusSelectClass(status = '') {
   const resolved = resolveOrderStatus(status);
   if (resolved === 'Completed') return 'status-select-completed';
-  if (resolved === 'Pending') return 'status-select-pending';
   return 'status-select-confirmed';
 }
 
