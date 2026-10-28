@@ -220,6 +220,7 @@ function renderOrderSummary() {
           ${recentOrders.map(order => {
             const dateStr = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'Recent';
             const itemsCount = (order.items || []).reduce((sum, item) => sum + (item.quantity || 1), 0);
+            const totalVal = parseFloat(order.financials?.grandTotal ?? order.grandTotal ?? order.total ?? 0).toFixed(2);
             const statusRaw = order.status || 'Confirmed';
             const s = statusRaw.toLowerCase();
             let badgeBg = 'rgba(2,132,199,0.12)';
@@ -230,7 +231,7 @@ function renderOrderSummary() {
               badgeBg = 'rgba(16,185,129,0.12)';
               badgeColor = '#059669';
               badgeText = '✅ Completed';
-            
+            }
 
             return `
               <tr style="border-bottom:1px solid var(--color-border);">
