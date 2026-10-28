@@ -544,6 +544,13 @@ function redirectAfterAuth() {
 
   if (isAdmin) {
     window.location.href = 'admin-dashboard.html';
+    return;
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const redirectTarget = urlParams.get('redirect');
+  if (redirectTarget && (redirectTarget === 'index.html' || redirectTarget.startsWith('index.html'))) {
+    window.location.href = redirectTarget;
   } else {
     window.location.href = 'customer-dashboard.html';
   }

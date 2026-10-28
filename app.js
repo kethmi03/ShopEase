@@ -411,9 +411,23 @@ function renderProductCatalog() {
     `;
   }).join('');
 
+  // Authentication gate for cart additions
+  function ensureAuthenticatedForCart() {
+    if (!Auth.isLoggedIn()) {
+      showToast('Please sign in to add items to your shopping cart. Redirecting to login...', 'warning');
+      announce('Please sign in to your account to add items to the cart.');
+      setTimeout(() => {
+        window.location.href = 'login.html?redirect=index.html';
+      }, 950);
+      return false;
+    }
+    return true;
+  }
+
   // Attach event listeners for product card buttons
   DOM.productGrid.querySelectorAll('.add-to-cart-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
+      if (!ensureAuthenticatedForCart()) return;
       const id = btn.dataset.addId;
       const res = Cart.addItem(id, 1);
       if (res.success) {
@@ -747,6 +761,14 @@ function openQuickView(productId) {
   });
 
   qvAddBtn?.addEventListener('click', () => {
+    if (!Auth.isLoggedIn()) {
+      showToast('Please sign in to add items to your shopping cart. Redirecting to login...', 'warning');
+      announce('Please sign in to your account to add items to the cart.');
+      setTimeout(() => {
+        window.location.href = 'login.html?redirect=index.html';
+      }, 950);
+      return;
+    }
     const qty = parseInt(qvQtyInput.value, 10) || 1;
     const res = Cart.addItem(product.id, qty);
     if (res.success) {
@@ -1378,6 +1400,14 @@ window.shopeaseApplyVoucher = (code) => {
 };
 
 window.shopeaseQuickAdd = (productId) => {
+  if (!Auth.isLoggedIn()) {
+    showToast('Please sign in to add items to your shopping cart. Redirecting to login...', 'warning');
+    announce('Please sign in to your account to add items to the cart.');
+    setTimeout(() => {
+      window.location.href = 'login.html?redirect=index.html';
+    }, 950);
+    return;
+  }
   const res = Cart.addItem(productId, 1);
   if (res.success) {
     showToast(res.message, 'success');
@@ -1683,6 +1713,14 @@ function renderProductSpotlight() {
   `;
 
   container.querySelector('.spotlight-add-btn')?.addEventListener('click', () => {
+    if (!Auth.isLoggedIn()) {
+      showToast('Please sign in to add items to your shopping cart. Redirecting to login...', 'warning');
+      announce('Please sign in to your account to add items to the cart.');
+      setTimeout(() => {
+        window.location.href = 'login.html?redirect=index.html';
+      }, 950);
+      return;
+    }
     const res = Cart.addItem(product.id, 1);
     if (res.success) {
       showToast(res.message, 'success');

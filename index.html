@@ -16,6 +16,10 @@
     href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300..900;1,300..900&family=Plus+Jakarta+Sans:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
     rel="stylesheet">
 
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
+  <link rel="alternate icon" type="image/jpeg" href="logo.jpg">
+
   <!-- Main Stylesheet -->
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -35,7 +39,7 @@
 
           <!-- Brand Identity Lockup -->
           <a href="index.html" class="brand-logo" aria-label="ShopEase Home Page">
-            <span class="brand-monogram" aria-hidden="true">SE</span>
+            <span class="brand-monogram" aria-hidden="true"><img src="logo.png" alt="ShopEase" /></span>
             <div class="brand-text-group">
               <span class="brand-title">Shop<span>Ease</span></span>
               <span class="brand-sub">Online Store</span>
@@ -188,6 +192,33 @@
               </a>
             </div>
 
+            <!-- Hero Trust / Perks Micro-Banner (Fills empty space with high-conversion proof) -->
+            <div class="hero-perks-deck" role="region" aria-label="Customer service perks">
+              <div class="hero-perk-item">
+                <span class="hero-perk-icon" aria-hidden="true">⚡</span>
+                <div class="hero-perk-text">
+                  <strong>Islandwide Express</strong>
+                  <span>24-48h Delivery</span>
+                </div>
+              </div>
+              <div class="hero-perk-divider" aria-hidden="true"></div>
+              <div class="hero-perk-item">
+                <span class="hero-perk-icon" aria-hidden="true">🌿</span>
+                <div class="hero-perk-text">
+                  <strong>100% Authentic</strong>
+                  <span>Curated Essentials</span>
+                </div>
+              </div>
+              <div class="hero-perk-divider" aria-hidden="true"></div>
+              <div class="hero-perk-item">
+                <span class="hero-perk-icon" aria-hidden="true">★</span>
+                <div class="hero-perk-text">
+                  <strong>4.9 / 5 Rating</strong>
+                  <span>1,200+ Reviews</span>
+                </div>
+              </div>
+            </div>
+
             <!-- Hero Slide Controls & Indicators -->
             <div class="hero-carousel-controls" role="region" aria-label="Featured product carousel controls">
               <div class="hero-counter-wrap">
@@ -198,6 +229,13 @@
 
               <div class="hero-progress-track" aria-hidden="true">
                 <div id="hero-progress-fill" class="hero-progress-fill" style="width: 25%;"></div>
+              </div>
+
+              <!-- Interactive Arrows & Pause/Play Buttons -->
+              <div class="hero-arrow-buttons">
+                <button type="button" id="hero-prev-btn" class="hero-arrow-btn" aria-label="Previous featured slide" title="Previous slide">←</button>
+                <button type="button" id="hero-play-pause-btn" class="hero-arrow-btn" aria-label="Pause hero slideshow" title="Pause slideshow">⏸</button>
+                <button type="button" id="hero-next-btn" class="hero-arrow-btn" aria-label="Next featured slide" title="Next slide">→</button>
               </div>
             </div>
 
@@ -215,12 +253,21 @@
 
           </div>
 
-          <!-- Right Column: Swapping Media Stage -->
+          <!-- Right Column: Swapping Media Stage with Atmosphere & Thumbnail Deck -->
           <div class="hero-media-col" id="hero-stage-wrapper">
+            <!-- Ambient Stage Radial Glow -->
+            <div class="hero-stage-ambient-glow" aria-hidden="true"></div>
+
             <div class="hero-media-frame">
+              <!-- Floating Corner Badge -->
+              <div class="hero-frame-floating-pill">
+                <span class="pulse-dot-mini" aria-hidden="true"></span>
+                <span>Editor's Selection • 2026</span>
+              </div>
+
               <div id="hero-image-stage" class="hero-image-stage">
                 <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200&q=85"
-                  alt="Artisan Organic Sourdough Loaf" class="hero-stage-img" loading="eager" />
+                  alt="Artisan Organic Sourdough Loaf" class="hero-stage-img" id="hero-stage-img" loading="eager" />
               </div>
 
               <!-- Floating Product Pill -->
@@ -231,7 +278,7 @@
                 </div>
                 <h3 id="hero-card-title" class="hero-card-title">Artisan Organic Sourdough Loaf</h3>
                 <div class="hero-card-footer">
-                  <span id="hero-card-price" class="hero-card-price">Rs. 4.95</span>
+                  <span id="hero-card-price" class="hero-card-price">Rs. 650.00</span>
                   <button type="button" id="hero-card-quick-btn" class="hero-card-quick-btn"
                     aria-label="Quick view product">
                     Quick View ↗
@@ -239,6 +286,39 @@
                 </div>
               </div>
             </div>
+
+            <!-- Interactive Quick Preview Thumbnails Strip -->
+            <div class="hero-thumbnails-strip" role="tablist" aria-label="Quick product preview selector">
+              <button type="button" class="hero-thumb-card active" data-slide="0" aria-label="Switch to Sourdough Loaf">
+                <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=160&q=80" alt="Loaf thumbnail" />
+                <div class="hero-thumb-info">
+                  <span class="hero-thumb-title">Sourdough</span>
+                  <span class="hero-thumb-price">Rs. 650</span>
+                </div>
+              </button>
+              <button type="button" class="hero-thumb-card" data-slide="1" aria-label="Switch to Denim Jacket">
+                <img src="https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=160&q=80" alt="Denim thumbnail" />
+                <div class="hero-thumb-info">
+                  <span class="hero-thumb-title">Trucker Jacket</span>
+                  <span class="hero-thumb-price">Rs. 6,800</span>
+                </div>
+              </button>
+              <button type="button" class="hero-thumb-card" data-slide="2" aria-label="Switch to ANC Headphones">
+                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=160&q=80" alt="Headphones thumbnail" />
+                <div class="hero-thumb-info">
+                  <span class="hero-thumb-title">Headphones</span>
+                  <span class="hero-thumb-price">Rs. 19,900</span>
+                </div>
+              </button>
+              <button type="button" class="hero-thumb-card" data-slide="3" aria-label="Switch to Ethiopian Coffee">
+                <img src="https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=160&q=80" alt="Coffee thumbnail" />
+                <div class="hero-thumb-info">
+                  <span class="hero-thumb-title">Coffee</span>
+                  <span class="hero-thumb-price">Rs. 2,900</span>
+                </div>
+              </button>
+            </div>
+
           </div>
 
         </div>
@@ -992,7 +1072,7 @@
       <div class="footer-top-row">
         <div class="footer-brand-col">
           <div class="brand-logo" style="margin-bottom:0.75rem;">
-            <span class="brand-monogram" aria-hidden="true">SE</span>
+            <span class="brand-monogram" aria-hidden="true"><img src="logo.png" alt="ShopEase" /></span>
             <div class="brand-text-group">
               <span class="brand-title">Shop<span>Ease</span></span>
               <span class="brand-sub">Online Store</span>

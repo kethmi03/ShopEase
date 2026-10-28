@@ -1,15 +1,3 @@
-/**
- * ShopEase Admin Console Controller
- * Clean, simple, and intuitive management for all 6 required modules:
- * 1. Dashboard Overview (6 key KPIs, recent orders, stock health alerts)
- * 2. Product Management (10 products table, add/replace slot, edit, delete, update price & stock)
- * 3. Category Management (3 departments: Food, Clothing, Tech, product counts, edit names)
- * 4. Order Management (Customer orders, items, totals, payment, live status dropdown, invoices)
- * 5. Inventory / Stock Management (Available stock, quick +/- stepper, status warnings, cart protection)
- * 6. Sales & Reports (Gross sales, orders, popular products, category-wise breakdown)
- * 7. Logout
- */
-
 import { Storage } from './storage.js';
 import { Auth } from './auth.js';
 import { CURRENCY, INITIAL_PRODUCTS } from './products.js';
@@ -1052,8 +1040,8 @@ window.adminViewInvoice = function (orderId) {
   const content = document.getElementById('invoice-modal-content');
   if (!content) return;
 
-  const items = order.items && order.items.length > 0 
-    ? order.items 
+  const items = order.items && order.items.length > 0
+    ? order.items
     : [{ name: 'Store Order Line Item', quantity: 1, price: order.financials?.grandTotal || 0, totalPrice: order.financials?.grandTotal || 0 }];
   const fin = order.financials || { grandTotal: 0, subtotal: 0, deliveryFee: 0 };
   const cust = order.customer || {};
@@ -1372,7 +1360,7 @@ function renderUsersTable() {
 
   tbody.innerHTML = filtered.map(u => {
     // Calculate customer order activity
-    const userOrders = orders.filter(o => 
+    const userOrders = orders.filter(o =>
       (o.customer?.email || '').toLowerCase() === (u.email || '').toLowerCase() ||
       (o.userId && o.userId === u.id)
     );
@@ -1457,7 +1445,7 @@ window.adminViewUserModal = function (identifier) {
     return;
   }
 
-  const userOrders = orders.filter(o => 
+  const userOrders = orders.filter(o =>
     (o.customer?.email || '').toLowerCase() === (user.email || '').toLowerCase() ||
     (o.userId && o.userId === user.id)
   );
