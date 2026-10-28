@@ -51,8 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
   renderProfile();
   renderOrderSummary();
 
-  // 5. Setup Action Listeners
+  // 5. Setup Action Listeners & Live Synchronisation
   setupEventListeners();
+  window.addEventListener('shopease:orders-updated', () => {
+    renderOrderSummary();
+  });
 });
 
 /**
@@ -217,14 +220,22 @@ function renderOrderSummary() {
           ${recentOrders.map(order => {
             const dateStr = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'Recent';
             const itemsCount = (order.items || []).reduce((sum, item) => sum + (item.quantity || 1), 0);
-            const totalVal = parseFloat(order.grandTotal ?? order.total ?? 0).toFixed(2);
-            const status = order.status || 'Delivered';
-            let badgeBg = 'rgba(16,185,129,0.12)';
-            let badgeColor = '#059669';
-            if (status.toLowerCase().includes('process') || status.toLowerCase().includes('pending')) {
+            const statusRaw = order.status || 'Confirmed';
+            const s = statusRaw.toLowerCase();
+            let badgeBg = 'rgba(2,132,199,0.12)';
+            let badgeColor = '#0284c7';
+            let badgeText = '● Confirmed';
+
+            if (s.includes('complete') || s.includes('deliver')) {
+              badgeBg = 'rgba(16,185,129,0.12)';
+              badgeColor = '#059669';
+              badgeText = '✅ Completed';
+            } else if (s.includes('process') || s.includes('pend')) {
               badgeBg = 'rgba(245,158,11,0.15)';
               badgeColor = '#d97706';
+              badgeText = '⏳ Pending';
             }
+
             return `
               <tr style="border-bottom:1px solid var(--color-border);">
                 <td style="padding:0.75rem 0.5rem; font-family:var(--font-mono); font-weight:700; color:var(--color-brand-primary);">
@@ -235,7 +246,7 @@ function renderOrderSummary() {
                 <td style="padding:0.75rem 0.5rem; font-family:var(--font-mono); font-weight:700;">${CURRENCY.symbol} ${totalVal}</td>
                 <td style="padding:0.75rem 0.5rem;">
                   <span style="display:inline-block; font-size:0.75rem; font-weight:700; padding:0.2rem 0.55rem; border-radius:var(--radius-full); background:${badgeBg}; color:${badgeColor};">
-                    ${status}
+                    ${badgeText}
                   </span>
                 </td>
               </tr>

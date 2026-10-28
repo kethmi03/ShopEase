@@ -145,7 +145,7 @@ export const Checkout = {
         tax: cartSummary.estimatedTax,
         grandTotal: cartSummary.grandTotal
       },
-      status: 'Confirmed - Preparing for Mock Dispatch'
+      status: 'Pending'
     };
 
     // Save order in localStorage

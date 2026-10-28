@@ -104,6 +104,23 @@ function dispatchStorageEvent(name, detail = {}) {
   }
 }
 
+// Cross-tab synchronisation for multi-window realtime state
+if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+  window.addEventListener('storage', (event) => {
+    if (event.key === STORAGE_KEYS.ORDERS) {
+      try {
+        const orders = event.newValue ? JSON.parse(event.newValue) : [];
+        dispatchStorageEvent('shopease:orders-updated', { orders });
+      } catch (e) {}
+    } else if (event.key === STORAGE_KEYS.INVENTORY) {
+      try {
+        const products = event.newValue ? JSON.parse(event.newValue) : [];
+        dispatchStorageEvent('shopease:inventory-updated', { products });
+      } catch (e) {}
+    }
+  });
+}
+
 function getItem(key, defaultValue = null) {
   try {
     if (hasLocalStorage) {

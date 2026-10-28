@@ -284,7 +284,11 @@ function renderOverviewRecentOrders() {
     return;
   }
 
-  tbody.innerHTML = orders.map(order => `
+  tbody.innerHTML = orders.map(order => {
+    const activeStatus = resolveOrderStatus(order.status);
+    const selectClass = getStatusSelectClass(activeStatus);
+
+    return `
     <tr>
       <td>
         <strong style="color:var(--color-brand-primary); font-family:var(--font-mono); font-size:0.9rem;">${order.orderId}</strong>
@@ -297,9 +301,16 @@ function renderOverviewRecentOrders() {
         <strong style="color:var(--color-text-primary); font-size:0.95rem;">${CURRENCY.format(order.financials?.grandTotal || 0)}</strong>
       </td>
       <td>
-        <span class="admin-status-badge ${getStatusBadgeClass(order.status)}">
-          ${escapeHtml(order.status || 'Confirmed')}
-        </span>
+        <select 
+          class="admin-status-select ${selectClass}" 
+          aria-label="Order ${order.orderId} status"
+          title="Click to change order status"
+          onchange="window.adminUpdateOrderStatus('${order.orderId}', this.value)"
+        >
+          <option value="Confirmed" ${activeStatus === 'Confirmed' ? 'selected' : ''}>● Confirmed</option>
+          <option value="Pending" ${activeStatus === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
+          <option value="Completed" ${activeStatus === 'Completed' ? 'selected' : ''}>✅ Completed</option>
+        </select>
       </td>
       <td style="text-align:right;">
         <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.6rem;" onclick="window.adminViewInvoice('${order.orderId}')">
@@ -307,7 +318,8 @@ function renderOverviewRecentOrders() {
         </button>
       </td>
     </tr>
-  `).join('');
+  `;
+  }).join('');
 }
 
 function renderOverviewStockHealth() {
@@ -630,17 +642,16 @@ function renderOrdersTable() {
           </span>
         </td>
         <td>
-          <!-- Live Status Dropdown -->
+          <!-- Live Status Dropdown with 3 options: Confirmed, Pending, Completed -->
           <select 
-            class="form-input" 
-            style="font-size:0.8rem; padding:0.25rem 0.5rem; height:auto; width:auto; font-weight:600;" 
+            class="admin-status-select ${getStatusSelectClass(order.status)}" 
+            aria-label="Order ${order.orderId} status"
+            title="Click to change order status"
             onchange="window.adminUpdateOrderStatus('${order.orderId}', this.value)"
           >
-            <option value="Pending" ${currentStatus.includes('Pending') ? 'selected' : ''}>⏳ Pending</option>
-            <option value="Confirmed" ${currentStatus.includes('Confirmed') ? 'selected' : ''}>● Confirmed</option>
-            <option value="Processing" ${currentStatus.includes('Processing') ? 'selected' : ''}>⚙️ Processing</option>
-            <option value="Completed" ${currentStatus.includes('Completed') || currentStatus.includes('Delivered') ? 'selected' : ''}>✅ Completed</option>
-            <option value="Cancelled" ${currentStatus.includes('Cancelled') ? 'selected' : ''}>❌ Cancelled</option>
+            <option value="Confirmed" ${resolveOrderStatus(order.status) === 'Confirmed' ? 'selected' : ''}>● Confirmed</option>
+            <option value="Pending" ${resolveOrderStatus(order.status) === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
+            <option value="Completed" ${resolveOrderStatus(order.status) === 'Completed' ? 'selected' : ''}>✅ Completed</option>
           </select>
         </td>
         <td style="text-align:right;">
@@ -1535,6 +1546,20 @@ window.adminViewUserModal = function (identifier) {
     modal.classList.add('open');
   }
 };
+
+function resolveOrderStatus(status = '') {
+  const s = String(status || '').toLowerCase();
+  if (s.includes('complete') || s.includes('deliver')) return 'Completed';
+  if (s.includes('pend') || s.includes('process')) return 'Pending';
+  return 'Confirmed';
+}
+
+function getStatusSelectClass(status = '') {
+  const resolved = resolveOrderStatus(status);
+  if (resolved === 'Completed') return 'status-select-completed';
+  if (resolved === 'Pending') return 'status-select-pending';
+  return 'status-select-confirmed';
+}
 
 function getStatusBadgeClass(status = '') {
   const s = status.toLowerCase();

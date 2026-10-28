@@ -650,6 +650,10 @@ function updateCartUI() {
 }
 
 function openCart() {
+  if (!Auth.isLoggedIn()) {
+    window.location.href = 'login.html';
+    return;
+  }
   state.activeModal = 'cart';
   DOM.cartOverlay.classList.add('open');
   DOM.cartOverlay.setAttribute('aria-hidden', 'false');
@@ -657,6 +661,8 @@ function openCart() {
   DOM.cartCloseBtn?.focus();
   announce('Shopping basket drawer opened.');
 }
+
+const openCartDrawer = openCart;
 
 function closeCart() {
   state.activeModal = null;
@@ -1091,6 +1097,32 @@ function autofillDemoCheckout() {
 /* ==========================================================================
    Order History Modal
    ========================================================================== */
+function getOrderStatusBadge(statusRaw = '') {
+  const s = String(statusRaw || '').toLowerCase();
+  if (s.includes('complete') || s.includes('deliver')) {
+    return {
+      text: '✅ Completed',
+      bg: 'var(--color-success-bg)',
+      color: 'var(--color-success)',
+      border: 'var(--color-success-border)'
+    };
+  }
+  if (s.includes('pend') || s.includes('process')) {
+    return {
+      text: '⏳ Pending',
+      bg: 'var(--color-warning-bg)',
+      color: 'var(--color-warning)',
+      border: 'var(--color-warning-border)'
+    };
+  }
+  return {
+    text: '● Confirmed',
+    bg: 'var(--color-info-bg)',
+    color: 'var(--color-info)',
+    border: 'var(--color-info-border)'
+  };
+}
+
 function openOrderHistory() {
   state.activeModal = 'orders';
   const orders = Storage.getOrders();
@@ -1106,13 +1138,15 @@ function openOrderHistory() {
     `;
     document.getElementById('btn-orders-shop-now')?.addEventListener('click', closeOrderHistory);
   } else {
-    DOM.ordersListContainer.innerHTML = orders.map(order => `
+    DOM.ordersListContainer.innerHTML = orders.map(order => {
+      const badge = getOrderStatusBadge(order.status);
+      return `
       <div class="order-receipt-card" style="margin-bottom:1.25rem;">
         <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem; border-bottom:1px solid var(--color-border); padding-bottom:0.5rem;">
           <div>
             <strong style="color:var(--color-brand-primary);">${order.orderId}</strong>
-            <span style="display:inline-block; margin-left:0.5rem; font-size:0.75rem; padding:0.15rem 0.5rem; background:var(--color-success-bg); color:var(--color-success); border-radius:4px; font-weight:bold;">
-              ${order.status}
+            <span style="display:inline-block; margin-left:0.5rem; font-size:0.75rem; padding:0.2rem 0.6rem; background:${badge.bg}; color:${badge.color}; border:1px solid ${badge.border}; border-radius:var(--radius-full); font-weight:700;">
+              ${badge.text}
             </span>
           </div>
           <div style="font-size:0.85rem; color:var(--color-text-muted);">
@@ -1142,7 +1176,8 @@ function openOrderHistory() {
           </strong>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
   }
 
   DOM.ordersOverlay.classList.add('open');
@@ -1211,6 +1246,10 @@ function initEventListeners() {
   // Cart Drawer toggles
   DOM.cartToggleBtn?.addEventListener('click', (e) => {
     e.preventDefault();
+    if (!Auth.isLoggedIn()) {
+      window.location.href = 'login.html';
+      return;
+    }
     openCart();
   });
   DOM.cartCloseBtn?.addEventListener('click', closeCart);
@@ -1313,9 +1352,18 @@ function initEventListeners() {
  */
 function renderNavBar() {
   const container = document.getElementById('main-nav-actions');
-  if (!container) return;
-
+  const cartBtn = document.getElementById('cart-toggle-btn');
   const user = Auth.getCurrentUser();
+
+  if (cartBtn) {
+    if (!user) {
+      cartBtn.setAttribute('title', 'Sign in to view shopping cart');
+      cartBtn.setAttribute('aria-label', 'Shopping cart - Sign in to view');
+    } else {
+      cartBtn.setAttribute('title', 'Open shopping cart');
+      cartBtn.setAttribute('aria-label', 'Open shopping cart');
+    }
+  }
 
   if (!user) {
     container.innerHTML = `

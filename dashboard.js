@@ -248,28 +248,26 @@ function renderDashboardHeader() {
     <div class="dashboard-hero">
       <div class="dashboard-user-info">
         <div class="dashboard-avatar-large" aria-hidden="true">${initials}</div>
-        <div>
-          <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
-            <h1 class="dashboard-hero-title">Welcome back, ${escapeHtml(fullName)}!</h1>
-            <span style="font-size:0.75rem; font-weight:800; padding:0.2rem 0.6rem; border-radius:var(--radius-full); background:var(--color-brand-primary); color:#ffffff; text-transform:uppercase;">
-              ${escapeHtml(user.role || 'Verified Member')}
+        <div class="dashboard-user-details">
+          <div class="dashboard-hero-title-row">
+            <h1 class="dashboard-hero-title">
+              Hello, <span>${escapeHtml(fullName)}</span>! <span class="hero-wave" aria-hidden="true">👋</span>
+            </h1>
+            <span class="hero-role-pill">
+              ${escapeHtml(user.role || 'Customer')}
             </span>
           </div>
           <p class="dashboard-hero-subtitle">
-            ${escapeHtml(user.email)} • Handcrafted Commerce Member Since ${new Date(user.createdAt || Date.now()).getFullYear()}
+            Discover curated artisan goods, manage your orders, and enjoy seamless shopping.
           </p>
-          <div style="font-size:0.825rem; color:var(--color-text-secondary); margin-top:0.35rem; display:flex; gap:1.25rem; flex-wrap:wrap;">
-            <span>📍 Delivery: <strong>${escapeHtml(user.address || 'Colombo, Sri Lanka')}</strong></span>
-            <span>📞 Contact: <strong>${escapeHtml(user.phone || '+94 77 123 4567')}</strong></span>
-          </div>
         </div>
       </div>
 
       <div class="dashboard-hero-actions">
-        <a href="#dash-products-section" class="btn btn-primary" style="padding:0.5rem 1rem; font-size:0.875rem;">
+        <a href="#dash-products-section" class="btn btn-primary" style="padding:0.6rem 1.25rem; font-size:0.875rem; font-weight:600; text-decoration:none;">
           Explore All 10 Products →
         </a>
-        <button type="button" class="btn btn-secondary" style="padding:0.5rem 1rem; font-size:0.875rem;" onclick="window.customerOpenCheckout()">
+        <button type="button" class="btn btn-secondary" style="padding:0.6rem 1.25rem; font-size:0.875rem; font-weight:600;" onclick="window.customerOpenCheckout()">
           Mock Checkout (Cart)
         </button>
       </div>
@@ -292,6 +290,12 @@ function renderKPIs() {
   const totalSpent = userOrders.reduce((sum, o) => sum + (o.financials?.grandTotal || 0), 0);
   const wishlist = Storage.getWishlist();
 
+  const pendingOrders = userOrders.filter(o => (o.status || '').toLowerCase().includes('pending')).length;
+  const completedOrders = userOrders.filter(o => {
+    const s = (o.status || '').toLowerCase();
+    return s.includes('complete') || s.includes('delivered');
+  }).length;
+
   kpiContainer.innerHTML = `
     <div class="dashboard-kpi-grid">
       <div class="dashboard-kpi-card">
@@ -311,8 +315,10 @@ function renderKPIs() {
         </div>
         <div class="kpi-body">
           <div class="kpi-number">${userOrders.length}</div>
-          <div class="kpi-label">Completed Orders</div>
-          <div style="font-size:0.75rem; color:var(--color-text-muted); margin-top:0.25rem;">Total spent: Rs. ${totalSpent.toFixed(2)}</div>
+          <div class="kpi-label">Orders Placed</div>
+          <div style="font-size:0.75rem; color:var(--color-text-muted); margin-top:0.25rem;">
+            ${pendingOrders > 0 ? `<strong style="color:var(--color-warning);">${pendingOrders} Pending</strong> • ` : ''}Total: Rs. ${totalSpent.toFixed(2)}
+          </div>
         </div>
       </div>
 
@@ -968,8 +974,13 @@ window.shopeaseCloseDashboardCart = function() {
 function updateCartBadge() {
   const cart = Cart.getSummary();
   const badge = document.getElementById('dash-cart-badge');
+  const cartBtn = document.getElementById('dash-cart-btn');
+  const count = cart.totalItems !== undefined ? cart.totalItems : (cart.itemCount ?? 0);
   if (badge) {
-    badge.textContent = cart.itemCount;
+    badge.textContent = count;
+  }
+  if (cartBtn) {
+    cartBtn.setAttribute('aria-label', `Shopping cart (${count} items)`);
   }
 }
 
@@ -1230,6 +1241,32 @@ window.customerSubmitPayment = async function(event) {
  * - Printable Invoice modal
  * ============================================================================
  */
+function getCustomerOrderStatusBadge(statusRaw = '') {
+  const s = String(statusRaw || '').toLowerCase();
+  if (s.includes('complete') || s.includes('deliver')) {
+    return {
+      text: '✅ Completed',
+      bg: 'var(--color-success-bg)',
+      color: 'var(--color-success)',
+      border: 'var(--color-success-border)'
+    };
+  }
+  if (s.includes('pend') || s.includes('process')) {
+    return {
+      text: '⏳ Pending',
+      bg: 'var(--color-warning-bg)',
+      color: 'var(--color-warning)',
+      border: 'var(--color-warning-border)'
+    };
+  }
+  return {
+    text: '● Confirmed',
+    bg: 'var(--color-info-bg)',
+    color: 'var(--color-info)',
+    border: 'var(--color-info-border)'
+  };
+}
+
 function renderOrdersSection() {
   const container = document.getElementById('dash-orders-container');
   if (!container) return;
@@ -1263,8 +1300,7 @@ function renderOrdersSection() {
     <div style="display:flex; flex-direction:column; gap:1.25rem;">
       ${userOrders.map(order => {
         const items = order.items || [];
-        const status = order.status || 'Confirmed';
-        const isCompleted = status.toLowerCase().includes('completed') || status.toLowerCase().includes('delivered');
+        const badge = getCustomerOrderStatusBadge(order.status);
 
         return `
           <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:1.25rem; box-shadow:var(--shadow-xs);">
@@ -1275,8 +1311,8 @@ function renderOrdersSection() {
                 <span style="font-size:0.8rem; color:var(--color-text-muted); margin-left:0.5rem;">• Placed on ${order.formattedDate || new Date(order.createdAt).toLocaleDateString()}</span>
               </div>
               <div style="display:flex; align-items:center; gap:0.6rem;">
-                <span style="font-size:0.75rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:var(--radius-full); background:${isCompleted ? 'var(--color-success-bg)' : 'var(--color-info-bg)'}; color:${isCompleted ? 'var(--color-success)' : 'var(--color-info)'}; border:1px solid ${isCompleted ? 'var(--color-success-border)' : 'var(--color-info-border)'};">
-                  ● ${escapeHtml(status)}
+                <span style="font-size:0.75rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:var(--radius-full); background:${badge.bg}; color:${badge.color}; border:1px solid ${badge.border};">
+                  ${badge.text}
                 </span>
                 <span style="font-size:0.75rem; padding:0.25rem 0.65rem; border-radius:var(--radius-full); background:var(--color-surface-subtle); border:1px solid var(--color-border); color:var(--color-text-secondary);">
                   💳 ${order.payment?.method || 'Demo Card (Paid)'}
@@ -1359,7 +1395,11 @@ window.customerViewInvoice = function(orderId) {
         <div>
           <strong style="display:block; margin-bottom:0.25rem;">Payment &amp; Status:</strong>
           <div>Method: ${order.payment?.method || 'Demo Card (Mock)'}</div>
-          <div>Status: <span style="font-weight:700; color:var(--color-success);">${order.status}</span></div>
+          <div style="margin-top:0.35rem;">Status: 
+            <span style="display:inline-block; font-size:0.75rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:var(--radius-full); background:${getCustomerOrderStatusBadge(order.status).bg}; color:${getCustomerOrderStatusBadge(order.status).color}; border:1px solid ${getCustomerOrderStatusBadge(order.status).border};">
+              ${getCustomerOrderStatusBadge(order.status).text}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -1469,7 +1509,7 @@ window.shopeaseSimulateCustomerOrder = function() {
       promoCode: cartSummary.activePromoCode,
       grandTotal: cartSummary.grandTotal
     },
-    status: 'Confirmed - Preparing for Mock Dispatch'
+    status: 'Pending'
   };
 
   Storage.deductStock(product.id, 1);

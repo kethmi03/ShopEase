@@ -124,11 +124,13 @@ async function runTestSuite() {
   );
 
   // TC-08: Cart totals remain mathematically correct
-  // Add 1 coffee (14.50) and 1 headphones (199.99)
-  Cart.addItem('prod-02', 1); // 14.50
-  Cart.addItem('prod-09', 1); // 199.99
+  // Add 1 coffee (prod-02) and 1 headphones (prod-09)
+  const p2 = Storage.getProductById('prod-02');
+  const p9 = Storage.getProductById('prod-09');
+  Cart.addItem('prod-02', 1);
+  Cart.addItem('prod-09', 1);
   summary = Cart.getSummary();
-  const expectedSubtotal = Number((14.50 + 199.99).toFixed(2)); // 214.49
+  const expectedSubtotal = Number((p2.price + p9.price).toFixed(2));
   const subtotalCorrect = summary.subtotal === expectedSubtotal;
   // Over 50 free delivery
   const deliveryFree = summary.deliveryFee === 0;
@@ -163,7 +165,7 @@ async function runTestSuite() {
   const foodOnly = allProds.filter(p => p.category === 'Food');
   const searchLoaf = allProds.filter(p => p.name.toLowerCase().includes('loaf') || p.description.toLowerCase().includes('loaf'));
   const sortedPriceAsc = [...allProds].sort((a, b) => a.price - b.price);
-  const discoveryWorking = foodOnly.length === 3 && searchLoaf.length >= 1 && sortedPriceAsc[0].price === 4.95;
+  const discoveryWorking = foodOnly.length === 3 && searchLoaf.length >= 1 && sortedPriceAsc[0].price === 650;
   report(
     'TC-10',
     'Product discovery controls (category filtering, keyword search, price sorting) work accurately',

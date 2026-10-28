@@ -224,6 +224,7 @@ export const Cart = {
     return {
       items,
       totalItems,
+      itemCount: totalItems,
       subtotal,
       deliveryFee,
       discount,
