@@ -635,8 +635,8 @@ function renderOrdersTable() {
         <td>
           <strong style="font-size:1rem; color:var(--color-text-primary);">${CURRENCY.format(order.financials?.grandTotal || 0)}</strong>
         </td>
-        <td>
-          <span style="font-size:0.75rem; font-weight:700; color:var(--color-success); background:rgba(16,185,129,0.1); padding:0.2rem 0.5rem; border-radius:var(--radius-sm); border:1px solid rgba(16,185,129,0.3);">
+        <td style="white-space:nowrap;">
+          <span class="admin-status-badge status-badge-success">
             ● Paid (Demo)
           </span>
         </td>
