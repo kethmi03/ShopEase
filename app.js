@@ -555,17 +555,23 @@ function updateCartUI() {
     <ul class="cart-items-list">
       ${summary.items.map(item => `
         <li class="cart-item" data-cart-item-id="${item.productId}">
-          <img src="${item.image}" alt="${item.name}" class="cart-item-img" />
+          <img 
+            src="${item.image}" 
+            alt="${escapeHtml(item.name)}" 
+            class="cart-item-img" 
+            onerror="this.src='https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=800&q=80'"
+          />
           <div class="cart-item-details">
-            <h4 class="cart-item-title">${item.name}</h4>
+            <h4 class="cart-item-title">${escapeHtml(item.name)}</h4>
             <div class="cart-item-unit-price">Rs. ${item.price.toFixed(2)} each</div>
             <div class="cart-item-bottom">
-              <div class="qty-stepper" role="group" aria-label="Quantity for ${item.name}">
+              <div class="qty-stepper" role="group" aria-label="Quantity for ${escapeHtml(item.name)}">
                 <button 
                   type="button" 
                   class="qty-stepper-btn btn-qty-dec" 
                   data-id="${item.productId}"
                   aria-label="Decrease quantity"
+                  title="Decrease quantity"
                 >−</button>
                 <span class="qty-stepper-val" aria-live="polite">${item.quantity}</span>
                 <button 
@@ -574,22 +580,30 @@ function updateCartUI() {
                   data-id="${item.productId}"
                   ${item.quantity >= item.stock ? 'disabled' : ''}
                   aria-label="Increase quantity"
+                  title="Increase quantity"
                 >+</button>
               </div>
 
-              <div class="cart-item-total">
-                Rs. ${item.totalPrice.toFixed(2)}
-              </div>
+              <div class="cart-item-total-group">
+                <span class="cart-item-total">
+                  Rs. ${item.totalPrice.toFixed(2)}
+                </span>
 
-              <button 
-                type="button" 
-                class="cart-item-remove-btn" 
-                data-remove-id="${item.productId}"
-                aria-label="Remove ${item.name} from cart"
-                title="Remove item"
-              >
-                🗑️
-              </button>
+                <button 
+                  type="button" 
+                  class="cart-item-remove-btn" 
+                  data-remove-id="${item.productId}"
+                  aria-label="Remove ${escapeHtml(item.name)} from cart"
+                  title="Remove item"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </li>
@@ -1350,9 +1364,11 @@ function renderNavBar() {
 
   if (cartBtn) {
     if (!user) {
+      cartBtn.style.display = 'none';
       cartBtn.setAttribute('title', 'Sign in to view shopping cart');
       cartBtn.setAttribute('aria-label', 'Shopping cart - Sign in to view');
     } else {
+      cartBtn.style.display = 'inline-flex';
       cartBtn.setAttribute('title', 'Open shopping cart');
       cartBtn.setAttribute('aria-label', 'Open shopping cart');
     }
@@ -1406,10 +1422,12 @@ function renderNavBar() {
   // Attach event handlers for authenticated dynamic buttons
   document.getElementById('orders-toggle-btn')?.addEventListener('click', openOrderHistory);
   document.getElementById('nav-logout-btn')?.addEventListener('click', () => {
+    closeCart();
     Auth.logout();
     showToast('Signed out successfully.', 'info');
     renderNavBar();
     renderUserWelcomeBanner();
+    updateCartUI();
   });
 }
 
@@ -2071,10 +2089,12 @@ function renderUserWelcomeBanner() {
   `;
 
   document.getElementById('banner-signout-btn')?.addEventListener('click', () => {
+    closeCart();
     Auth.logout();
     showToast('Signed out successfully.', 'info');
     renderUserMenu();
     renderUserWelcomeBanner();
+    updateCartUI();
   });
 }
 
