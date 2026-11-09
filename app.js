@@ -695,9 +695,40 @@ function triggerCartBadgePulse() {
 /* ==========================================================================
    Product Quick View Modal
    ========================================================================== */
+let currentProductUtterance = null;
+let productTTSState = 'idle'; // 'idle' | 'playing' | 'paused' | 'muted'
+
+function stopProductTTS() {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+  productTTSState = 'idle';
+  currentProductUtterance = null;
+}
+
+function buildProductSpeechText(product) {
+  const parts = [];
+  parts.push(product.name + '.');
+  parts.push(`Category: ${product.category}.`);
+  parts.push(`Price: ${product.price} Rupees per ${product.unit}.`);
+  parts.push(`Customer rating: ${product.rating.toFixed(1)} out of 5 stars from ${product.reviewsCount} verified reviews.`);
+  if (product.description) {
+    parts.push(`Description: ${product.description}`);
+  }
+  if (product.features && product.features.length > 0) {
+    parts.push(`Key specifications: ${product.features.join('. ')}.`);
+  }
+  const stockText = product.stock <= 0 ? 'Currently out of stock.' : `${product.stock} items currently in stock.`;
+  parts.push(`Availability: ${stockText}`);
+  return parts.join(' ');
+}
+
 function openQuickView(productId) {
   const product = Storage.getProductById(productId);
   if (!product) return;
+
+  // Stop any previous speech playback
+  stopProductTTS();
 
   state.quickViewProduct = product;
   state.activeModal = 'quick-view';
@@ -708,11 +739,36 @@ function openQuickView(productId) {
   DOM.quickViewContent.innerHTML = `
     <div class="quick-view-grid">
       <div>
-        <img src="${product.image}" alt="${product.name}" class="quick-view-img" />
+        <img src="${product.image}" alt="${escapeHtml(product.name)}" class="quick-view-img" onerror="this.src='https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=800&q=80'" />
       </div>
       <div>
-        <div class="badge badge-category" style="margin-bottom:0.5rem;">${product.category}</div>
-        <h2 style="font-size:1.4rem; font-weight:800; line-height:1.3; margin-bottom:0.5rem;">${product.name}</h2>
+        <!-- Accessibility Text-to-Speech (TTS) Reader Bar -->
+        <div class="tts-accessibility-bar" id="tts-bar" role="region" aria-label="Text to speech accessibility controls">
+          <div class="tts-info">
+            <span class="tts-icon" aria-hidden="true">🔊</span>
+            <div class="tts-status-text">
+              <strong>Audio Description</strong>
+              <span id="tts-status-label" class="tts-status-label">Listen to product details</span>
+            </div>
+          </div>
+          <div class="tts-controls">
+            <button type="button" id="tts-play-btn" class="tts-btn tts-btn-primary" aria-label="Read product details aloud" title="Listen / Read aloud">
+              <span class="tts-btn-icon" aria-hidden="true">▶</span>
+              <span class="tts-btn-label" id="tts-play-label">Listen</span>
+            </button>
+            <button type="button" id="tts-pause-btn" class="tts-btn tts-btn-secondary" aria-label="Pause audio reader" title="Pause audio" disabled>
+              <span class="tts-btn-icon" aria-hidden="true">⏸</span>
+              <span class="tts-btn-label">Pause</span>
+            </button>
+            <button type="button" id="tts-mute-btn" class="tts-btn tts-btn-danger" aria-label="Mute and stop audio reader" title="Mute / Stop audio" disabled>
+              <span class="tts-btn-icon" aria-hidden="true">🔇</span>
+              <span class="tts-btn-label">Mute</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="badge badge-category" style="margin-bottom:0.5rem;">${escapeHtml(product.category)}</div>
+        <h2 style="font-size:1.4rem; font-weight:800; line-height:1.3; margin-bottom:0.5rem;">${escapeHtml(product.name)}</h2>
         
         <div class="card-rating" style="margin-bottom:1rem;">
           <span>${stars}</span>
@@ -722,16 +778,16 @@ function openQuickView(productId) {
 
         <div style="font-size:1.75rem; font-weight:800; color:var(--color-brand-primary); margin-bottom:0.5rem;">
           Rs. ${product.price.toFixed(2)}
-          <span style="font-size:0.85rem; font-weight:normal; color:var(--color-text-muted);">/ ${product.unit}</span>
+          <span style="font-size:0.85rem; font-weight:normal; color:var(--color-text-muted);">/ ${escapeHtml(product.unit)}</span>
         </div>
 
         <p style="font-size:0.95rem; color:var(--color-text-secondary); line-height:1.6; margin-bottom:1rem;">
-          ${product.description}
+          ${escapeHtml(product.description)}
         </p>
 
         <h4 style="font-size:0.9rem; font-weight:700; margin-bottom:0.5rem;">Key Specifications:</h4>
         <ul class="feature-list">
-          ${product.features.map(f => `<li>${f}</li>`).join('')}
+          ${(product.features || []).map(f => `<li>${escapeHtml(f)}</li>`).join('')}
         </ul>
 
         <div style="margin: 1.25rem 0; padding:0.75rem; background:var(--color-surface-subtle); border:1px solid var(--color-border); border-radius:var(--radius-sm); font-size:0.9rem;">
@@ -763,6 +819,105 @@ function openQuickView(productId) {
   DOM.quickViewOverlay.classList.add('open');
   DOM.quickViewOverlay.setAttribute('aria-hidden', 'false');
   DOM.quickViewCloseBtn?.focus();
+
+  // TTS Controls Setup
+  const ttsBar = document.getElementById('tts-bar');
+  const ttsStatusLabel = document.getElementById('tts-status-label');
+  const ttsPlayBtn = document.getElementById('tts-play-btn');
+  const ttsPlayLabel = document.getElementById('tts-play-label');
+  const ttsPauseBtn = document.getElementById('tts-pause-btn');
+  const ttsMuteBtn = document.getElementById('tts-mute-btn');
+
+  function updateTTSUI(state) {
+    if (!ttsBar) return;
+    if (state === 'playing') {
+      ttsBar.classList.add('speaking');
+      if (ttsStatusLabel) ttsStatusLabel.textContent = 'Reading aloud...';
+      if (ttsPlayBtn) ttsPlayBtn.disabled = true;
+      if (ttsPauseBtn) ttsPauseBtn.disabled = false;
+      if (ttsMuteBtn) ttsMuteBtn.disabled = false;
+    } else if (state === 'paused') {
+      ttsBar.classList.remove('speaking');
+      if (ttsStatusLabel) ttsStatusLabel.textContent = 'Audio paused';
+      if (ttsPlayBtn) {
+        ttsPlayBtn.disabled = false;
+        if (ttsPlayLabel) ttsPlayLabel.textContent = 'Resume';
+      }
+      if (ttsPauseBtn) ttsPauseBtn.disabled = true;
+      if (ttsMuteBtn) ttsMuteBtn.disabled = false;
+    } else { // 'idle' or 'muted'
+      ttsBar.classList.remove('speaking');
+      if (ttsStatusLabel) ttsStatusLabel.textContent = state === 'muted' ? 'Audio muted' : 'Listen to product details';
+      if (ttsPlayBtn) {
+        ttsPlayBtn.disabled = false;
+        if (ttsPlayLabel) ttsPlayLabel.textContent = 'Listen';
+      }
+      if (ttsPauseBtn) ttsPauseBtn.disabled = true;
+      if (ttsMuteBtn) ttsMuteBtn.disabled = true;
+    }
+  }
+
+  ttsPlayBtn?.addEventListener('click', () => {
+    if (!('speechSynthesis' in window)) {
+      showToast('Text-to-speech is not supported in this browser.', 'warning');
+      return;
+    }
+
+    if (productTTSState === 'paused') {
+      window.speechSynthesis.resume();
+      productTTSState = 'playing';
+      updateTTSUI('playing');
+      announce('Resumed product audio description.');
+      return;
+    }
+
+    // Fresh playback
+    window.speechSynthesis.cancel();
+    const speechText = buildProductSpeechText(product);
+    currentProductUtterance = new SpeechSynthesisUtterance(speechText);
+    currentProductUtterance.rate = 0.95;
+    currentProductUtterance.pitch = 1.0;
+    currentProductUtterance.lang = 'en-US';
+
+    currentProductUtterance.onstart = () => {
+      productTTSState = 'playing';
+      updateTTSUI('playing');
+    };
+
+    currentProductUtterance.onend = () => {
+      productTTSState = 'idle';
+      updateTTSUI('idle');
+      announce('Finished reading product details.');
+    };
+
+    currentProductUtterance.onerror = (err) => {
+      console.debug('TTS error:', err);
+      productTTSState = 'idle';
+      updateTTSUI('idle');
+    };
+
+    window.speechSynthesis.speak(currentProductUtterance);
+    announce(`Reading product details for ${product.name}`);
+  });
+
+  ttsPauseBtn?.addEventListener('click', () => {
+    if ('speechSynthesis' in window && window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+      window.speechSynthesis.pause();
+      productTTSState = 'paused';
+      updateTTSUI('paused');
+      announce('Audio reader paused.');
+    }
+  });
+
+  ttsMuteBtn?.addEventListener('click', () => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    productTTSState = 'muted';
+    updateTTSUI('muted');
+    showToast('Audio reader muted and stopped.', 'info');
+    announce('Audio reader muted and stopped.');
+  });
 
   // Quantity handlers in quick view
   const qvQtyInput = document.getElementById('qv-qty-input');
@@ -804,6 +959,7 @@ function openQuickView(productId) {
 }
 
 function closeQuickView() {
+  stopProductTTS();
   state.activeModal = null;
   DOM.quickViewOverlay.classList.remove('open');
   DOM.quickViewOverlay.setAttribute('aria-hidden', 'true');

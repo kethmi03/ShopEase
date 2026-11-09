@@ -3073,6 +3073,140 @@ body {
   font-weight: bold;
 }
 
+/* Product Details Text-to-Speech (TTS) Accessibility Controls */
+.tts-accessibility-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: 0.85rem;
+  transition: all var(--transition-fast);
+}
+
+.tts-accessibility-bar.speaking {
+  border-color: var(--color-brand-primary);
+  background: rgba(216, 92, 54, 0.05);
+  box-shadow: 0 0 0 2px rgba(216, 92, 54, 0.15);
+}
+
+.tts-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.tts-icon {
+  font-size: 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.tts-accessibility-bar.speaking .tts-icon {
+  animation: pulse-ring 1.8s infinite;
+  color: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+}
+
+.tts-status-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.tts-status-text strong {
+  font-size: 0.78rem;
+  color: var(--color-text-primary);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.tts-status-label {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tts-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.tts-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 30px;
+  padding: 0 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tts-btn:hover:not(:disabled) {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-strong);
+}
+
+.tts-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.tts-btn-primary {
+  background: var(--color-brand-primary);
+  color: #FFFFFF;
+  border-color: var(--color-brand-primary);
+}
+
+.tts-btn-primary:hover:not(:disabled) {
+  background: #B84320;
+  border-color: #B84320;
+  color: #FFFFFF;
+}
+
+.tts-btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+.tts-btn-danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--color-danger);
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+@media (max-width: 576px) {
+  .tts-accessibility-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .tts-controls {
+    justify-content: flex-end;
+  }
+}
+
 /* Checkout Stepper & Card */
 .checkout-modal-card {
   max-width: 660px;
